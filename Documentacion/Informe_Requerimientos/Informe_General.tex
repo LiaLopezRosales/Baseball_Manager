@@ -1,0 +1,175 @@
+\documentclass{report}
+\usepackage[spanish]{babel}
+\usepackage[left=2.5cm, right=2.5cm, top=3cm, bottom=3cm]{geometry}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{hyperref}   
+
+%\geometry{
+ % top=2cm,  bottom=2cm,  left=1.5cm,  right=1.5cm
+%}
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+    \begin{titlepage}
+        \centering
+        {\bfseries\LARGE Facultad de Matemática y Computación \par}
+        \vspace*{1cm}
+        {\scshape\Large Ingeniería de Software \par}
+        \vspace*{3cm}
+        {\scshape\Huge Informe de Especificación de Requerimientos \par}
+        \vspace*{1cm}
+        {\LARGE \textbf{Tema: Gestión de campeonatos de béisbol} }
+        \vfill
+        {\bfseries\LARGE Integrantes: \par}
+        {\Large Ariadna Vel\'azquez Rey  C311 \par} 
+        {\Large L\'ia L\'opez Rosales  C312 \par} 
+        {\Large Carlos Daniel Largacha Leal  C312 \par} 
+        {\Large Gabriel Andr\'es Pla Lasa  C311 \par} 
+        {\Large Raidel Miguel Cabellud Lizaso C311 \par} 
+        \vfill
+    \end{titlepage}
+
+    \begin{center}
+        \section*{Introducción}
+    \end{center}
+
+        \subsection*{Propósito del Documento}
+
+        \subsection*{Alcance del Producto}
+
+        \subsection*{Definiciones, acrónimos y abreviaturas}
+
+        \subsection*{Referencias}
+
+        \subsection*{Resumen del resto del documento}
+
+
+    \newpage
+
+    \begin{center}
+        \section*{Description General}
+    \end{center}
+
+        \subsection*{Perspectiva del Producto}
+
+        \subsection*{Funciones del Producto}
+
+        \subsection*{Características de los usuarios}
+
+        \subsection*{Restricciones generales}
+
+        \subsection*{Dependencias y suposiciones}
+
+    \newpage
+    
+    \begin{center}
+        \section*{Requerimientos Específicos}
+    \end{center}
+
+    \vspace{0.5cm}
+
+        \subsection*{Requerimientos Funcionales}
+            \begin{enumerate}
+                \item Registrar datos por el administrador mediante formularios.
+                \item Generar modelos tabulares y gráficos.
+                \item Gestionar los roles de la base de datos que son los usuarios especiales (administrador), los 
+                directores técnicos y los usuarios normales (periodista).
+                \item Obtener nombres de equipos ganadores y directores técnicos en series nacionales por temporada.
+                \item Obtener nombres y posiciones de jugadores del equipo "Todos Estrellas" y su efectividad por 
+                serie.
+                \item Obtener series con mayor y menor cantidad de juegos celebrados.
+                \item Listar equipos en primer y último lugar por serie, clasificados por tipo y orden cronológico.
+                \item Obtener total de juegos ganados por un lanzador y su promedio de carreras limpias permitidas.
+                \item Modificar posición de un jugador en la alineación inicial de un juego específico.
+                \item Obtener estadísticas de un jugador.
+                \item Exportar reportes a formato PDF con soporte para la agregación de otros formatos.
+                \item Presentar diferentes vistas para los distintos tipos de roles.
+                \item Generar formularios para ingresar los datos a la base de datos por parte del administrador 
+                (distintos formularios para las distintas tablas de la base de datos).
+                \item Tener un formulario para el director técnico que le permita realizar los cambios en  la 
+                alineación.
+                \item Mostrar un formulario con opciones de filtrado y solicitudes para la generación de los reportes.
+            \end{enumerate}
+
+        \vspace{1cm}
+
+        \subsection*{Requerimientos No Funcionales}
+
+            \vspace{0.3cm}
+
+            \subsubsection*{Usabilidad}
+            \begin{itemize}
+                \item Se espera que la interfaz sea capaz de mostrar gráficas.
+                \item Se espera un sistema visual de filtrado para seleccionar qué datos mostrar en los reportes.
+            \end{itemize}
+        
+            \subsubsection*{Seguridad}
+            \begin{itemize}
+                \item Todos los datos personales y críticos deben ser encriptados en tránsito y en almacenamiento.
+                \item La autenticación y autorización deben ser seguras, permitiendo que solo los usuarios 
+                autorizados tengan acceso a funcionalidades específicas.
+            \end{itemize}
+        
+            \subsubsection*{Portabilidad y Compatibilidad}
+            \begin{itemize}
+                \item El diseño de la interfaz se espera que sea ajustable al tamaño de los distintos dispositivos 
+                en los que puede abrirse el sitio web.
+                \item Debe ser compatible con los navegadores más utilizados, asegurando que las interfaces web 
+                sean responsivas y adaptativas.
+            \end{itemize}
+        
+            \subsubsection*{Rendimiento}
+            \begin{itemize}
+                \item El sistema debe ser capaz de manejar múltiples solicitudes simultáneamente sin una degradación 
+                significativa en el tiempo de respuesta.
+            \end{itemize}
+        
+            \subsubsection*{Escalabilidad}
+            \begin{itemize}
+                \item La arquitectura debe permitir la escalabilidad horizontal y vertical. Esto significa que se 
+                debe poder agregar más recursos (como servidores adicionales) para manejar un mayor número de 
+                usuarios o datos sin necesidad de reestructurar significativamente el sistema.
+            \end{itemize}
+        
+            \subsubsection*{Mantenibilidad}
+            \begin{itemize}
+                \item El sistema debe estar desarrollado con buenas prácticas de programación, como la documentación 
+                adecuada (docstring) y código modular.
+            \end{itemize}
+        
+            \subsubsection*{Extensibilidad}
+            \begin{itemize}
+                \item La arquitectura del sistema debe ser flexible para permitir la adición de nuevas funcionalidades 
+                sin necesidad de grandes modificaciones en el código base.
+            \end{itemize}
+        
+            \subsubsection*{Almacenamiento, importación y exportación de datos}
+            \begin{itemize}
+                \item El software deberá de almacenar todos los datos en una base de datos SQL.
+                \item El software deberá ser capaz de convertir los reportes solicitados a documentos PDF.
+            \end{itemize}
+
+        \vspace{1cm}
+
+        \subsection*{Requerimientos de Entorno}
+            \begin{itemize}
+                \item Para la base de datos se ha de utilizar la tecnología PostgreSQL.
+                \item En cuanto al backend de la aplicación web, este de desarrollará en python con DjangoRest como 
+                librería principal, omitiendo la función de admin que viene ya preparada.
+                \item El frontend se realizará en React.
+            \end{itemize}
+
+    \newpage
+
+    \section*{Anexos}
+
+\end{document}
