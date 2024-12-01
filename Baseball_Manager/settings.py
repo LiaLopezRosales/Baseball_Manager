@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'db_structure',
     'rest_framework',
     'corsheaders',
+    'rest_framework.authtoken',  # Add this for token authentication
+    'django.contrib.auth'       # Ensure auth is enabled
 ]
 
 MIDDLEWARE = [
@@ -108,6 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'auth.User'  # We will use the default Django User model.
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
