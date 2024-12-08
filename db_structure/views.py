@@ -87,3 +87,6 @@ class PlayerInPositionViewSet(viewsets.ModelViewSet):
 class PlayerSwapViewSet(viewsets.ModelViewSet):
     queryset = PlayerSwap.objects.all()
     serializer_class = PlayerSwapSerializer
+from django.shortcuts import render
+
+# Create your views here.
