@@ -1,0 +1,14 @@
+[project]
+name = "Baseball_Manager"  
+version = "0.1.0"           # Versión inicial del proyecto
+dependencies = [
+    "asgiref", #para poder instalar manualmente la ultima versión de django
+    "sqlparse", #lo mismo que el de arriba, si se instalada directo con pip no hace falta pensarlos porque se instalan automáticamente
+    "django",
+    "djangorestframework",
+    "django-cors-headers",
+    "psycopg2-binary",
+    "Pillow",                
+    "django-extensions",     
+    "python-decouple",        
+]

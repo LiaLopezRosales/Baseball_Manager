@@ -481,3 +481,13 @@ $RECYCLE.BIN/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+
+#Extras pertenecientes al entorno virtual y que son propios de cada pc
+.venv
+/python_enviroment/
+/instalaciones_django/
+uv-installer.sh
+
+#configuración personal para la base de datos
+.env
