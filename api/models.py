@@ -5,7 +5,6 @@ from .roles import AdminRole, DirectorTecnicoRole, UsuarioGeneralRole
 class CustomUser(AbstractUser):
     """
     Modelo de usuario extendido.
-    Incluye el campo 'rol' para asociar con clases de roles dinámicas.
     """
     ADMIN = AdminRole.name
     DIRECTOR_TECNICO = DirectorTecnicoRole.name
