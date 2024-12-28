@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from django.contrib.auth.models import Permission
+
 
 class Role(ABC):
     """
@@ -22,17 +24,7 @@ class AdminRole(Role):
     Tiene acceso completo al sistema.
     """
     name = "Admin"
-    # permissions = [
-    #     'add_user', 'change_user', 'delete_user', 'view_user',
-    #     'add_team', 'change_team', 'delete_team', 'view_team',
-    #     'add_game', 'change_game', 'delete_game', 'view_game',
-    #     'add_lineup', 'change_lineup', 'delete_lineup', 'view_lineup',
-    #     'generate_reports',
-    # ]
-
-    # def has_permission(self, permission):
-    #     return permission in self.permissions
-
+    
     def has_permission(self, permission):
         """
         Devuelve True para cualquier permiso, ya que Admin tiene permisos globales.
