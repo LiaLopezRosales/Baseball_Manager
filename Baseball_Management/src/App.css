@@ -1,77 +1,173 @@
+/* Estilos Globales */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5; /* Fondo suave */
+    color: #333; /* Texto principal */
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilo App */
 .App {
-  text-align: center;
+    text-align: center;
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+    height: 40vmin;
+    pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+    .App-logo {
+        animation: App-logo-spin infinite 20s linear;
+    }
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+    background-color: beige;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: black;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Añadir sombra */
 }
 
 .App-link {
-  color: #61dafb;
+    color: #61dafb;
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
+/* Estilo pelotero */
 .pelotero {
-  background-color: white;
-  color:black;
-  margin: 10px;
-  border: gray 3px solid;
-  padding: 8px;
-  width: 300px;
-  height: 100px;
+    background-color: white; /* Color principal */
+    color: black; /* Color del texto */
+    margin: 10px;
+    border: 3px solid darkslategray; /* Borde darkslategray como color secundario */
+    width: 600px; /* Nueva anchura */
+    height: 200px; /* Nueva altura */
+    box-shadow: 0 4px 8px rgba(47, 79, 79, 0.2); /* Sombra darkslategray suave */
+    border-radius: 10px; /* Bordes redondeados */
+    overflow: hidden; /* Asegura que el contenido no se desborde */
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s; /* Transiciones suaves */
 }
 
+    .pelotero p:first-child {
+        background-color: darkslategray; /* Barra darkslategray para el nombre */
+        color: antiquewhite; /* Texto blanco para mejor contraste */
+        margin: 0;
+        padding: 10px;
+        text-align: center; /* Centra el texto horizontalmente */
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        box-sizing: border-box; /* Incluye padding en el ancho y alto */
+        border-radius: 5px 5px 0 0;
+    }
+
+    .pelotero .info {
+        padding: 20px; /* Añade padding a la información del jugador */
+        margin-top: 50px; /* Ajusta el margen superior para dejar espacio a la barra azul */
+        color: black;
+    }
+
+.foto-jugador {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%; /* Hace que la imagen sea circular */
+    object-fit: cover; /* Asegura que la imagen cubra toda el área del contenedor */
+    margin-right: 20px; /* Espacio entre la imagen y la información del jugador */
+    position: absolute;
+    top: 30%;
+    right: 8px;
+}
+
+.pelotero:hover {
+    background-color: lightblue; /* Efecto al pasar el ratón */
+    border: 3px solid navy;
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(47, 79, 79, 0.3); /* Sombra más intensa */
+}
+
+/* Estilo sidebar */
 .sidebar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100px;
-  height: 50px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 100vh;
+    background-color: rgba(47, 79, 79, 0.1);
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1;
 }
 
+/* Estilo login */
 .login {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100px;
-  height: 50px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100px;
+    height: 50px;
+    background-color: rgba(47, 79, 79, 0.1);
+    padding: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 2; /* Asegúrate de que el botón tenga un índice z más alto */
 }
 
+/* Estilo del botón */
+button {
+    background-color: darkslategray; /* Color de fondo */
+    color: white; /* Color del texto */
+    border: none; /* Sin borde */
+    padding: 5px 10px; /* Reducido el espaciado interno */
+    font-size: 14px; /* Tamaño del texto más pequeño */
+    border-radius: 5px; /* Bordes redondeados */
+    cursor: pointer; /* Puntero al pasar el ratón */
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s; /* Transiciones suaves */
+}
+
+    button:hover {
+        background-color: navy; /* Color de fondo al pasar el ratón */
+        transform: scale(1.05); /* Aumenta ligeramente el tamaño */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra al pasar el ratón */
+    }
+
+    button:active {
+        background-color: navy; /* Color de fondo al hacer clic */
+        transform: scale(0.95); /* Reduce ligeramente el tamaño */
+    }
+
+    button:focus {
+        outline: none; /* Quita el borde de enfoque por defecto */
+        box-shadow: 0 0 5px rgba(47, 79, 79, 0.5); /* Añade una sombra */
+    }
+
+
+/* Estilo box */
 .box {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 5px;
-  font-family: sans-serif;
-  text-align: center;
-  line-height: 1;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  max-width: 50%;
-  max-height: 50%;
-  padding: 20px 40px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    font-family: sans-serif;
+    text-align: center;
+    line-height: 1.5;
+    backdrop-filter: blur(10px);
+    max-width: 50%;
+    max-height: 50%;
+    padding: 20px 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Añadir sombra */
 }
