@@ -1,92 +1,128 @@
-from rest_framework import permissions
-from rest_framework import viewsets
-from .models import *
+from django.shortcuts import render
+from .services import *
 from .serializers import *
+from db_structure.generic_classes.BaseViewSet import BaseViewSet
 
-class RolViewSet(viewsets.ModelViewSet):
-    queryset = Rol.objects.all()
+
+class RolViewSet(BaseViewSet):
+    service = RolService
     serializer_class = RolSerializer
-    permission_classes=[permissions.AllowAny]
 
-class PositionViewSet(viewsets.ModelViewSet):
-    queryset = Position.objects.all()
+class PositionViewSet(BaseViewSet):
+    service = PositionService
     serializer_class = PositionSerializer
 
-class SeasonViewSet(viewsets.ModelViewSet):
-    queryset = Season.objects.all()
+
+class SeasonViewSet(BaseViewSet):
+    service = SeasonService
     serializer_class = SeasonSerializer
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+class UserViewSet(BaseViewSet):
+    service = UserService
     serializer_class = UserSerializer
 
-class WorkerViewSet(viewsets.ModelViewSet):
-    queryset = Worker.objects.all()
+
+
+class WorkerViewSet(BaseViewSet):
+    service = WorkerService
     serializer_class = WorkerSerializer
 
-class DirectionTeamViewSet(viewsets.ModelViewSet):
-    queryset = DirectionTeam.objects.all()
+
+
+class DirectionTeamViewSet(BaseViewSet):
+    service = DirectionTeamService
     serializer_class = DirectionTeamSerializer
 
-class TeamViewSet(viewsets.ModelViewSet):
-    queryset = Team.objects.all()
+
+
+class TeamViewSet(BaseViewSet):
+    service = TeamService
     serializer_class = TeamSerializer
 
-class LineUpViewSet(viewsets.ModelViewSet):
-    queryset = LineUp.objects.all()
+
+class LineUpViewSet(BaseViewSet):
+    service = LineUpService
     serializer_class = LineUpSerializer
 
-class PersonViewSet(viewsets.ModelViewSet):
-    queryset = Person.objects.all()
+
+
+class PersonViewSet(BaseViewSet):
+    service = PersonService
     serializer_class = PersonSerializer
 
-class BaseballPlayerViewSet(viewsets.ModelViewSet):
-    queryset = BaseballPlayer.objects.all()
+
+
+class BaseballPlayerViewSet(BaseViewSet):
+    service = BaseballPlayerService
     serializer_class = BaseballPlayerSerializer
 
-class TechnicalDirectorViewSet(viewsets.ModelViewSet):
-    queryset = TechnicalDirector.objects.all()
+
+
+class TechnicalDirectorViewSet(BaseViewSet):
+    service = TechnicalDirectorService
     serializer_class = TechnicalDirectorSerializer
 
-class SeriesViewSet(viewsets.ModelViewSet):
-    queryset = Series.objects.all()
+
+
+class SeriesViewSet(BaseViewSet):
+    service = SeriesService
     serializer_class = SeriesSerializer
 
-class BPParticipationViewSet(viewsets.ModelViewSet):
-    queryset = BPParticipation.objects.all()
+
+
+class BPParticipationViewSet(BaseViewSet):
+    service = BPParticipationService
     serializer_class = BPParticipationSerializer
 
-class PlayerInLineUpViewSet(viewsets.ModelViewSet):
-    queryset = PlayerInLineUp.objects.all()
+
+
+class PlayerInLineUpViewSet(BaseViewSet):
+    service = PlayerInLineUpService
     serializer_class = PlayerInLineUpSerializer
 
-class TeamOnTheFieldViewSet(viewsets.ModelViewSet):
-    queryset = TeamOnTheField.objects.all()
+
+
+class TeamOnTheFieldViewSet(BaseViewSet):
+    service = TeamOnTheFieldService
     serializer_class = TeamOnTheFieldSerializer
 
-class ScoreViewSet(viewsets.ModelViewSet):
-    queryset = Score.objects.all()
+
+
+class ScoreViewSet(BaseViewSet):
+    service = ScoreService
     serializer_class = ScoreSerializer
 
-class GameViewSet(viewsets.ModelViewSet):
-    queryset = Game.objects.all()
+
+
+class GameViewSet(BaseViewSet):
+    service = GameService
     serializer_class = GameSerializer
 
-class PitcherViewSet(viewsets.ModelViewSet):
-    queryset = Pitcher.objects.all()
+
+
+class PitcherViewSet(BaseViewSet):
+    service = PitcherService
     serializer_class = PitcherSerializer
 
-class StarPlayerViewSet(viewsets.ModelViewSet):
-    queryset = StarPlayer.objects.all()
+
+
+class StarPlayerViewSet(BaseViewSet):
+    service = StarPlayerService
     serializer_class = StarPlayerSerializer
 
-class PlayerInPositionViewSet(viewsets.ModelViewSet):
-    queryset = PlayerInPosition.objects.all()
+
+
+class PlayerInPositionViewSet(BaseViewSet):
+    service = PlayerInPositionService
     serializer_class = PlayerInPositionSerializer
 
-class PlayerSwapViewSet(viewsets.ModelViewSet):
-    queryset = PlayerSwap.objects.all()
-    serializer_class = PlayerSwapSerializer
-from django.shortcuts import render
 
-# Create your views here.
+
+class PlayerSwapViewSet(BaseViewSet):
+    service = PlayerSwapService
+    serializer_class = PlayerSwapSerializer
+
+
+
+
+
