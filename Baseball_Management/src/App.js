@@ -1,9 +1,9 @@
 // import logo from './logo.svg';
 import React, { useState } from 'react';
 import './App.css';
-import PlayerList from './player list';
-import Sidebar from './sidebar';
-import LoginBoard from './login';
+import PlayerList from './components/player_list';
+import Sidebar from './components/sidebar';
+import LoginBoard from './components/login';
 
 function App() {
   const [isLogged, setLogin] = useState( false );
