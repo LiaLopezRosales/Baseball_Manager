@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 class User(models.Model):
     id = models.AutoField(primary_key=True)              
@@ -15,7 +16,24 @@ class User(models.Model):
         null=True,                                        
         blank=True                                        
     )
-    password = models.CharField(max_length=128)           
+    password = models.CharField(max_length=128)
+    
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    ~models.Q(rol_id=2) | ~models.Q(TD_id__isnull=True)
+                ),
+                name='check_td_not_null_when_rol_2'
+            )
+        ]
+
+    def clean(self):
+        # Validation for rol_id and TD_id
+        if self.rol_id_id == 2 and self.TD_id is None:
+            raise ValidationError("TD_id cannot be NULL when rol_id is '2'.")
+        if self.TD_id is None and self.rol_id_id == 2:
+            raise ValidationError("rol_id cannot be '2' when TD_id is NULL.")         
 
     def __str__(self):
         return self.email 
@@ -77,12 +95,12 @@ class Worker(models.Model):
     
 class DirectionTeam(models.Model):
     id = models.AutoField(primary_key=True)                
-    TD_id = models.OneToOneField(                         
-        'TechnicalDirector',                                
-        on_delete=models.SET_NULL,
-        to_field='id',
-        null=True                                         
-    )
+    # TD_id = models.OneToOneField(                         
+    #     'TechnicalDirector',                                
+    #     on_delete=models.SET_NULL,
+    #     to_field='id',
+    #     null=True                                         
+    # )
     Team_id = models.OneToOneField(                        
         'Team',                                          
         on_delete=models.CASCADE,                     
@@ -98,12 +116,12 @@ class Team(models.Model):
     color = models.CharField(max_length=50)               
     initials = models.CharField(max_length=10)            
     representative_entity = models.CharField(max_length=100)  
-    DT_id = models.OneToOneField(                         
-        'DirectionTeam',
-        on_delete=models.SET_NULL,
-        null=True,                                        
-        blank=True                                                                               # No permite valores nulos
-    )
+    # DT_id = models.OneToOneField(                         
+    #     'DirectionTeam',
+    #     on_delete=models.SET_NULL,
+    #     null=True,                                        
+    #     blank=True                                                                               # No permite valores nulos
+    # )
 
     def __str__(self):
         return f"Equipo {self.name} ({self.initials})"
@@ -178,12 +196,12 @@ class Series(models.Model):
         return f"Serie {self.name} ({self.type}) en Temporada {self.season.id}"
     
 class Pitcher(models.Model):
-    id = models.OneToOneField(                             
-        'BaseballPlayer',
-        on_delete=models.CASCADE,                        
-        primary_key=True,
-        related_name='pitcher_role'                                
-    )
+    # id = models.OneToOneField(                             
+    #     'BaseballPlayer',
+    #     on_delete=models.CASCADE,                        
+    #     primary_key=True,
+    #     related_name='pitcher_role'                                
+    # )
     CI = models.ForeignKey(                                
         'BaseballPlayer',
         on_delete=models.CASCADE,                         
@@ -197,9 +215,9 @@ class Pitcher(models.Model):
             ('derecha', 'Derecha')
         ]
     )
-    No_games_won = models.IntegerField()                   
-    No_games_lost = models.IntegerField()                  
-    running_average = models.IntegerField()                
+    No_games_won = models.PositiveIntegerField()                   
+    No_games_lost = models.PositiveIntegerField()                  
+    running_average = models.PositiveIntegerField()               
 
     def __str__(self):
         return f"Lanzador {self.id} (Mano Dominante: {self.dominant_hand})"
@@ -274,7 +292,7 @@ class TeamOnTheField(models.Model):
     )
 
     def __str__(self):
-        return f"Equipo en el Campo {self.id} (Equipo ID: {self.team_id})"
+        return f"Equipo en el Campo {self.id} (Alineación ID: {self.lineup_id})"
     
 class StarPlayer(models.Model):
     series = models.ForeignKey(                            
