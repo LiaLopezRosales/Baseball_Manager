@@ -300,12 +300,14 @@ class PlayerInPosition(models.Model):
     BP_id = models.ForeignKey(                             
         'BaseballPlayer',
         on_delete=models.CASCADE,
-        null=False
+        null=False,
+        related_name='playerinposition_bp'
     )
     position = models.ForeignKey(                          
         'Position',
         on_delete=models.CASCADE,
-        null=False
+        null=False, 
+        related_name='playerinposition_position'
     )
     effectiveness = models.FloatField()                    
 
