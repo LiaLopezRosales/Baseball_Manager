@@ -1,11 +1,11 @@
 from django.db import connection
 from django.db.models import Count
 import db_structure.models as db
-from django.db.models import Prefetch, Max
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Max, Q, F
 
 
 cursor = connection.cursor()
+
 
 def get_final_winner_teams_and_coaches(season_id):
     # Obtener series de la temporada específica
@@ -37,7 +37,7 @@ def get_final_winner_teams_and_coaches(season_id):
 
     return result
 
-def get_final_winner_teams_and_coaches_postgresql(season_id):
+def get_final_winner_teams_and_coaches_psql(season_id):
     query = """
         SELECT t.name AS team_name, p.name AS coach_name, p.lastname AS coach_lastname
         FROM series s
@@ -89,7 +89,7 @@ def get_star_players_for_series(series_id):
     
     return result
 
-def get_star_players_for_series_sql(series_id):
+def get_star_players_for_series_psql(series_id):
     sql = """
     SELECT p.name, p.lastname, pos.name as position_name, pip.effectiveness
     FROM starplayer sp
@@ -190,9 +190,7 @@ def get_teams_by_series(season_id):
 
     return result
 
-import psycopg2
-
-def get_teams_by_series(season_id):
+def get_teams_by_series_psql(season_id):
 
     # Consulta SQL para obtener los equipos de primer y último lugar por serie
     query = """
@@ -229,3 +227,30 @@ def get_teams_by_series(season_id):
 
     # Devolver los resultados
     return results
+
+
+def get_pitcher_wins(pitcher_id):
+    wins = db.Game.objects.filter(
+        (
+            Q(local__lineup_id__player_in_lineup__player_in_position__BP_id__pitcher_id=pitcher_id) &
+            Q(score__winner=F('local__lineup_id__team_id'))
+        ) |
+        (
+            Q(rival__lineup_id__player_in_lineup__player_in_position__BP_id__pitcher_id=pitcher_id) &
+            Q(score__winner=F('rival__lineup_id__team_id'))
+        )
+    ).distinct().count()
+    return wins
+
+def get_pitcher_losses(pitcher_id):
+    losses = db.Game.objects.filter(
+        (
+            Q(local__lineup_id__player_in_lineup__player_in_position__BP_id__pitcher_id=pitcher_id) &
+            Q(score__loser=F('local__lineup_id__team_id'))
+        ) |
+        (
+            Q(rival__lineup_id__player_in_lineup__player_in_position__BP_id__pitcher_id=pitcher_id) &
+            Q(score__loser=F('rival__lineup_id__team_id'))
+        )
+    ).distinct().count()
+    return losses
