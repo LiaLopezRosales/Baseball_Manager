@@ -303,7 +303,7 @@
         \hspace*{0.9cm} W-ID $\rightarrow$ CI, \newline
         \hspace*{0.9cm} CI $\rightarrow$ W-ID, \newline
         \hspace*{0.9cm} W-ID $\rightarrow$ DT-ID, \newline
-        \hspace*{0.9cm} DT-ID $\rightarrow$ W-ID, \newline
+        \hspace*{0.9cm} DT-ID $\rightarrow$ W-ID, U-ID \newline
         \hspace*{0.9cm} ED-ID $\rightarrow$ ED-ID, \newline
         \hspace*{0.9cm} E-ID $\rightarrow$ NombreE, Color, Entidad representante, Iniciales, \newline
         \hspace*{0.9cm} E-ID, AI-ID $\rightarrow$ E-ID, AI-ID, \newline
@@ -338,7 +338,7 @@
 
     \vspace*{0.3cm}
     En la siguiente tabla se muestran los resultados de aplicar el algoritmo del cubrimiento mínimo a partir de las dependencias funcionales expuestas. 
-    El código del algoritmo se puede encontrar en la página de este proyecto en GitHub. \url{https://github.com/gaboCiber/Baseball-Champions/} 
+    El código del algoritmo se puede encontrar en la página de este proyecto en GitHub. \url{https://github.com/AriadnaVelazquez744/Baseball_Manager/} 
 
     \begin{tabularx}{\textwidth}{|X|X|X|}
         \toprule
@@ -357,6 +357,7 @@
         W-ID $\rightarrow$ CI \newline 
         W-ID $\rightarrow$ DT-ID \newline 
         DT-ID $\rightarrow$ W-ID \newline 
+        DT-ID $\rightarrow$ U-ID \newline 
         E-ID $\rightarrow$ NombreE \newline 
         E-ID $\rightarrow$ Color \newline 
         E-ID $\rightarrow$ Entidad representante \newline 
@@ -414,6 +415,7 @@
         W-ID $\rightarrow$ CI \newline 
         W-ID $\rightarrow$ DT-ID \newline 
         DT-ID $\rightarrow$ W-ID \newline 
+        DT-ID $\rightarrow$ U-ID \newline 
         E-ID $\rightarrow$ NombreE \newline 
         E-ID $\rightarrow$ Color \newline 
         E-ID $\rightarrow$ Entidad representante \newline 
@@ -463,6 +465,7 @@
         BP-ID $\rightarrow$ Años de experiencia \newline 
         W-ID $\rightarrow$ CI \newline 
         DT-ID $\rightarrow$ W-ID \newline 
+        DT-ID $\rightarrow$ U-ID \newline 
         E-ID $\rightarrow$ NombreE \newline 
         E-ID $\rightarrow$ Color \newline 
         E-ID $\rightarrow$ Entidad representante \newline 
@@ -542,7 +545,7 @@
         CI $\rightarrow$ NombreP, Edad, Apellidos \newline 
         BP-ID $\rightarrow$ CI, Promedio de bateo, Años de experiencia, Lanzador \newline 
         W-ID $\rightarrow$ CI, ED-ID \newline 
-        DT-ID $\rightarrow$ W-ID \newline 
+        DT-ID $\rightarrow$ W-ID, U-ID \newline 
         E-ID $\rightarrow$ NombreE, Color, Entidad representante, Iniciales, ED-ID \newline 
         T-ID, S-ID $\rightarrow$ NombreTS, TipoS, Fecha de inicio, Fecha de fin \newline 
         P-ID $\rightarrow$ NombrePos \newline 
@@ -561,13 +564,13 @@
 
     \newpage 
 
-    Y entonces una de las posibles llaves cándidatas de este cojunto irreducible de dependencias funcionales es: U-ID, F-ID, BP-ID. \newline
+    Y entonces una de las posibles llaves cándidatas de este cojunto irreducible de dependencias funcionales es: F-ID, BP-ID. \newline
 
-    Esto se debe a que: tanto U-ID como F-ID son atributos que deben pertenecer a toda llave candidata, puesto que,
+    Esto se debe a que: F-ID es atributos que deben pertenecer a toda llave candidata, puesto que,
     no aparecen en la parte derecha de ninguna dependencias funcional del conjunto, es decir, no existe ningún
-    otro atributo simple o compuesto que pueda obtener a U-ID o F-ID. \newline
+    otro atributo simple o compuesto que pueda obtener a F-ID. \newline
     
-    Y por otra parte se tiene que la clausura $\{$BP-ID$\}_{F}^{+}$ = $\mathsf{U} - \{$ U-ID, F-ID$\}$. Por lo tanto U-ID, F-ID, BP-ID es una llave candidata. \newline
+    Y por otra parte se tiene que la clausura $\{$BP-ID$\}_{F}^{+}$ = $\mathsf{U} - \{$F-ID$\}$. Por lo tanto F-ID, BP-ID es una llave candidata. \newline
 
     Luego para garantizar un diseño lógico robusto y evitar redundancias, es necesario obtener un esquema de descomposición en Tercera Forma Normal (3FN),
     el cual puede ser obtenido, a partir de de su algoritmo homólogo y tiene como entrada el conjunto irreducible de dependencias funcionales anteriomente expuesto. \newline
@@ -597,8 +600,8 @@
         $ F_{5} = \sqcap_{U_{_{5}}}(F) \equiv \{W-ID \rightarrow CI, \hspace{0.2cm} ED-ID \} $\newline 
         
         $ R_{6} ( U_{6} , F_{6} ) $ \newline 
-        $ U_{6} = \{{W-ID, \hspace{0.2cm}  DT-ID}\} $ \newline 
-        $ F_{6} = \sqcap_{U_{_{6}}}(F) \equiv \{DT-ID \rightarrow W-ID \} $\newline 
+        $ U_{6} = \{{W-ID, \hspace{0.2cm}  DT-ID, \hspace{0.2cm} U-ID}\} $ \newline 
+        $ F_{6} = \sqcap_{U_{_{6}}}(F) \equiv \{DT-ID \rightarrow W-ID, \hspace{0.2cm} U-ID \} $\newline 
         
         $ R_{7} ( U_{7} , F_{7} ) $ \newline 
         $ U_{7} = \{{NombreE, \hspace{0.2cm}  E-ID, \hspace{0.2cm}  Iniciales, \hspace{0.2cm}  Entidad \hspace{0.2cm} representante, \hspace{0.2cm}  ED-ID, \hspace{0.2cm}  Color}\} $ \newline 
@@ -660,7 +663,7 @@
         $ F_{19} = \sqcap_{U_{_{19}}}(F) \equiv \{AI-ID, \hspace{0.2cm} E-ID, \hspace{0.2cm} BP-ID, \hspace{0.2cm} P-ID \rightarrow AI-ID, \hspace{0.2cm} E-ID, \hspace{0.2cm} BP-ID, \hspace{0.2cm} P-ID \} $\newline \\        
                 
         \midrule
-        \textbf{Llave del esquema de descomposición:} $U-ID, \hspace{0.2cm} F-ID, \hspace{0.2cm} BP-ID$  \\
+        \textbf{Llave del esquema de descomposición:} $F-ID, \hspace{0.2cm} BP-ID$  \\
         \bottomrule
     \end{tabularx}
 
@@ -678,9 +681,7 @@
     Como se utilizó el algoritmo de la Tercera Forma Normal (3FN) para obtener una descomposición de los esquemas relaciones, 
     entonces se cumple por construcción la Propiedad de Preservación de Dependencias Funcionales (PPDF). \\
 
-    Por otra parte, para comprobar la Propiedad del Joint Sin Perdidas (PLJ) se programó su algoritmo homólogo y dada su salida se obtiene que la PLJ no se cumple completamente en el esquema de descomposciones expuestos anteriormente.
-    Y esto se debe a que la descomposición $R_1$ y $R_2$ correspondientes a las entidades Usuario y Rol respectivamente, no se relacionan con ninguna otra descomposición, pero este resultado es el esperado pues el MERX, del cual se baso el esquema de descomposiciones, lo refleja de esa manera.
-    Luego, también es posible notar que en la tabla resultante la descomposición $R_{16}$  se relaciona con casi todos los atributos del universo, excepto los que conforman a $R_1$ y $R_2$, y por lo tanto se puede concluir que la PLJ se cumple parcialmente. 
-    Y finalmente la descomposición anterior constituye un diseño correcto.
+    Por otra parte, para comprobar la Propiedad del Joint Sin Perdidas (PLJ) se programó su algoritmo homólogo y se dio como resultado el cumplimiento de la PLJ.
+    Esto también se puede verificar puesto que la llave del esquema de descomposición es $F-ID, BP-ID$ y se encuentra como parte izquierda en $F_{16}$.
 
 \end{document}

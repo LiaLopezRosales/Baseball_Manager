@@ -254,3 +254,12 @@ def get_pitcher_losses(pitcher_id):
         )
     ).distinct().count()
     return losses
+
+def get_pitcher_wins_and_running_average(pitcher_id):
+    wins = get_pitcher_wins(pitcher_id)
+    running_average = db.Pitcher.objects.filter(id=pitcher_id).values_list('running_average', flat=True).first()
+
+    return {
+        "total_wins": wins,
+        "running_average": running_average
+    }

@@ -78,16 +78,6 @@ class BPParticipationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BPParticipation
         fields = '__all__'
-
-class PlayerInLineUpSerializer(serializers.ModelSerializer):
-    line_up = LineUpSerializer(read_only=True)  # Incluye detalles completos de la alineación
-    player_in_position = serializers.PrimaryKeyRelatedField(
-        queryset=PlayerInPosition.objects.all(), write_only=True
-    )
-
-    class Meta:
-        model = PlayerInLineUp
-        fields = '__all__'
         
 class TeamOnTheFieldSerializer(serializers.ModelSerializer):
     team_id = LineUpSerializer(read_only=True)  # Detalles completos de `LineUp` para lectura
@@ -119,7 +109,7 @@ class GameSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class PitcherSerializer(serializers.ModelSerializer):
-    id = BaseballPlayerSerializer()  # Incluye detalles del `BaseballPlayer`
+    #id = BaseballPlayerSerializer()  # Incluye detalles del `BaseballPlayer`
     CI = serializers.PrimaryKeyRelatedField(queryset=BaseballPlayer.objects.all())
 
     class Meta:
@@ -176,3 +166,13 @@ class PlayerSwapSerializer(serializers.ModelSerializer):
             'date'
         ]
 
+class PlayerInLineUpSerializer(serializers.ModelSerializer):
+    line_up = LineUpSerializer(read_only=True)  # Incluye detalles completos de la alineación
+    player_in_position = PlayerInPositionSerializer(read_only=True)
+    # player_in_position = serializers.PrimaryKeyRelatedField(
+    #     queryset=PlayerInPosition.objects.all(), write_only=True
+    # )
+
+    class Meta:
+        model = PlayerInLineUp
+        fields = '__all__'

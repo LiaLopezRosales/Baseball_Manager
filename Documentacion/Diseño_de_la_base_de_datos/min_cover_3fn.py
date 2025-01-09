@@ -598,7 +598,7 @@ baseball = [
     "W-ID ⟶ CI",
     #"CI ⟶ W-ID",
     "W-ID ⟶ DT-ID",
-    "DT-ID ⟶ W-ID",
+    "DT-ID ⟶ W-ID, U-ID",
     #"ED-ID ⟶ ED-ID",
     "E-ID ⟶ NombreE, Color, Entidad_representante, Iniciales",
     #"E-ID, AI-ID ⟶ E-ID, AI-ID",
@@ -632,6 +632,6 @@ baseball = [
 
 uni, fc, sc, tc, tcgr, des = min_cover_3fn(baseball)
 
-print_min_cover_3fn_to_txt(fc, sc, tc, tcgr, des, 'Generate/baseball.txt')
-print_min_cover_3fn_to_tex(fc, sc, tc, tcgr, des, 'Generate/baseball.tex')
-print_plj_to_txt(uni, fc, des, 'Generate/baseball.txt')
+print_min_cover_3fn_to_txt(fc, sc, tc, tcgr, des, 'baseball.txt')
+print_min_cover_3fn_to_tex(fc, sc, tc, tcgr, des, 'baseball.tex')
+print_plj_to_txt(uni, fc, des, 'baseball.txt')
