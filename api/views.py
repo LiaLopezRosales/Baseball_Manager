@@ -4,8 +4,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
+from db_structure.models import PlayerSwap
+from .permissions import IsAdmin, IsDirectorTecnicoAndOwnTeam, IsUsuarioGeneral
 from .models import CustomUser
-from .serializers import UserSerializer
+from .serializers import UserSerializer, CambioSerializer
 
 class LoginView(APIView):
     """
@@ -42,3 +46,48 @@ class LoginView(APIView):
             # Captura cualquier otro error inesperado
             return Response({'error': f'Error interno del servidor: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+# Vista para estadísticas públicas (accesible a todos los usuarios)
+class StatisticsView(APIView):
+    permission_classes = [IsUsuarioGeneral]
+
+    def get(self, request):
+        return Response({"estadisticas": "Datos públicos de estadísticas."})
+
+
+# Vista protegida para cambiar la alineación, solo para el DT de su equipo
+class TeamLineupView(APIView):
+    permission_classes = [IsAuthenticated, IsDirectorTecnicoAndOwnTeam]
+
+    def post(self, request, team_id):
+        # Solo el DT puede modificar su propio equipo
+        return Response({"message": f"Alineación modificada para el equipo {team_id}"})
+
+
+# Vista exclusiva para administradores con permisos CRUD completos
+class AdminDashboardView(APIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def get(self, request):
+        return Response({"message": "Bienvenido al Panel de Administración"})
+
+
+# Modelo de vista con CRUD completo para la tabla de cambios
+class CambioViewSet(ModelViewSet):
+    """
+    Vista para gestionar los cambios en la alineación.
+    Solo un DT puede modificar su propio equipo y un Admin tiene acceso total.
+    """
+    queryset = PlayerSwap.objects.all()
+    serializer_class = CambioSerializer
+    permission_classes = [IsAuthenticated, IsDirectorTecnicoAndOwnTeam]
+
+    def get_queryset(self):
+        """Filtra para que el DT solo vea sus propios cambios."""
+        user = self.request.user
+        if user.get_role_name() == "Director Técnico":
+            return PlayerSwap.objects.filter(team_id=user.get_team_id())
+        elif user.get_role_name() == "Admin":
+            return PlayerSwap.objects.all()
+        return PlayerSwap.objects.none()

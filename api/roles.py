@@ -30,13 +30,13 @@ class DirectorTecnicoRole(Role):
             user_team_id = user.get_team_id()
             if team_id and user_team_id == team_id:
                 return True
-            elif not team_id:
-                return True  # Acceso general si no se pasa un team_id
+            # elif not team_id:
+            #     return True  # Acceso general si no se pasa un team_id
         return False
 
 class UsuarioGeneralRole(Role):
     name = "Usuario General"
-    permissions = ["view_team", "view_game"]
+    permissions = ["view_stats", "view_game"]
 
     def has_permission(self, permission):
         return permission in self.permissions

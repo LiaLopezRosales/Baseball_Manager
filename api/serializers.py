@@ -2,6 +2,7 @@
 
 from rest_framework import serializers
 from .models import CustomUser
+from db_structure.models import PlayerSwap
 
 class UserSerializer(serializers.ModelSerializer):
     role_name = serializers.SerializerMethodField()
@@ -21,3 +22,11 @@ class UserSerializer(serializers.ModelSerializer):
     def get_permissions(self, obj):
         return obj.get_role_instance().permissions
 
+
+class CambioSerializer(serializers.ModelSerializer):
+    """
+    Serializador para la tabla de cambios.
+    """
+    class Meta:
+        model = PlayerSwap
+        fields = '__all__'
