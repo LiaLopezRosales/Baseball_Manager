@@ -31,13 +31,13 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-placeholder')
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
-
+# ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'django.contrib.admin',     # Deshabilita panel admin
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'db_structure',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'django_extensions',
     'api',
@@ -96,13 +97,6 @@ DATABASES = {
     }
 }
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.AllowAny',  # Permite todo por defecto
-#     ]
-# }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -137,10 +131,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    # 'django.contrib.auth.hashers.Argon2PasswordHasher',   # Para una encriptación más segura
+    # 'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    # 'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    # 'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',     # Encriptado por defecto
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.ScriptPasswordHasher',
 ]
 
 AUTH_USER_MODEL = 'api.CustomUser'
@@ -170,4 +169,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',  # React frontend
+    'http://127.0.0.1:3000',
 ]
+
+
+STATIC_URL = 'static/'
+# Sirviendo React desde Django temporalmente para producción
+#STATICSFILES_DIRS = [BASE_DIR / "Baseball_Management" / "build" / "static"]

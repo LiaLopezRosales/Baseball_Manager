@@ -490,4 +490,4 @@ yarn-error.log*
 uv-installer.sh
 
 #configuración personal para la base de datos
-.env
+./.env

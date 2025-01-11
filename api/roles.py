@@ -1,68 +1,43 @@
-from abc import ABC, abstractmethod
-from django.contrib.auth.models import Permission
+# api/roles.py
 
+from abc import ABC, abstractmethod
 
 class Role(ABC):
     """
-    Clase base abstracta para definir roles.
-    Define la estructura que deben seguir todos los roles.
+    Clase base abstracta para roles con permisos.
     """
     name = "BaseRole"
     permissions = []
 
     @abstractmethod
     def has_permission(self, permission):
-        """
-        Verifica si el rol tiene un permiso específico.
-        """
         return permission in self.permissions
-
 
 class AdminRole(Role):
-    """
-    Rol de Administrador.
-    Tiene acceso completo al sistema.
-    """
     name = "Admin"
-    
+    permissions = ["*"]  # Acceso total
+
     def has_permission(self, permission):
-        """
-        Devuelve True para cualquier permiso, ya que Admin tiene permisos globales.
-        """
         return True
 
-    @property
-    def permissions(self):
-        """
-        Devuelve dinámicamente todos los permisos disponibles en el sistema.
-        """
-        all_permissions = Permission.objects.values_list('codename', flat=True)
-        return list(all_permissions)
-
 class DirectorTecnicoRole(Role):
-    """
-    Rol de Director Técnico.
-    Tiene permisos limitados relacionados con equipos y juegos.
-    """
     name = "Director Técnico"
-    permissions = [
-        'view_team', 'view_game',
-        'add_lineup', 'change_lineup', 'view_lineup',
-    ]
+    permissions = ["view_team", "change_lineup", "view_game"]
 
-    def has_permission(self, permission):
-        return permission in self.permissions
-
+    def has_permission(self, permission, user, team_id=None):
+        # Validar si el equipo pertenece al Director Técnico
+        if permission in self.permissions:
+            user_team_id = user.get_team_id()
+            if team_id and user_team_id == team_id:
+                return True
+            elif not team_id:
+                return True  # Acceso general si no se pasa un team_id
+        return False
 
 class UsuarioGeneralRole(Role):
-    """
-    Rol de Usuario General.
-    Solo tiene permisos para visualizar información pública.
-    """
     name = "Usuario General"
-    permissions = [
-        'view_team', 'view_game', 'generate_reports',
-    ]
+    permissions = ["view_team", "view_game"]
 
     def has_permission(self, permission):
         return permission in self.permissions
+
