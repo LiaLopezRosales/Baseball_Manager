@@ -11,9 +11,7 @@
 \usepackage{float}
 \usepackage{hyperref}   
 
-%\geometry{
- % top=2cm,  bottom=2cm,  left=1.5cm,  right=1.5cm
-%}
+
 
 \setlength{\parindent}{0pt}
 
@@ -46,6 +44,13 @@
 
         \subsection*{Alcance del Producto}
 
+        Este proyecto tiene como objetivo el desarrollo de una aplicación web que facilite la gestión de los 
+        campeonatos de béisbol. Su propósito principal es permitir a los usuarios consultar y analizar información 
+        relevante de las series y los peloteros, proporcionando herramientas que soporten la toma de decisiones 
+        basada en estadísticas detalladas y actualizadas. El sistema será accesible, eficiente y adaptado a las 
+        necesidades de diversos usuarios, desde administradores hasta periodistas.
+
+
         \subsection*{Definiciones, acrónimos y abreviaturas}
 
         \subsection*{Referencias}
@@ -60,12 +65,99 @@
     \end{center}
 
         \subsection*{Perspectiva del Producto}
+        La aplicación web será una solución integral para la gestión y consulta de estadísticas en campeonatos de 
+        béisbol. Estará diseñada para ofrecer:
+        \begin{itemize}
+            \item Acceso a estadísticas detalladas de series, equipos y jugadores.
+            \item Generación de reportes personalizados.
+            \item Funcionalidades diferenciadas según el rol del usuario (administrador, director técnico, 
+            periodista/usuarios generales, etc.).
+        \end{itemize}
 
         \subsection*{Funciones del Producto}
+        
+        \begin{enumerate}
+        \item \textbf{Descripción de los Actores}
+
+            \begin{itemize}
+                \item \textbf{Administrador:} Responsable de gestionar los datos de series, equipos y jugadores, además de configurar el sistema y generar reportes.
+                \item \textbf{Director Técnico:} Encargado de gestionar las alineaciones de los equipos y consultar estadísticas específicas.
+                \item \textbf{Periodista/Usuario General:} Consulta las estadísticas y genera reportes basados en los datos almacenados en el sistema.
+            \end{itemize}
+
+        \item \textbf{Casos de Uso del Sistema} (que se muestran ilustrados en la Figura 1)
+            
+            \subsubsection{Registrar datos en el sistema}
+            \begin{itemize}
+                \item \textbf{Actor:} Administrador
+                \item \textbf{Descripción:} El administrador registra datos de series, equipos y jugadores mediante formularios en la aplicación web.
+            \end{itemize}
+
+            \subsubsection{Gestionar alineaciones de equipos}
+            \begin{itemize}
+                \item \textbf{Actor:} Director Técnico y Administrador
+                \item \textbf{Descripción:} Permite al director técnico modificar la posición de los jugadores en la alineación inicial y realizar ajustes durante una serie.
+            \end{itemize}
+
+            \subsubsection{Consultar estadísticas de jugadores y equipos}
+            \begin{itemize}
+                \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
+                \item \textbf{Descripción:} El sistema permite acceder a estadísticas detalladas, como promedios de bateo, efectividad de los lanzadores y resultados de los equipos.
+            \end{itemize}
+
+            \subsubsection{Obtener reportes personalizados}
+            \begin{itemize}
+                \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
+                \item \textbf{Descripción:} Genera reportes en formato PDF o gráficos que resumen el desempeño de jugadores y equipos en una serie.
+            \end{itemize}
+
+            \subsubsection{Visualizar datos tabulares y gráficos}
+            \begin{itemize}
+                \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
+                \item \textbf{Descripción:} Presentación visual de estadísticas mediante tablas y gráficos para un análisis claro y rápido.
+            \end{itemize}
+
+            \subsubsection{Listar equipos por clasificación}
+            \begin{itemize}
+                \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
+                \item \textbf{Descripción:} Permite obtener la clasificación de los equipos según los resultados de cada serie.
+            \end{itemize}
+
+            \subsubsection{Modificar roles de usuarios}
+            \begin{itemize}
+                \item \textbf{Actor:} Administrador
+                \item \textbf{Descripción:} El administrador puede asignar o modificar roles para los usuarios del sistema.
+            \end{itemize}
+
+            \subsubsection{Exportar reportes a formato PDF}
+            \begin{itemize}
+                \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
+                \item \textbf{Descripción:} Funcionalidad para guardar reportes generados en formato PDF, con soporte para otros formatos adicionales.
+            \end{itemize}
+
+        \end{enumerate}
+
 
         \subsection*{Características de los usuarios}
+        El sistema contará con diferentes perfiles de usuarios:
+        \begin{itemize}
+            \item \textbf{Administradores}: Control total del sistema, incluyendo la estructura de las series.
+            \item \textbf{Directores Técnicos}: Gestión de alineaciones y rendimiento de los equipos.
+            \item \textbf{Periodistas/Usuarios Generales}: Consulta de información general sobre los campeonatos. 
+            Acceso a estadísticas y reportes para análisis independiente.
+        \end{itemize}
+
 
         \subsection*{Restricciones generales}
+        \begin{itemize}
+            \item \textbf{Accesibilidad}: La aplicación será multiplataforma, garantizando su uso desde dispositivos 
+            móviles y de escritorio.
+            \item \textbf{Disponibilidad}: Asegurará el acceso continuo a la información para usuarios autorizados.
+            \item \textbf{Tecnologías}: El desarrollo empleará Django como ORM, bajo una arquitectura hibrida de 
+            N-Capas con Microkernel, siguiendo la metodología DIC.
+            \item \textbf{Seguridad}: Se implementarán mecanismos para proteger la confidencialidad, integridad y 
+            disponibilidad de los datos.
+        \end{itemize}
 
         \subsection*{Dependencias y suposiciones}
 
@@ -161,6 +253,15 @@
         \vspace{1cm}
 
         \subsection*{Requerimientos de Entorno}
+
+            Para garantizar la ejecución del sistema, se deben cumplir las siguientes condiciones:
+
+            \subsubsection{Hardware}
+            \begin{itemize}
+                \item Dispositivos capaces de ejecutar navegadores modernos y conexiones a internet estables.
+            \end{itemize}
+            
+            \subsubsection{Software}
             \begin{itemize}
                 \item Para la base de datos se ha de utilizar la tecnología PostgreSQL.
                 \item En cuanto al backend de la aplicación web, este de desarrollará en python con DjangoRest como 
@@ -171,5 +272,12 @@
     \newpage
 
     \section*{Anexos}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.9,keepaspectratio]{caso_de_uso.png}
+        \caption{Diagrama de casos de uso}
+    \end{figure}
+
 
 \end{document}
