@@ -1,6 +1,5 @@
-// frontend/src/components/login.jsx
-
 import React, { useState } from 'react';
+import './login.css';  // Asegúrate de que el archivo CSS correcto se importe
 
 function LoginBoard() {
     const [email, setEmail] = useState('');
@@ -23,7 +22,6 @@ function LoginBoard() {
                 body: JSON.stringify({ email, password })
             });
 
-            // Intentar convertir a JSON y manejar errores de formato
             let data;
             try {
                 data = await response.json();
@@ -37,7 +35,6 @@ function LoginBoard() {
 
             const { token, team_id, role_name, user } = data;
 
-            // Almacenar en el localStorage
             localStorage.setItem('token', token);
             localStorage.setItem('team_id', team_id);
             localStorage.setItem('role_name', role_name);
@@ -60,13 +57,17 @@ function LoginBoard() {
     };
 
     return (
-        <div>
+        <div className="login-board">
             {!isLogged ? (
-                <div>
-                    <label>Email: </label>
-                    <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    <label>Contraseña: </label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <div className="form-container">
+                    <div className="form-group">
+                        <label>Email: </label>
+                        <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                        <label>Contraseña: </label>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    </div>
                     <button onClick={handleLogin}>Iniciar sesión</button>
                     {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 </div>
@@ -85,4 +86,3 @@ function LoginBoard() {
 }
 
 export default LoginBoard;
-

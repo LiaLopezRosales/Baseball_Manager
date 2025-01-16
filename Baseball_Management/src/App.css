@@ -33,7 +33,7 @@ body {
     font-size: calc(10px + 2vmin);
     color: black;
     padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Añadir sombra */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Aï¿½adir sombra */
 }
 
 .App-link {
@@ -80,7 +80,7 @@ body {
     }
 
     .pelotero .info {
-        padding: 20px; /* Añade padding a la información del jugador */
+        padding: 20px; /* Aï¿½ade padding a la informaciï¿½n del jugador */
         margin-top: 50px; /* Ajusta el margen superior para dejar espacio a la barra azul */
         color: black;
     }
@@ -89,23 +89,23 @@ body {
     width: 100px;
     height: 100px;
     border-radius: 50%; /* Hace que la imagen sea circular */
-    object-fit: cover; /* Asegura que la imagen cubra toda el área del contenedor */
-    margin-right: 20px; /* Espacio entre la imagen y la información del jugador */
+    object-fit: cover; /* Asegura que la imagen cubra toda el ï¿½rea del contenedor */
+    margin-right: 20px; /* Espacio entre la imagen y la informaciï¿½n del jugador */
     position: absolute;
     top: 30%;
     right: 8px;
 }
 
 .pelotero:hover {
-    background-color: lightblue; /* Efecto al pasar el ratón */
+    background-color: lightblue; /* Efecto al pasar el ratï¿½n */
     border: 3px solid navy;
     transform: scale(1.05);
-    box-shadow: 0 8px 16px rgba(47, 79, 79, 0.3); /* Sombra más intensa */
+    box-shadow: 0 8px 16px rgba(47, 79, 79, 0.3); /* Sombra mï¿½s intensa */
 }
 
 /* Estilo sidebar */
 .sidebar {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 200px;
@@ -114,7 +114,30 @@ body {
     padding: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Asegura que el contenido principal estÃ© en la parte superior y el footer en la parte inferior */
 }
+
+.sidebar-footer { margin-top: auto; /* Empuja el footer hacia la parte inferior */ 
+    margin-bottom: 40px; /* AÃ±ade un poco de espacio desde el borde inferior */
+}
+
+.sidebar ul { 
+    list-style-type: none; padding: 0; 
+} 
+
+    .sidebar ul li { 
+        text-align: left; /* Alinear el texto a la izquierda */ 
+        font-size: 18px; /* Ajustar el tamaÃ±o de la letra */ 
+        padding: 10px 0; cursor: 
+        pointer; transition: background-color 0.3s; 
+        padding-left: 10px;
+    } 
+    
+    .sidebar ul li:hover { 
+        background-color: rgba(47, 79, 79, 0.3); /* AÃ±adir un efecto al pasar el ratÃ³n */
+    }
 
 /* Estilo login */
 .login {
@@ -126,35 +149,35 @@ body {
     background-color: rgba(47, 79, 79, 0.1);
     padding: 10px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 2; /* Asegúrate de que el botón tenga un índice z más alto */
+    z-index: 2; /* Asegï¿½rate de que el botï¿½n tenga un ï¿½ndice z mï¿½s alto */
 }
 
-/* Estilo del botón */
+/* Estilo del botï¿½n */
 button {
     background-color: darkslategray; /* Color de fondo */
     color: white; /* Color del texto */
     border: none; /* Sin borde */
     padding: 5px 10px; /* Reducido el espaciado interno */
-    font-size: 14px; /* Tamaño del texto más pequeño */
+    font-size: 14px; /* Tamaï¿½o del texto mï¿½s pequeï¿½o */
     border-radius: 5px; /* Bordes redondeados */
-    cursor: pointer; /* Puntero al pasar el ratón */
+    cursor: pointer; /* Puntero al pasar el ratï¿½n */
     transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s; /* Transiciones suaves */
 }
 
     button:hover {
-        background-color: navy; /* Color de fondo al pasar el ratón */
-        transform: scale(1.05); /* Aumenta ligeramente el tamaño */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra al pasar el ratón */
+        background-color: navy; /* Color de fondo al pasar el ratï¿½n */
+        transform: scale(1.05); /* Aumenta ligeramente el tamaï¿½o */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra al pasar el ratï¿½n */
     }
 
     button:active {
         background-color: navy; /* Color de fondo al hacer clic */
-        transform: scale(0.95); /* Reduce ligeramente el tamaño */
+        transform: scale(0.95); /* Reduce ligeramente el tamaï¿½o */
     }
 
     button:focus {
         outline: none; /* Quita el borde de enfoque por defecto */
-        box-shadow: 0 0 5px rgba(47, 79, 79, 0.5); /* Añade una sombra */
+        box-shadow: 0 0 5px rgba(47, 79, 79, 0.5); /* Aï¿½ade una sombra */
     }
 
 
@@ -169,5 +192,5 @@ button {
     max-width: 50%;
     max-height: 50%;
     padding: 20px 40px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Añadir sombra */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Aï¿½adir sombra */
 }

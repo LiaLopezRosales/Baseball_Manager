@@ -1,80 +1,55 @@
-// import logo from './logo.svg';
 import React, { useState } from 'react';
 import './App.css';
-import PlayerList from './components/player_list';
-import Sidebar from './components/sidebar';
+import Sidebar from './components/sidebar';  // Eliminé la importación de PlayerList
 import LoginBoard from './components/login';
+import Modal from './components/Modal';  // Importa el componente Modal
+import PlayerList from './components/player_list';
 
 function App() {
-  const [isLogged, setLogin] = useState( false );
-  const [userName, setUserName] = useState("");
-  const [show, setShow] = useState( true );
+  const [isLogged, setLogin] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);  // Estado para el Modal
+  const [selectedOption, setSelectedOption] = useState(''); // Nuevo estado
 
   function handleClick() {
-    setLogin(!isLogged)
+    setLogin(!isLogged);
   }
 
   const handleNameChange = (event) => {
-    setUserName(event.target.value)
-  }
+    setUserName(event.target.value);
+  };
 
+  const handleOptionSelect = (option) => {
+    setSelectedOption(option);
+  };
+
+  const handleModalOpen = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="App">
       <header className="App-header">
-        {/* <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a> */}
-        
-        <div className='login'>
-          <button onClick={() => { setShow(!show) }}>Account</button>
-        </div>
-
         <p>{isLogged ? 'Welcome ' + userName : ''}</p>
 
-        {show ? (
-        <PlayerList logged={isLogged}/>
-        ) : (
-        <LoginBoard name={userName} isLogged={isLogged} onButtonClick = {() => handleClick()} NameOnChange={handleNameChange}/>
-        )}
+        <Sidebar onOptionSelect={handleOptionSelect} onModalOpen={handleModalOpen} /> {/* Pasar la función de selección de opciones y apertura del modal a Sidebar */}
 
-        <Sidebar />
-      
-        </header>
+        <div className='content'>
+          {selectedOption === 'Player List' && <PlayerList logged={isLogged} />}
+          {selectedOption === 'Other Option' && <p>Contenido para otra opción</p>}
+          {/* Añadir más opciones aquí según sea necesario */}
+        </div>
+
+        <Modal isOpen={isModalOpen} onClose={handleModalClose}>
+          <LoginBoard name={userName} isLogged={isLogged} onButtonClick={() => handleClick()} NameOnChange={handleNameChange} />
+        </Modal>
+      </header>
     </div>
   );
 }
 
 export default App;
-
-// export default () => {
-//   const [show, setShow] = useState(true);
-
-//   return (
-//     <>
-//       <button
-//         type="button"
-//         onClick={() => {
-//           setShow(!show);
-//         }}
-//       >
-//         Mostrar {show ? 'Div 2' : 'Div 1'}
-//       </button>
-
-//       {show ? (
-//         <div style={{ color: 'red' }}>Div 1</div>
-//       ) : (
-//         <div style={{ color: 'blue' }}>Div 2</div>
-//       )}
-//     </>
-//   );
-// };
