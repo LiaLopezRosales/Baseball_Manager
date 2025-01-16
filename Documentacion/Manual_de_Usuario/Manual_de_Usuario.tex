@@ -1,0 +1,73 @@
+\documentclass{report}
+\usepackage[spanish]{babel}
+\usepackage[left=2.5cm, right=2.5cm, top=3cm, bottom=3cm]{geometry}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{hyperref}   
+
+
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+    \begin{titlepage}
+        \centering
+        {\bfseries\Huge Manual de Usuario \par}
+        \vspace*{1cm}
+        \vspace*{3cm}
+        \vspace*{1cm}
+        {\LARGE \textbf{Nombre: Gestión de campeonatos de béisbol} }
+        \vfill
+        {\bfseries\LARGE Autores: \par}
+        {\Large Ariadna Vel\'azquez Rey  C311 \par} 
+        {\Large L\'ia L\'opez Rosales  C312 \par} 
+        {\Large Carlos Daniel Largacha Leal  C312 \par} 
+        {\Large Gabriel Andr\'es Pla Lasa  C311 \par} 
+        {\Large Raidel Miguel Cabellud Lizaso C311 \par} 
+        \vfill
+    \end{titlepage}
+
+    \section*{Objetivo del proyecto}
+    Este proyecto tiene como objetivo el desarrollo de una aplicación web que facilite la gestión de los 
+    campeonatos de béisbol. Su propósito principal es permitir a los usuarios consultar y analizar información 
+    relevante de las series y los peloteros, proporcionando herramientas que soporten la toma de decisiones 
+    basada en estadísticas detalladas y actualizadas. El sistema será accesible, eficiente y adaptado a las 
+    necesidades de diversos usuarios, desde administradores hasta periodistas.
+
+
+    \section*{Requerimientos Técnicos}
+    \begin{itemize}
+        \item Dispositivos capaces de ejecutar navegadores modernos y conexiones a internet estables.
+        \item En caso de tener una versión local también son necesarios más de 300 mb disponibles para la instalación.
+    \end{itemize}
+    
+    \section*{Requerimientos de Software}
+    Para ejecutarla de forma local es necesario seguir las siguientes orientaciones: 
+    \begin{itemize}
+        \item Tener instalado los paquetes para manejo de PostgreSQL, crear una base de datos de tipo psql y editar 
+        los datos de especificación en el archivo .env de la carpeta principal.
+        \item Tener instalado el compilador de Python y las librerías que aparecen en el archivo principal 
+        pyproject.toml.
+        \item Instalar con 'npm install' desde la dirección de archivo Baseball\_Management/src los módulos para 
+        ejecutar React.
+    \end{itemize}
+
+    \section*{Forma de instalar la aplicación}
+    Para ejecutarla desde una versión local hay dos maneras de hacerlo:
+    \begin{enumerate}
+        \item Ejecutar en la consola (con el permiso -x) el archivo run.sh.
+        \item Ejecutar en la consola desde la dirección de la carpeta Baseball\_Management el comando 'npm start'.
+    \end{enumerate}
+
+    \section*{Breve explicación de cada una de las opciones del sistema}
+
+    \section*{Breve explicación de cada una de las salidas del sistema}
+
+\end{document}
