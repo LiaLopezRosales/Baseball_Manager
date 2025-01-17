@@ -1,4 +1,4 @@
-class BaseService:
+class BaseRepository:
     model = None  
     @classmethod
     def get_all(cls):

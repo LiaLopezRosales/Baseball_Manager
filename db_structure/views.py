@@ -1,125 +1,125 @@
 from django.shortcuts import render
-from .services import *
+from .repositories import *
 from .serializers import *
 from db_structure.generic_classes.BaseViewSet import BaseViewSet
 
 
 class RolViewSet(BaseViewSet):
-    service = RolService
+    repository = RolRepository
     serializer_class = RolSerializer
 
 class PositionViewSet(BaseViewSet):
-    service = PositionService
+    repository = PositionRepository
     serializer_class = PositionSerializer
 
 
 class SeasonViewSet(BaseViewSet):
-    service = SeasonService
+    repository = SeasonRepository
     serializer_class = SeasonSerializer
 
 class UserViewSet(BaseViewSet):
-    service = UserService
+    repository = UserRepository
     serializer_class = UserSerializer
 
 
 
 class WorkerViewSet(BaseViewSet):
-    service = WorkerService
+    repository = WorkerRepository
     serializer_class = WorkerSerializer
 
 
 
 class DirectionTeamViewSet(BaseViewSet):
-    service = DirectionTeamService
+    repository = DirectionTeamRepository
     serializer_class = DirectionTeamSerializer
 
 
 
 class TeamViewSet(BaseViewSet):
-    service = TeamService
+    repository = TeamRepository
     serializer_class = TeamSerializer
 
 
 class LineUpViewSet(BaseViewSet):
-    service = LineUpService
+    repository = LineUpRepository
     serializer_class = LineUpSerializer
 
 
 
 class PersonViewSet(BaseViewSet):
-    service = PersonService
+    repository = PersonRepository
     serializer_class = PersonSerializer
 
 
 
 class BaseballPlayerViewSet(BaseViewSet):
-    service = BaseballPlayerService
+    repository = BaseballPlayerRepository
     serializer_class = BaseballPlayerSerializer
 
 
 
 class TechnicalDirectorViewSet(BaseViewSet):
-    service = TechnicalDirectorService
+    repository = TechnicalDirectorRepository
     serializer_class = TechnicalDirectorSerializer
 
 
 
 class SeriesViewSet(BaseViewSet):
-    service = SeriesService
+    repository = SeriesRepository
     serializer_class = SeriesSerializer
 
 
 
 class BPParticipationViewSet(BaseViewSet):
-    service = BPParticipationService
+    repository = BPParticipationRepository
     serializer_class = BPParticipationSerializer
 
 
 
 class PlayerInLineUpViewSet(BaseViewSet):
-    service = PlayerInLineUpService
+    repository = PlayerInLineUpRepository
     serializer_class = PlayerInLineUpSerializer
 
 
 
 class TeamOnTheFieldViewSet(BaseViewSet):
-    service = TeamOnTheFieldService
+    repository = TeamOnTheFieldRepository
     serializer_class = TeamOnTheFieldSerializer
 
 
 
 class ScoreViewSet(BaseViewSet):
-    service = ScoreService
+    repository = ScoreRepository
     serializer_class = ScoreSerializer
 
 
 
 class GameViewSet(BaseViewSet):
-    service = GameService
+    repository = GameRepository
     serializer_class = GameSerializer
 
 
 
 class PitcherViewSet(BaseViewSet):
-    service = PitcherService
+    repository = PitcherRepository
     serializer_class = PitcherSerializer
 
 
 
 class StarPlayerViewSet(BaseViewSet):
-    service = StarPlayerService
+    repository = StarPlayerRepository
     serializer_class = StarPlayerSerializer
 
 
 
 class PlayerInPositionViewSet(BaseViewSet):
-    service = PlayerInPositionService
+    repository = PlayerInPositionRepository
     serializer_class = PlayerInPositionSerializer
 
 
 
 class PlayerSwapViewSet(BaseViewSet):
-    service = PlayerSwapService
+    repository = PlayerSwapRepository
     serializer_class = PlayerSwapSerializer
 
 
