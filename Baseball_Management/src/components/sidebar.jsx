@@ -1,10 +1,10 @@
 import React from 'react';
 
-function Sidebar({ onOptionSelect, onModalOpen }) {
+function Sidebar({ role, onOptionSelect, onModalOpen }) {
   return (
     <div className='sidebar'>
       <ul>
-        <li onClick={() => onOptionSelect('Player List')}>Player List</li>
+        {role === 'Admin' && <li onClick={() => onOptionSelect('Player List')}>Player List</li>}
         <li onClick={() => onOptionSelect('Other Option')}>Other Option</li>
         {/* Añade más opciones aquí según sea necesario */}
       </ul>

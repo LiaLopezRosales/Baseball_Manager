@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './login.css';  // Asegúrate de que el archivo CSS correcto se importe
 
-function LoginBoard() {
+function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, updateRole }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [isLogged, setIsLogged] = useState(false);
     const [teamId, setTeamId] = useState(null);
     const [roleName, setRoleName] = useState('');
     const [permissions, setPermissions] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
 
     const handleLogin = async () => {
         setErrorMessage('');  // Resetear errores previos
@@ -43,7 +44,12 @@ function LoginBoard() {
             setTeamId(team_id);
             setRoleName(role_name);
             setPermissions(user.permissions);
-            setIsLogged(true);
+            updateRole(role_name);  // Actualiza el rol en App.js
+            NameOnChange(email);
+            setLogin(true);  // Actualiza isLogged en App.js
+            onButtonClick();  // Llama a la función pasada como prop para cambiar el estado en el padre
+            
+            navigate('/admin');  // Redirige a /admin después del login exitoso
         } 
         catch (error) {
             console.error('Error capturado:', error.message);
@@ -53,7 +59,11 @@ function LoginBoard() {
 
     const handleLogout = () => {
         localStorage.clear();
-        setIsLogged(false);
+        onButtonClick();  // Llama a la función pasada como prop para cambiar el estado en el padre
+        updateRole('Guest');  // Resetea el rol en App.js
+        NameOnChange('');
+        setLogin(false);  // Actualiza isLogged en App.js
+        navigate(-1);  // Redirige a la página anterior
     };
 
     return (
