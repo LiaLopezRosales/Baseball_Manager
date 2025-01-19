@@ -49,7 +49,8 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
             setLogin(true);  // Actualiza isLogged en App.js
             onButtonClick();  // Llama a la función pasada como prop para cambiar el estado en el padre
             
-            navigate('/admin');  // Redirige a /admin después del login exitoso
+            // Redirige a /admin si el rol es Admin 
+            if (role_name === 'Admin') { navigate('/admin'); }
         } 
         catch (error) {
             console.error('Error capturado:', error.message);
