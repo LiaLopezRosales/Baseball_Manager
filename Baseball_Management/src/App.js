@@ -49,11 +49,28 @@ function App() {
 
                     <div className='content'>
                         {selectedOption === 'Player List' && <PlayerList logged={isLogged} />}
-                        {selectedOption === 'Other Option' && <p>Contenido para otra opción</p>}
+                        {selectedOption === 'Posiciones' && <p>Contenido para Posiciones</p>}
+                        {selectedOption === 'Usuarios' && <p>Contenido para Usuarios</p>}
+                        {selectedOption === 'Temporadas' && <p>Contenido para Temporadas</p>}
+                        {selectedOption === 'Trabajadores' && <p>Contenido para Trabajadores</p>}
+                        {selectedOption === 'Equipos' && <p>Contenido para Equipos</p>}
+                        {selectedOption === 'Alineaciones' && <p>Contenido para Alineaciones</p>}
+                        {selectedOption === 'Personas' && <p>Contenido para Personas</p>}
+                        {selectedOption === 'Jugadores' && <p>Contenido para Jugadores</p>}
+                        {selectedOption === 'Directores Técnicos' && <p>Contenido para Directores Técnicos</p>}
+                        {selectedOption === 'Jugadores en Alineación' && <p>Contenido para Jugadores en Alineación</p>}
+                        {selectedOption === 'BP Participations' && <p>Contenido para BP Participations</p>}
+                        {selectedOption === 'Equipos en el Campo' && <p>Contenido para Equipos en el Campo</p>}
+                        {selectedOption === 'Puntuaciones' && <p>Contenido para Puntuaciones</p>}
+                        {selectedOption === 'Juegos' && <p>Contenido para Juegos</p>}
+                        {selectedOption === 'Pitchers' && <p>Contenido para Pitchers</p>}
+                        {selectedOption === 'Jugadores Estrella' && <p>Contenido para Jugadores Estrella</p>}
+                        {selectedOption === 'Jugadores en Posición' && <p>Contenido para Jugadores en Posición</p>}
+                        {selectedOption === 'Intercambios de Jugadores' && <p>Contenido para Intercambios de Jugadores</p>}
                     </div>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>
-                        <LoginBoard 
+                        <LoginBoard o
                             name={userName} 
                             isLogged={isLogged} 
                             setLogin={setLogin} 

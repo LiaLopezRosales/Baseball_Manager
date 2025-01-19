@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './login.css';  // Asegúrate de que el archivo CSS correcto se importe
+import './login.css'; 
 
 function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, updateRole }) {
     const [email, setEmail] = useState('');

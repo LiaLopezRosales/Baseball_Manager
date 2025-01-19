@@ -1,0 +1,48 @@
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .sidebar-content {
+    flex: 1;
+    overflow-y: auto; /* Hacer que esta sección sea desplazable */
+  }
+  
+  .sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0; /* Asegúrate de que no haya margen para el ul */
+  }
+  
+  .sidebar li {
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .sidebar li:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .sidebar-footer {
+    padding: 10px;
+    background-color: rgba(155, 19, 19, 0); /* Puedes ajustar el estilo según tus necesidades */
+    position: sticky;
+    bottom: 0;
+    z-index: 1000; /* Asegúrate de que esté sobre el contenido desplazable */
+  }
+  
+  .sidebar-footer button {
+    width: 100%;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  .sidebar-footer button:hover {
+    background-color: #0056b3;
+  }
+  
