@@ -4,7 +4,6 @@ import './App.css';
 import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
-import PlayerList from './components/player_list';
 import AdminPage from './components/admin';  // Importa el componente de la página de administrador
 
 import BaseballPlayerCRUD from './components/FormulariosCRUD/BaseballPlayerCRUD';
@@ -71,7 +70,6 @@ function App() {
                     <Sidebar role={role} onOptionSelect={handleOptionSelect} onModalOpen={handleModalOpen} />
 
                     <div className='content'>
-                        {selectedOption === 'Player List' && <PlayerList logged={isLogged} />}
                         {selectedOption === 'Posiciones' && < PositionCRUD />}
                         {selectedOption === 'Usuarios' && < UserCRUD />}
                         {selectedOption === 'Temporadas' && < SeasonCRUD/>}
@@ -90,6 +88,8 @@ function App() {
                         {selectedOption === 'Jugadores Estrella' && < StarPlayerCRUD />}
                         {selectedOption === 'Jugadores en Posición' && < PlayerInPositionCRUD />}
                         {selectedOption === 'Intercambios de Jugadores' && < PlayerSwapCRUD />}
+                        {selectedOption === 'Series' && < SeriesCRUD />}
+                        {selectedOption === 'Direction Team' && < DirectionTeamCRUD />}
                     </div>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>
@@ -106,7 +106,7 @@ function App() {
             </div>
 
             <Routes>
-                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/admin-dashboard" element={<AdminPage />} />
                 {/* Define otras rutas aquí según sea necesario */}
             </Routes>
         </Router>

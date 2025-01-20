@@ -6,7 +6,6 @@ function Sidebar({ role, onOptionSelect, onModalOpen }) {
     <div className='sidebar'>
       <div className='sidebar-content'>
         <ul>
-          {role === 'Admin' && <li onClick={() => onOptionSelect('Player List')}>Player List</li>}
           {role === 'Admin' && <li onClick={() => onOptionSelect('Posiciones')}>Posiciones</li>}
           {role === 'Admin' && <li onClick={() => onOptionSelect('Usuarios')}>Usuarios</li>}
           {role === 'Admin' && <li onClick={() => onOptionSelect('Temporadas')}>Temporadas</li>}
@@ -25,7 +24,8 @@ function Sidebar({ role, onOptionSelect, onModalOpen }) {
           {role === 'Admin' && <li onClick={() => onOptionSelect('Jugadores Estrella')}>Jugadores Estrella</li>}
           {role === 'Admin' && <li onClick={() => onOptionSelect('Jugadores en Posición')}>Jugadores en AlineaciónPosición</li>}
           {role === 'Admin' && <li onClick={() => onOptionSelect('Intercambios de Jugadores')}>Intercambios de Jugadores</li>}
-          <li onClick={() => onOptionSelect('Other Option')}>Other Option</li>
+          {role === 'Admin' && <li onClick={() => onOptionSelect('Series')}>Series</li>}
+          {role === 'Admin' && <li onClick={() => onOptionSelect('Direction Team')}>Equipos de Dirección</li>}
           {/* Añade más opciones aquí según sea necesario */}
         </ul>
       </div>

@@ -64,7 +64,8 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
         updateRole('Guest');  // Resetea el rol en App.js
         NameOnChange('');
         setLogin(false);  // Actualiza isLogged en App.js
-        navigate(-1);  // Redirige a la página anterior
+        navigate('/');
+        window.location.reload();  // Recarga la página
     };
 
     return (
