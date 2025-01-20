@@ -1,0 +1,92 @@
+.base-crud-container {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    max-width: 1200px; /* Mantener un ancho máximo mayor */
+    margin: 0 auto; /* Centrar el contenedor */
+    width: 1100px; 
+    text-align: center; /* Centrar el texto */
+}
+
+.edit-button, .delete-button {
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-right: 10px; /* Aumentar el margen derecho para más espacio */
+}
+
+.edit-button {
+    background-color: #808080; /* Color gris para el botón de editar */
+}
+
+.delete-button {
+    background-color: #f44336; /* Color rojo para el botón de eliminar */
+}
+
+.edit-button:hover, .delete-button:hover {
+    opacity: 0.8;
+}
+
+.actions, .form-actions {
+    margin-top: 20px;
+    text-align: center; /* Centrar el contenido */
+}
+
+.actions button, .form-actions button {
+    margin: 0 10px; /* Márgenes horizontales */
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block; /* Asegurar que se alineen horizontalmente */
+    text-align: center; /* Centrar el texto del botón */
+}
+
+.item-form {
+    margin-top: 20px;
+}
+
+.item-list {
+    margin: 0 auto;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+}
+
+.item-list table {
+    margin: 0 auto; /* Centrar la tabla horizontalmente */
+    width: 100%;
+    border-collapse: collapse; /* Asegurar que las celdas compartan bordes */
+}
+
+.item-list th, .item-list td {
+    text-align: center; /* Alinear las celdas al centro */
+    border: 1px solid #ccc; /* Agregar borde a cada celda */
+    padding: 8px; /* Añadir algo de padding para mejor apariencia */
+}
+
+.item-list tr:hover {
+    background-color: #6b9fcf; /* Color de fondo al pasar el ratón */
+    cursor: pointer; /* Cambiar el cursor a pointer */
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
