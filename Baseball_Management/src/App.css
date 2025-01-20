@@ -1,3 +1,4 @@
+
 /* Estilos Globales */
 body {
     font-family: 'Arial', sans-serif;
@@ -33,7 +34,9 @@ body {
     font-size: calc(10px + 2vmin);
     color: black;
     padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* A�adir sombra */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Añadir sombra */
+    margin-left: 300px; /* Añadir esta línea para tener en cuenta el ancho de la barra lateral */
+    width: calc(100% - 350px); /* Añadir esta línea para ajustar el ancho */
 }
 
 .App-link {
@@ -108,7 +111,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 200px;
+    width: 250px;
     height: 100vh;
     background-color: rgba(47, 79, 79, 0.1);
     padding: 20px;
@@ -119,25 +122,6 @@ body {
     justify-content: space-between; /* Asegura que el contenido principal esté en la parte superior y el footer en la parte inferior */
 }
 
-.sidebar-footer { margin-top: auto; /* Empuja el footer hacia la parte inferior */ 
-    margin-bottom: 40px; /* Añade un poco de espacio desde el borde inferior */
-}
-
-.sidebar ul { 
-    list-style-type: none; padding: 0; 
-} 
-
-    .sidebar ul li { 
-        text-align: left; /* Alinear el texto a la izquierda */ 
-        font-size: 18px; /* Ajustar el tamaño de la letra */ 
-        padding: 10px 0; cursor: 
-        pointer; transition: background-color 0.3s; 
-        padding-left: 10px;
-    } 
-    
-    .sidebar ul li:hover { 
-        background-color: rgba(47, 79, 79, 0.3); /* Añadir un efecto al pasar el ratón */
-    }
 
 /* Estilo login */
 .login {
@@ -154,7 +138,7 @@ body {
 
 /* Estilo del bot�n */
 button {
-    background-color: darkslategray; /* Color de fondo */
+    background-color: #007bff; /* Color de fondo */
     color: white; /* Color del texto */
     border: none; /* Sin borde */
     padding: 5px 10px; /* Reducido el espaciado interno */
@@ -165,7 +149,7 @@ button {
 }
 
     button:hover {
-        background-color: navy; /* Color de fondo al pasar el rat�n */
+        background-color: #0056b3; /* Color de fondo al pasar el rat�n */
         transform: scale(1.05); /* Aumenta ligeramente el tama�o */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra al pasar el rat�n */
     }

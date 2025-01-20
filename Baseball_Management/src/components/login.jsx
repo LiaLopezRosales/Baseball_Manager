@@ -50,7 +50,7 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
             onButtonClick();  // Llama a la función pasada como prop para cambiar el estado en el padre
             
             // Redirige a /admin si el rol es Admin 
-            if (role_name === 'Admin') { navigate('/admin'); }
+            if (role_name === 'Admin') { navigate('/admin-dashboard'); }
         } 
         catch (error) {
             console.error('Error capturado:', error.message);
@@ -83,7 +83,7 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
                     {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 </div>
             ) : (
-                <div>
+                <div className="form-container">
                     <p>
                         Bienvenido, <strong>{roleName}</strong> 
                         {teamId ? ` - Equipo ID: ${teamId}` : ' - Sin equipo asignado'}

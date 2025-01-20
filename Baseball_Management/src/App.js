@@ -65,8 +65,8 @@ function App() {
         <Router>
             <div className="App">
                 <header className="App-header">
-                    <p>{isLogged ? 'Welcome ' + userName : ''}</p>
-                    <p>Rol Actual: {role}</p>
+                    {/*<p>{isLogged ? 'Welcome ' + userName : ''}</p>
+                    <p>Rol Actual: {role}</p>*/}
 
                     <Sidebar role={role} onOptionSelect={handleOptionSelect} onModalOpen={handleModalOpen} />
 
