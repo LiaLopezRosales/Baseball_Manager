@@ -7,6 +7,29 @@ import Modal from './components/Modal';
 import PlayerList from './components/player_list';
 import AdminPage from './components/admin';  // Importa el componente de la página de administrador
 
+import BaseballPlayerCRUD from './components/FormulariosCRUD/BaseballPlayerCRUD';
+import BPParticipationCRUD from './components/FormulariosCRUD/BPParticipationCRUD';
+import DirectionTeamCRUD from './components/FormulariosCRUD/DirectionTeamCRUD';
+import GameCRUD from './components/FormulariosCRUD/GameCRUD';
+import LineUpCRUD from './components/FormulariosCRUD/LineUpCRUD';
+import PersonCRUD from './components/FormulariosCRUD/PersonCRUD';
+import PitcherCRUD from './components/FormulariosCRUD/PitcherCRUD';
+import PlayerInLineUpCRUD from './components/FormulariosCRUD/PlayerInLineUpCRUD';
+import PlayerInPositionCRUD from './components/FormulariosCRUD/PlayerInPositionCRUD';
+import PlayerSwapCRUD from './components/FormulariosCRUD/PlayerSwapCRUD';
+import PositionCRUD from './components/FormulariosCRUD/PositionCRUD';
+import RolCRUD from './components/FormulariosCRUD/RolCRUD';
+import ScoreCRUD from './components/FormulariosCRUD/ScoreCRUD';
+import SeasonCRUD from './components/FormulariosCRUD/SeasonCRUD';
+import SeriesCRUD from './components/FormulariosCRUD/SeriesCRUD';
+import StarPlayerCRUD from './components/FormulariosCRUD/StarPlayerCRUD';
+import TeamCRUD from './components/FormulariosCRUD/TeamCRUD';
+import TeamOnTheFieldCRUD from './components/FormulariosCRUD/TeamOnTheFieldCRUD';
+import TechnicalDirectorCRUD from './components/FormulariosCRUD/TechnicalDirectorCRUD';
+import UserCRUD from './components/FormulariosCRUD/UserCRUD';
+import WorkerCRUD from './components/FormulariosCRUD/WorkerCRUD';
+
+
 function App() {
     const [isLogged, setLogin] = useState(false);
     const [userName, setUserName] = useState('');
@@ -49,24 +72,24 @@ function App() {
 
                     <div className='content'>
                         {selectedOption === 'Player List' && <PlayerList logged={isLogged} />}
-                        {selectedOption === 'Posiciones' && <p>Contenido para Posiciones</p>}
-                        {selectedOption === 'Usuarios' && <p>Contenido para Usuarios</p>}
-                        {selectedOption === 'Temporadas' && <p>Contenido para Temporadas</p>}
-                        {selectedOption === 'Trabajadores' && <p>Contenido para Trabajadores</p>}
-                        {selectedOption === 'Equipos' && <p>Contenido para Equipos</p>}
-                        {selectedOption === 'Alineaciones' && <p>Contenido para Alineaciones</p>}
-                        {selectedOption === 'Personas' && <p>Contenido para Personas</p>}
-                        {selectedOption === 'Jugadores' && <p>Contenido para Jugadores</p>}
-                        {selectedOption === 'Directores Técnicos' && <p>Contenido para Directores Técnicos</p>}
-                        {selectedOption === 'Jugadores en Alineación' && <p>Contenido para Jugadores en Alineación</p>}
-                        {selectedOption === 'BP Participations' && <p>Contenido para BP Participations</p>}
-                        {selectedOption === 'Equipos en el Campo' && <p>Contenido para Equipos en el Campo</p>}
-                        {selectedOption === 'Puntuaciones' && <p>Contenido para Puntuaciones</p>}
-                        {selectedOption === 'Juegos' && <p>Contenido para Juegos</p>}
-                        {selectedOption === 'Pitchers' && <p>Contenido para Pitchers</p>}
-                        {selectedOption === 'Jugadores Estrella' && <p>Contenido para Jugadores Estrella</p>}
-                        {selectedOption === 'Jugadores en Posición' && <p>Contenido para Jugadores en Posición</p>}
-                        {selectedOption === 'Intercambios de Jugadores' && <p>Contenido para Intercambios de Jugadores</p>}
+                        {selectedOption === 'Posiciones' && < PositionCRUD />}
+                        {selectedOption === 'Usuarios' && < UserCRUD />}
+                        {selectedOption === 'Temporadas' && < SeasonCRUD/>}
+                        {selectedOption === 'Trabajadores' && < WorkerCRUD/>}
+                        {selectedOption === 'Equipos' && < TeamCRUD />}
+                        {selectedOption === 'Alineaciones' && < LineUpCRUD />}
+                        {selectedOption === 'Personas' && < PersonCRUD />}
+                        {selectedOption === 'Jugadores' && < BaseballPlayerCRUD />}
+                        {selectedOption === 'Directores Técnicos' && < TechnicalDirectorCRUD />}
+                        {selectedOption === 'Jugadores en Alineación' && < PlayerInLineUpCRUD />}
+                        {selectedOption === 'BP Participations' && < BPParticipationCRUD />}
+                        {selectedOption === 'Equipos en el Campo' && < TeamOnTheFieldCRUD />}
+                        {selectedOption === 'Puntuaciones' && < ScoreCRUD />}
+                        {selectedOption === 'Juegos' && < GameCRUD />}
+                        {selectedOption === 'Pitchers' && < PitcherCRUD />}
+                        {selectedOption === 'Jugadores Estrella' && < StarPlayerCRUD />}
+                        {selectedOption === 'Jugadores en Posición' && < PlayerInPositionCRUD />}
+                        {selectedOption === 'Intercambios de Jugadores' && < PlayerSwapCRUD />}
                     </div>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>
