@@ -90,3 +90,10 @@
     border: 1px solid #ccc;
     border-radius: 5px;
 }
+
+.error-message {
+    color: red;
+    font-size: 0.6em;
+    margin-top: 0.75em;
+  }
+  
