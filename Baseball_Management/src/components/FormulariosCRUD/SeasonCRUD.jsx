@@ -15,7 +15,7 @@ const SeasonCRUD = () => {
         <BaseCRUD
           apiUrl={apiUrl}
           fields={fields}
-          title="Roles"
+          title="Temporadas"
           initialFormValues={initialFormValues}
         />
     );

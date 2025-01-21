@@ -6,7 +6,7 @@ import BaseCRUD from "./BaseCRUD";
 const PitcherCRUD = () => {
     const fields = [
         { name: "CI", label: "CI", type: "number", nullable: false },
-        { name: "dominant_hand", label: "Mano Dominante", type: "number", nullable: false },
+        { name: "dominant_hand", label: "Mano Dominante", type: "text", nullable: false },
         { name: "No_games_won", label: "Juegos Ganados", type: "number", nullable: false },
         { name: "No_games_lost", label: "Juegos Perdidos", type: "number", nullable: false },
         { name: "running_average", label: "Promedio de Carreras", type: "number", nullable: false },

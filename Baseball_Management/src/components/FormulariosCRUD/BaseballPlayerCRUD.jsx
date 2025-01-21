@@ -24,7 +24,7 @@ const BaseballPlayerCRUD = () => {
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
-            title="Jugadores de Béisbol"
+            title="Jugadores"
             initialFormValues={initialFormValues}
         />
     );

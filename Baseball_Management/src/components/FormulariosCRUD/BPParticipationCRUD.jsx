@@ -20,7 +20,7 @@ const BPParticipationCRUD = () => {
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
-            title="Participación de Jugadores de Béisbol"
+            title="Participación de Jugadores"
             initialFormValues={initialFormValues}
         />
     );
