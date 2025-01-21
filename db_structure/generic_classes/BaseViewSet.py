@@ -1,5 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import IntegrityError
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 class BaseViewSet(viewsets.ViewSet):
     repository = None  
@@ -20,18 +23,31 @@ class BaseViewSet(viewsets.ViewSet):
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            obj = self.repository.create(serializer.validated_data)
-            return Response(self.serializer_class(obj).data, status=status.HTTP_201_CREATED)
+            try:
+                obj = self.repository.create(serializer.validated_data)
+                return Response(self.serializer_class(obj).data, status=status.HTTP_201_CREATED)
+            except (DjangoValidationError, DRFValidationError) as e:
+                return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
+            except IntegrityError as e:
+                return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            obj = self.repository.update(pk, serializer.validated_data)
-            if obj:
-                return Response(self.serializer_class(obj).data)
+        obj = self.repository.get_by_id(pk)
+        if not obj:
             return Response({'error': f'{self.repository.model.__name__} not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(instance=obj, data=request.data)
+        if serializer.is_valid():
+            try:
+                obj = serializer.save()
+                return Response(self.serializer_class(obj).data)
+            except (DjangoValidationError, DRFValidationError) as e:
+                return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
+            except IntegrityError as e:
+                return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def destroy(self, request, pk=None):
         if self.repository.delete(pk):

@@ -1,6 +1,7 @@
 // Baseball_Management/src/components/BaseCRUD.jsx
 
 import React, { useState, useEffect, useCallback } from "react";
+import "./BaseCRUD.css";
 
 const BaseCRUD = ({
   apiUrl,
