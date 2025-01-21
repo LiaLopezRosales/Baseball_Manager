@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
-import AdminPage from './components/admin';  // Importa el componente de la página de administrador
+import AdminPage from './components/admin';
 
 import BaseballPlayerCRUD from './components/FormulariosCRUD/BaseballPlayerCRUD';
 import BPParticipationCRUD from './components/FormulariosCRUD/BPParticipationCRUD';
@@ -28,7 +28,6 @@ import TechnicalDirectorCRUD from './components/FormulariosCRUD/TechnicalDirecto
 import UserCRUD from './components/FormulariosCRUD/UserCRUD';
 import WorkerCRUD from './components/FormulariosCRUD/WorkerCRUD';
 
-
 function App() {
     const [isLogged, setLogin] = useState(false);
     const [userName, setUserName] = useState('');
@@ -36,8 +35,17 @@ function App() {
     const [selectedOption, setSelectedOption] = useState('');
     const [role, setRole] = useState('');
 
+    useEffect(() => {
+        const loggedStatus = localStorage.getItem('isLogged') === 'true';
+        setLogin(loggedStatus);
+
+        const savedRole = localStorage.getItem('role') || '';
+        setRole(savedRole);
+    }, []);
+
     const handleClick = () => {
         setLogin(!isLogged);
+        localStorage.setItem('isLogged', !isLogged);
     };
 
     const handleNameChange = (newName) => {
@@ -58,12 +66,14 @@ function App() {
 
     const updateRole = (newRole) => {
         setRole(newRole);
+        localStorage.setItem('role', newRole);
     };
 
     return (
         <Router>
             <div className="App">
                 <header className="App-header">
+                    {/*<p>{isLogged ? 'Logged In' : 'Logged Out'}</p>
                     {/*<p>{isLogged ? 'Welcome ' + userName : ''}</p>
                     <p>Rol Actual: {role}</p>*/}
 
@@ -93,7 +103,7 @@ function App() {
                     </div>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>
-                        <LoginBoard o
+                        <LoginBoard
                             name={userName} 
                             isLogged={isLogged} 
                             setLogin={setLogin} 

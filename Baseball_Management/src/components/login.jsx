@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './login.css'; 
 
@@ -14,6 +14,10 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
     // Estado para manejar la visibilidad de la contraseña
     const [showPassword, setShowPassword] = useState(false);
 
+    useEffect(() => {
+        const savedRoleName = localStorage.getItem('role_name') || '';
+        setRoleName(savedRoleName);
+    }, []);
 
     const handleLogin = async () => {
         setErrorMessage('');  // Resetear errores previos
@@ -91,26 +95,39 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
                     </div>
                     <div className="form-group">
                         <label>Contraseña: </label>
-                        <input 
-                            type={showPassword ? "text" : "password"} 
-                            value={password} 
-                            onChange={(e) => setPassword(e.target.value)} 
-                        />
-                        <button type="button" onClick={togglePasswordVisibility}>
-                            {showPassword ? "Ocultar" : "Mostrar"}
-                        </button>
+                        <div className="password-container">
+                            <input 
+                                type={showPassword ? "text" : "password"} 
+                                value={password} 
+                                onChange={(e) => setPassword(e.target.value)} 
+                            />
+                            <button 
+                                type="button" 
+                                onClick={togglePasswordVisibility}
+                            >
+                                {showPassword ? "Ocultar" : "Mostrar"}
+                            </button>
+                        </div>
                     </div>
-                    <button onClick={handleLogin}>Iniciar sesión</button>
-                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                    <button 
+                        onClick={handleLogin} 
+                        className="login-button"
+                    >
+                        Iniciar sesión
+                    </button>
+                    {errorMessage && <p className="error-message">{errorMessage}</p>}
                 </div>
             ) : (
                 <div className="form-container">
-                    <p>
-                        Bienvenido, <strong>{roleName}</strong> 
-                        {teamId ? ` - Equipo ID: ${teamId}` : ' - Sin equipo asignado'}
-                    </p>
+                    <p>Bienvenido, <strong>{roleName}</strong></p>
+                    {/* {teamId ? ` - Equipo ID: ${teamId}` : ' - Sin equipo asignado'} */}
                     <p>Permisos: {permissions.join(", ")}</p>
-                    <button onClick={handleLogout}>Cerrar sesión</button>
+                    <button 
+                        onClick={handleLogout} 
+                        className="logout-button"
+                    >
+                        Cerrar sesión
+                    </button>
                 </div>
             )}
         </div>
