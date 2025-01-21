@@ -204,6 +204,18 @@ class Pitcher(models.Model):
     def __str__(self):
         return f"Lanzador {self.id} (Mano Dominante: {self.dominant_hand})"
     
+    def save(self, *args, **kwargs):
+        from api.reports.queries import get_pitcher_wins, get_pitcher_losses
+        self.No_games_won = get_pitcher_wins(self.id)
+        self.No_games_lost = get_pitcher_losses(self.id)
+        super().save(*args, **kwargs)
+
+    def refresh_from_db(self, using=None, fields=None, **kwargs):
+        super().refresh_from_db(using, fields, **kwargs)
+        from api.reports.queries import get_pitcher_wins, get_pitcher_losses
+        self.No_games_won = get_pitcher_wins(self.id)
+        self.No_games_lost = get_pitcher_losses(self.id)
+    
 class BPParticipation(models.Model):
     BP_id = models.ForeignKey(                             
         'BaseballPlayer',
