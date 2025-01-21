@@ -11,6 +11,10 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
+    // Estado para manejar la visibilidad de la contraseña
+    const [showPassword, setShowPassword] = useState(false);
+
+
     const handleLogin = async () => {
         setErrorMessage('');  // Resetear errores previos
 
@@ -68,17 +72,33 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
         window.location.reload();  // Recarga la página
     };
 
+    // Función para alternar la visibilidad de la contraseña
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
     return (
         <div className="login-board">
             {!isLogged ? (
                 <div className="form-container">
                     <div className="form-group">
                         <label>Email: </label>
-                        <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} />
+                        <input 
+                            type="text" 
+                            value={email} 
+                            onChange={(e) => setEmail(e.target.value)} 
+                        />
                     </div>
                     <div className="form-group">
                         <label>Contraseña: </label>
-                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                        <input 
+                            type={showPassword ? "text" : "password"} 
+                            value={password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                        />
+                        <button type="button" onClick={togglePasswordVisibility}>
+                            {showPassword ? "Ocultar" : "Mostrar"}
+                        </button>
                     </div>
                     <button onClick={handleLogin}>Iniciar sesión</button>
                     {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
