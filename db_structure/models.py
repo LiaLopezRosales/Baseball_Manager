@@ -70,7 +70,7 @@ class TechnicalDirector(models.Model):
         return f"Director Técnico {self.id}"  
     
 class Worker(models.Model):                
-    CI = models.OneToOneField(                             
+    P_id = models.OneToOneField(                             
         'Person',                                         
         on_delete=models.CASCADE,  
         null=False                                         
@@ -84,7 +84,7 @@ class Worker(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(                      
-                fields=['CI', 'id'],
+                fields=['P_id', 'id'],
                 name='primary_key_worker'
             )
         ]      
@@ -114,7 +114,8 @@ class Team(models.Model):
         return f"Equipo {self.name} ({self.initials})"
     
 class Person(models.Model):
-    CI = models.IntegerField(primary_key=True)            
+    id = models.AutoField(primary_key=True)
+    CI = models.IntegerField()            
     age = models.IntegerField()                           
     name = models.CharField(max_length=100)               
     lastname = models.CharField(max_length=100)           
@@ -131,7 +132,7 @@ class Position(models.Model):
     
 class BaseballPlayer(models.Model):
     id = models.AutoField(primary_key=True)                
-    CI = models.OneToOneField(                             
+    P_id = models.OneToOneField(                             
         'Person',
         on_delete=models.CASCADE,
         null=False,
@@ -151,7 +152,8 @@ class BaseballPlayer(models.Model):
         return f"Pelotero {self.CI.name} {self.CI.lastname}" 
     
 class Season(models.Model):
-    id = models.AutoField(primary_key=True)                
+    id = models.AutoField(primary_key=True) 
+    name=models.CharField()               
     def __str__(self):
         return f"Temporada {self.id}"
     
@@ -191,10 +193,10 @@ class Series(models.Model):
         return f"Serie {self.name} ({self.type}) en Temporada {self.season.id}"
     
 class Pitcher(models.Model):
-    CI = models.ForeignKey(                                
+    P_id = models.ForeignKey(                                
         'BaseballPlayer',
         on_delete=models.CASCADE,                         
-        to_field='CI',
+        to_field='P_id',
         related_name='pitcher_ci'                             
     )
     dominant_hand = models.CharField(                      
@@ -227,7 +229,7 @@ class BPParticipation(models.Model):
     BP_id = models.ForeignKey(                             
         'BaseballPlayer',
         on_delete=models.CASCADE,                        
-        to_field='CI',
+        to_field='P_id',
         related_name='bp_participations'                                
     )
 
