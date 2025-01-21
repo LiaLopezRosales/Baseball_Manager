@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
 
 class User(models.Model):
     id = models.AutoField(primary_key=True)              
@@ -29,12 +31,9 @@ class User(models.Model):
         ]
 
     def clean(self):
-        # Validation for rol_id and TD_id
-        if self.rol_id_id == 2 and self.TD_id is None:
-            raise ValidationError("TD_id cannot be NULL when rol_id is '2'.")
-        if self.TD_id is None and self.rol_id_id == 2:
-            raise ValidationError("rol_id cannot be '2' when TD_id is NULL.")         
-
+        if self.rol_id and self.rol_id.type == "Director" and self.TD_id is None:
+            raise ValidationError("TD_id cannot be NULL when rol_id is '2'.")        
+    
     def __str__(self):
         return self.email 
     
@@ -179,6 +178,14 @@ class Series(models.Model):
                 name='check_init_date_before_end_date'
             )
         ]
+        
+    def clean(self):
+        # Validación: init_date debe ser anterior a end_date
+        if self.init_date >= self.end_date:
+            raise ValidationError({
+                'init_date':  ("The initial date must be before the end date."),
+                'end_date': _("The end date must be after the initial date."),
+            })
 
     def __str__(self):
         return f"Serie {self.name} ({self.type}) en Temporada {self.season.id}"
@@ -362,6 +369,15 @@ class Score(models.Model):
                 name='check_w_points_gte_l_points'
             )
         ]
+        
+    def clean(self):
+        # Validación: winner y loser no pueden ser el mismo equipo
+        if self.winner == self.loser:
+            raise ValidationError("Winner and loser cannot be the same team.")
+        # Validación: w_points debe ser mayor o igual a l_points
+        if self.w_points < self.l_points:
+            raise ValidationError("Winner points (w_points) must be greater than or equal to loser points (l_points).")
+
 
     def __str__(self):
         return f"Marcador: {self.winner} {self.w_points} - {self.l_points} {self.loser}"
