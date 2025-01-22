@@ -291,7 +291,8 @@ def populate_baseball_players_and_positions(teams):
     # Crear jugadores de béisbol
     num_players = len(teams) * len(positions) * 2  # 2 jugadores por posición por equipo
     baseball_players = BaseballPlayerFactory.create_batch(num_players)
-
+    pitcher_list = []
+    
     # Asignar posiciones y efectividad
     team_player_mapping = {}
     for i, team in enumerate(teams):
@@ -308,12 +309,12 @@ def populate_baseball_players_and_positions(teams):
 
             # Si la posición es "Pitcher", agregar a la tabla Pitcher
             if position.name == "Pitcher":
-                pitcher = PitcherFactory(P_id=player)
+                pitcher_list.append(PitcherFactory(P_id=player))
 
 
     print(f"{len(baseball_players)} jugadores de béisbol creados y asignados a posiciones.")
     print(f"Jugadores con posición 'Pitcher' añadidos a la tabla Pitcher.")
-    return {"positions": positions, "baseball_players": baseball_players, "team_player_mapping": team_player_mapping}
+    return {"positions": positions, "baseball_players": baseball_players, "team_player_mapping": team_player_mapping, "pitcher_list": pitcher_list}
 
 
 def simulate_championship_with_participations(positions, team_player_mapping):
@@ -380,6 +381,7 @@ def simulate_championship_with_participations(positions, team_player_mapping):
                     date=game_date
                 )
             )
+            
 
     # Poblar tabla PlayerInLineUp con los mismos LineUps
     player_in_lineup = []
@@ -393,6 +395,7 @@ def simulate_championship_with_participations(positions, team_player_mapping):
                     player_in_position=player.playerinposition_bp.first()
                 )
             )
+            
 
     # Poblar tabla PlayerSwap
     player_swaps = []
@@ -443,6 +446,9 @@ def simulate_championship_with_participations(positions, team_player_mapping):
                     )
                 )
 
+    for g in games:
+        g.save()
+        
     print("Campeonato simulado exitosamente.")
     return {
         "seasons": seasons,
@@ -463,7 +469,12 @@ def simulate_full_championship():
         positions=player_position_data["positions"],
         team_player_mapping=player_position_data["team_player_mapping"]
     )
-
+    
+    for pitcher in player_position_data['pitcher_list']:
+        # pitcher.No_games_won = get_pitcher_wins(pitcher.id)
+        # pitcher.No_games_lost = get_pitcher_losses(pitcher.id)
+        pitcher.save()
+    
     print("Simulación completa del campeonato.")
     return {**user_worker_data, **player_position_data, **championship_data}
 
