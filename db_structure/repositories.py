@@ -1,5 +1,7 @@
 from db_structure.models import *
 from db_structure.generic_classes.BaseRepository import BaseRepository
+from rest_framework.authtoken.models import Token
+
 
 class RolRepository(BaseRepository):
     model = Rol
@@ -14,6 +16,15 @@ class SeasonRepository(BaseRepository):
 
 class UserRepository(BaseRepository):
     model= User
+    
+    @classmethod
+    def delete(cls, obj_id):
+        obj = cls.get_by_id(obj_id)
+        if obj:
+            Token.objects.filter(user_id=obj_id).delete()
+            obj.delete()
+            return True
+        return False
 
 class WorkerRepository(BaseRepository):
     model= Worker

@@ -4,7 +4,7 @@ from rest_framework import serializers
 from .models import CustomUser
 from db_structure.models import PlayerSwap
 
-class UserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     role_name = serializers.SerializerMethodField()
     team_id = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()

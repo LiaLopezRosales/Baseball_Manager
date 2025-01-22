@@ -31,15 +31,25 @@ class User(models.Model):
         ]
 
     def clean(self):
-        if self.rol_id and self.rol_id.type == "Director" and self.TD_id is None:
-            raise ValidationError("TD_id cannot be NULL when rol_id is '2'.")        
+        if self.rol_id and self.rol_id.type == "Director Técnico" and self.TD_id is None:
+            raise ValidationError("TD_id cannot be NULL when rol_id is 'Director Técnico'.")        
     
     def __str__(self):
         return self.email 
     
 class Rol(models.Model):
+    TYPE_DIRECTOR = "Director Técnico"
+    TYPE_ADMIN = "Admin"
+    TYPE_USER="Usuario General"
+
+    ROLE_TYPES = [
+        (TYPE_DIRECTOR, "Director Técnico"),
+        (TYPE_ADMIN, "Admin"),
+        (TYPE_USER, "Usuario  General")
+    ]
+
     id = models.AutoField(primary_key=True)                
-    type = models.CharField(max_length=50)                 
+    type = models.CharField(max_length=50, choices=ROLE_TYPES)                 
 
     def __str__(self):
         return self.type  
@@ -115,7 +125,7 @@ class Team(models.Model):
     
 class Person(models.Model):
     id = models.AutoField(primary_key=True)
-    CI = models.IntegerField()            
+    CI = models.IntegerField(unique=True)            
     age = models.IntegerField()                           
     name = models.CharField(max_length=100)               
     lastname = models.CharField(max_length=100)           
@@ -149,7 +159,7 @@ class BaseballPlayer(models.Model):
     )
 
     def __str__(self):
-        return f"Pelotero {self.CI.name} {self.CI.lastname}" 
+        return f"Pelotero {self.P_id.name} {self.P_id.lastname}" 
     
 class Season(models.Model):
     id = models.AutoField(primary_key=True) 
