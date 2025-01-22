@@ -20,6 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+        
+    
 
 class WorkerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -113,7 +115,7 @@ class GameSerializer(serializers.ModelSerializer):
         
 class PitcherSerializer(serializers.ModelSerializer):
     #id = BaseballPlayerSerializer()  # Incluye detalles del `BaseballPlayer`
-    CI = serializers.PrimaryKeyRelatedField(queryset=BaseballPlayer.objects.all())
+    P_id= serializers.PrimaryKeyRelatedField(queryset=BaseballPlayer.objects.all())
 
     class Meta:
         model = Pitcher

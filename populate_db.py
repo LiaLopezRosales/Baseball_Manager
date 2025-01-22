@@ -19,13 +19,20 @@ class RolFactory(DjangoModelFactory):
     class Meta:
         model = Rol
 
-    type = factory.Iterator(["periodistas", "admin", "dt"])
+    type = factory.Iterator(["Admin", "Director Técnico", "Usuario General"])
+    
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        # Recuperar o crear la instancia del rol
+        instance, _ = model_class.objects.get_or_create(*args, **kwargs)
+        return instance
 
 # Person Factory
 class PersonFactory(DjangoModelFactory):
     class Meta:
         model = Person
-
+    
+    
     CI = factory.Faker('random_int', min=10000000, max=99999999)
     age = factory.Faker('random_int', min=18, max=70)
     name = factory.Faker('first_name')
@@ -36,7 +43,7 @@ class WorkerFactory(DjangoModelFactory):
     class Meta:
         model = Worker
 
-    CI = factory.SubFactory(PersonFactory)
+    P_id = factory.SubFactory(PersonFactory)
     DT_id = None  # This can be assigned later
 
 # Team Factory
@@ -71,7 +78,7 @@ class UserFactory(DjangoModelFactory):
 
     email = factory.Faker('email')
     password = factory.Faker('password')
-    rol_id = factory.SubFactory(RolFactory)
+    rol_id = factory.Faker('random_int', min=1, max=3)
     TD_id = factory.Maybe(
         'rol_id',
         yes_declaration=factory.SubFactory(TechnicalDirectorFactory),
@@ -93,7 +100,7 @@ class BaseballPlayerFactory(DjangoModelFactory):
     class Meta:
         model = BaseballPlayer
 
-    CI = factory.SubFactory(PersonFactory)  # Assume PersonFactory exists
+    P_id = factory.SubFactory(PersonFactory)  # Assume PersonFactory exists
     batting_average = factory.Faker('pyfloat', positive=True, max_value=1, right_digits=3)
     years_of_experience = factory.Faker('random_int', min=1, max=20)
     pitcher = None  # Can be set explicitly
@@ -102,6 +109,8 @@ class BaseballPlayerFactory(DjangoModelFactory):
 class SeasonFactory(DjangoModelFactory):
     class Meta:
         model = Season
+        
+    name = factory.Faker('random_element', elements=['Spring-Summer', 'Fall-Winter'])
 
 # Series Factory
 class SeriesFactory(DjangoModelFactory):
@@ -119,7 +128,7 @@ class PitcherFactory(DjangoModelFactory):
     class Meta:
         model = Pitcher
 
-    CI = factory.SubFactory(BaseballPlayerFactory)
+    P_id = factory.SubFactory(BaseballPlayerFactory)
     dominant_hand = factory.Faker('random_element', elements=['izquierda', 'derecha'])
     No_games_won = factory.Faker('random_int', min=0, max=20)
     No_games_lost = factory.Faker('random_int', min=0, max=20)
@@ -217,9 +226,9 @@ class PlayerInLineUpFactory(DjangoModelFactory):
 def populate_users_and_workers():
     # Crear roles predefinidos
     roles = {
-        "admin": RolFactory(type="admin"),
-        "dt": RolFactory(type="dt"),
-        "periodista": RolFactory(type="periodistas")
+        "Admin": RolFactory(type="Admin"),
+        "Director Técnico": RolFactory(type="Director Técnico"),
+        "Usuario General": RolFactory(type="Usuario General")
     }
 
     # Crear equipos y equipos de dirección
@@ -240,7 +249,7 @@ def populate_users_and_workers():
         # Crear usuario asociado al director técnico
         users.append(
             UserFactory(
-                rol_id=roles["dt"],
+                rol_id=roles["Director Técnico"],
                 TD_id=technical_director
             )
         )
@@ -258,7 +267,7 @@ def populate_users_and_workers():
         if i%2==0:
             users.append(
                 UserFactory(
-                    rol_id=random.choice([roles["admin"], roles["periodista"]]),
+                    rol_id=random.choice([roles["Admin"], roles["Usuario General"]]),
                     TD_id=None
                 )
             )
@@ -299,7 +308,7 @@ def populate_baseball_players_and_positions(teams):
 
             # Si la posición es "Pitcher", agregar a la tabla Pitcher
             if position.name == "Pitcher":
-                pitcher = PitcherFactory(CI=player)
+                pitcher = PitcherFactory(P_id=player)
 
 
     print(f"{len(baseball_players)} jugadores de béisbol creados y asignados a posiciones.")

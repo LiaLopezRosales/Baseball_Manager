@@ -9,7 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 from db_structure.models import PlayerSwap
 from .permissions import IsAdmin, IsDirectorTecnicoAndOwnTeam, IsUsuarioGeneral
 from .models import CustomUser
-from .serializers import UserSerializer, CambioSerializer
+from .serializers import CustomUserSerializer, CambioSerializer
 
 class LoginView(APIView):
     """
@@ -34,7 +34,7 @@ class LoginView(APIView):
 
             # Generación del token
             token, created = Token.objects.get_or_create(user=user)
-            user_data = UserSerializer(user).data
+            user_data = CustomUserSerializer(user).data
             return Response({
                 'token': token.key, 
                 'user': user_data,

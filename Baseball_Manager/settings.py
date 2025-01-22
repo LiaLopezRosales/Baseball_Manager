@@ -94,9 +94,6 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
-        'TEST': {
-            'NAME': 'test_campeonatos',  # Nombre fijo para la base de datos de pruebas
-        }
     }
     
 }
@@ -152,13 +149,18 @@ AUTH_USER_MODEL = 'api.CustomUser'
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = False
+
+# Formatos personalizados de entrada para fechas y horas
+DATE_INPUT_FORMATS = ['%d/%m/%Y']  # Día/Mes/Año
+DATETIME_INPUT_FORMATS = ['%d/%m/%Y %H:%M:%S']  # Día/Mes/Año Hora:Minuto:Segundo
+
 
 
 # Static files (CSS, JavaScript, Images)
