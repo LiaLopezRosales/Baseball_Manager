@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './login.css'; 
 
-function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, updateRole }) {
+function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, updateRole, updateTeam}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [teamId, setTeamId] = useState(null);
@@ -52,13 +52,19 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
             setTeamId(team_id);
             setRoleName(role_name);
             setPermissions(user.permissions);
+
+            updateTeam(team_id); // Actualiza el equipo en App.js
             updateRole(role_name);  // Actualiza el rol en App.js
-            NameOnChange(email);
+            NameOnChange(email); //Actualiza el usuario en App.js
             setLogin(true);  // Actualiza isLogged en App.js
             onButtonClick();  // Llama a la función pasada como prop para cambiar el estado en el padre
             
-            // Redirige a /admin si el rol es Admin 
+            // Redirección en dependencia del rol 
             if (role_name === 'Admin') { navigate('/admin-dashboard'); }
+
+            if (role_name === 'Director Técnico') { navigate('/DT'); }
+
+            if (role_name === 'Usuario General') { navigate('/UG'); }
         } 
         catch (error) {
             console.error('Error capturado:', error.message);
@@ -71,6 +77,7 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
         onButtonClick();  // Llama a la función pasada como prop para cambiar el estado en el padre
         updateRole('Guest');  // Resetea el rol en App.js
         NameOnChange('');
+        updateTeam(null);
         setLogin(false);  // Actualiza isLogged en App.js
         navigate('/');
         window.location.reload();  // Recarga la página
@@ -121,7 +128,7 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
                 <div className="form-container">
                     <p>Bienvenido, <strong>{roleName}</strong></p>
                     {/* {teamId ? ` - Equipo ID: ${teamId}` : ' - Sin equipo asignado'} */}
-                    <p>Permisos: {permissions.join(", ")}</p>
+                    {/*<p>Permisos: {permissions.join(", ")}</p>*/}
                     <button 
                         onClick={handleLogout} 
                         className="logout-button"

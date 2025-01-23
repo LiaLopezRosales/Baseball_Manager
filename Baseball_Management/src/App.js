@@ -17,7 +17,7 @@ import PlayerInLineUpCRUD from './components/FormulariosCRUD/PlayerInLineUpCRUD'
 import PlayerInPositionCRUD from './components/FormulariosCRUD/PlayerInPositionCRUD';
 import PlayerSwapCRUD from './components/FormulariosCRUD/PlayerSwapCRUD';
 import PositionCRUD from './components/FormulariosCRUD/PositionCRUD';
-//import RolCRUD from './components/FormulariosCRUD/RolCRUD';
+// import RolCRUD from './components/FormulariosCRUD/RolCRUD';
 import ScoreCRUD from './components/FormulariosCRUD/ScoreCRUD';
 import SeasonCRUD from './components/FormulariosCRUD/SeasonCRUD';
 import SeriesCRUD from './components/FormulariosCRUD/SeriesCRUD';
@@ -29,13 +29,38 @@ import UserCRUD from './components/FormulariosCRUD/UserCRUD';
 import WorkerCRUD from './components/FormulariosCRUD/WorkerCRUD';
 
 function App() {
-    const [isLogged, setLogin] = useState(false);
+    // Estado para verificar si el usuario está logged in
+    const [isLogged, setLogin] = useState(() => {
+        // Inicializa el estado con el valor de localStorage si existe
+        const savedIsLogged = localStorage.getItem('isLogged');
+        return savedIsLogged === 'true';
+    });
+    
+    // Estado para almacenar el nombre del usuario
     const [userName, setUserName] = useState('');
+
+    // Estado para controlar si el modal está abierto
     const [isModalOpen, setIsModalOpen] = useState(false);  
+
+    // Estado para seleccionar la opción actual
     const [selectedOption, setSelectedOption] = useState('');
-    const [role, setRole] = useState('');
+
+    // Estado para almacenar el rol del usuario
+    const [role, setRole] = useState(() => {
+        // Inicializa el estado con el valor de localStorage si existe
+        const savedRole = localStorage.getItem('role') || '';
+        return savedRole;
+    });   
+    
+    // Estado para almacenar el equipo actual (inicializado como null)
+    const [team, setTeam] = useState(() => {
+        // Inicializa el estado con el valor de localStorage si existe
+        const savedTeam = localStorage.getItem('team');
+        return savedTeam ? JSON.parse(savedTeam) : null;
+    });
 
     useEffect(() => {
+        // Al montar el componente, actualiza los estados con los valores de localStorage
         const loggedStatus = localStorage.getItem('isLogged') === 'true';
         setLogin(loggedStatus);
 
@@ -43,42 +68,54 @@ function App() {
         setRole(savedRole);
     }, []);
 
+    // Función para cambiar el estado de logged in
     const handleClick = () => {
         setLogin(!isLogged);
         localStorage.setItem('isLogged', !isLogged);
     };
 
+    // Función para actualizar el nombre del usuario
     const handleNameChange = (newName) => {
         setUserName(newName);
     };
 
+    // Función para seleccionar una opción
     const handleOptionSelect = (option) => {
         setSelectedOption(option);
     };
 
+    // Funciones para controlar el estado del modal
     const handleModalOpen = () => {
         setIsModalOpen(true);
     };
-
     const handleModalClose = () => {
         setIsModalOpen(false);
     };
 
+    // Función para actualizar el rol del usuario
     const updateRole = (newRole) => {
         setRole(newRole);
         localStorage.setItem('role', newRole);
     };
 
+    // Función para actualizar el equipo actual
+    const updateTeam = (newTeam) => {
+        setTeam(newTeam);
+        localStorage.setItem('team', JSON.stringify(newTeam));
+    };
+
+    // Renderiza la interfaz de la aplicación
     return (
         <Router>
             <div className="App">
                 <header className="App-header">
                     {/*<p>{isLogged ? 'Logged In' : 'Logged Out'}</p>
-                    {/*<p>{isLogged ? 'Welcome ' + userName : ''}</p>
+                    <p>{isLogged ? 'Welcome ' + userName : ''}</p>
                     <p>Rol Actual: {role}</p>*/}
 
                     <Sidebar role={role} onOptionSelect={handleOptionSelect} onModalOpen={handleModalOpen} />
 
+                    {/* Botones del sidebar */}
                     <div className='content'>
                         {selectedOption === 'Posiciones' && < PositionCRUD />}
                         {selectedOption === 'Usuarios' && < UserCRUD />}
@@ -109,7 +146,8 @@ function App() {
                             setLogin={setLogin} 
                             onButtonClick={handleClick} 
                             NameOnChange={handleNameChange} 
-                            updateRole={updateRole} 
+                            updateRole={updateRole}
+                            updateTeam={updateTeam} 
                         />
                     </Modal>
                 </header>
@@ -124,3 +162,4 @@ function App() {
 }
 
 export default App;
+
