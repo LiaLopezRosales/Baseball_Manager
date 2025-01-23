@@ -1,212 +1,284 @@
-// Baseball_Management/src/components/BaseCRUD.jsx
-
 import React, { useState, useEffect, useCallback } from "react";
 import "./BaseCRUD.css";
 
-	const BaseCRUD = ({
-	apiUrl,
-	fields,
-	title,
-	initialFormValues,
-	}) => {
-	const [data, setData] = useState([]);
-	const [isEditing, setIsEditing] = useState(false);
-	const [isCreating, setIsCreating] = useState(false);
-	const [currentItem, setCurrentItem] = useState(null);
-	const [formErrors, setFormErrors] = useState({});
-	const [formValues, setFormValues] = useState(initialFormValues);
+/**
+ * Componente base para operaciones CRUD (Create, Read, Update, Delete)
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {string} props.apiUrl - URL de la API para realizar las operaciones
+ * @param {Array} props.fields - Arreglo de campos del formulario
+ * @param {string} props.title - Título del componente
+ * @param {Object} [props.initialFormValues] - Valores iniciales del formulario
+ */
+const BaseCRUD = ({
+  apiUrl,
+  fields,
+  title,
+  initialFormValues,
+}) => {
+  // Estado para almacenar los datos obtenidos de la API
+  const [data, setData] = useState([]);
+  
+  // Estados para gestionar el modo de edición/creación
+  const [isEditing, setIsEditing] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  
+  // Estado para almacenar el item actual en edición
+  const [currentItem, setCurrentItem] = useState(null);
+  
+  // Estado para almacenar errores de validación
+  const [formErrors, setFormErrors] = useState({});
+  
+  // Estado para almacenar los valores del formulario
+  const [formValues, setFormValues] = useState(initialFormValues || {});
+  
+  // Configuración para ordenar los datos
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
-	const fetchItems = useCallback(async () => {
-		try {
-		const response = await fetch(apiUrl);
-		if (response.ok) {
-			const data = await response.json();
-			setData(data);
-		} else {
-			console.error("Error fetching data");
-		}
-		} catch (error) {
-		console.error("Error:", error);
-		}
-	}, [apiUrl]);
+  /**
+   * Maneja el ordenamiento de los datos según el campo seleccionado
+   * @param {string} key - Clave del campo para ordenar
+   */
+  const handleSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
 
-	useEffect(() => {
-		fetchItems();
-	}, [fetchItems]);
+  /**
+   * Obtiene los datos de la API y los almacena en el estado
+   */
+  const fetchItems = useCallback(async () => {
+    try {
+      const response = await fetch(apiUrl);
+      if (response.ok) {
+        let data = await response.json();
+        if (sortConfig.key) {
+          data = data.sort((a, b) => {
+            if (a[sortConfig.key] < b[sortConfig.key]) {
+              return sortConfig.direction === 'ascending' ? -1 : 1;
+            }
+            if (a[sortConfig.key] > b[sortConfig.key]) {
+              return sortConfig.direction === 'ascending' ? 1 : -1;
+            }
+            return 0;
+          });
+        }
+        setData(data);
+      } else {
+        console.error("Error fetching data");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }, [apiUrl, sortConfig]);
 
-	const handleInputChange = (e) => {
-		const { name, value } = e.target;
-		setFormValues({ ...formValues, [name]: value });
-	};
+  // Ejecuta fetchItems cuando se monta el componente o cambia apiUrl
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
 
-	const handleCreate = () => {
-		setIsCreating(true);
-		setFormValues(initialFormValues);
-		setFormErrors({});
-	};
+  /**
+   * Maneja los cambios de entrada en el formulario
+   * @param {Event} e - Evento del input
+   */
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues({ ...formValues, [name]: value });
+  };
 
-	const handleEdit = (item) => {
-		const updatedFormValues = {};
-		fields.forEach((field) => {
-		updatedFormValues[field.name] =
-			item[field.name] !== null ? item[field.name] : field.nullable ? "" : item[field.name];
-		});
+  /**
+   * Inicia el modo de creación de un nuevo item
+   */
+  const handleCreate = () => {
+    setIsCreating(true);
+    setFormValues(initialFormValues || {});
+    setFormErrors({});
+  };
 
-		setIsEditing(true);
-		setCurrentItem(item);
-		setFormValues(updatedFormValues);
-		setFormErrors({});
-	};
+  /**
+   * Inicia el modo de edición de un item existente
+   * @param {Object} item - Item para editar
+   */
+  const handleEdit = (item) => {
+    const updatedFormValues = {};
+    fields.forEach((field) => {
+      updatedFormValues[field.name] =
+        item[field.name] !== null ? item[field.name] : field.nullable ? "" : item[field.name];
+    });
 
-	const onSaveSuccess = () => {
-		alert("Datos guardados correctamente");
-	};
+    setIsEditing(true);
+    setCurrentItem(item);
+    setFormValues(updatedFormValues);
+    setFormErrors({});
+  };
 
-	const handleSave = async () => {
-		// Asegurar que no haya barras adicionales en la URL
-		const baseUrl = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
-		const url = isEditing ? `${baseUrl}/${currentItem.id}/` : apiUrl;
-		const method = isEditing ? "PUT" : "POST";
+  /**
+   * Maneja el éxito al guardar los datos
+   */
+  const onSaveSuccess = () => {
+    alert("Datos guardados correctamente");
+  };
 
-		// Filtrar campos autoGenerados antes de enviar al backend
-		const filteredFormValues = Object.fromEntries(
-			Object.entries(formValues).filter(
-				([key]) => !fields.find((field) => field.name === key && field.autoGenerated)
-			)
-		);
-	
-		// enviar la información al server y capturar la respuesta de esta para confirmar que se procesó correctamente o capturar el error que ocurrió
-		try {
-		const response = await fetch(url, {
-			method,
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(filteredFormValues),
-		});
+  /**
+   * Guarda los datos en la API y actualiza el estado
+   */
+  const handleSave = async () => {
+    // Asegurar que no haya barras adicionales en la URL
+    const baseUrl = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
+    const url = isEditing ? `${baseUrl}/${currentItem.id}/` : apiUrl;
+    const method = isEditing ? "PUT" : "POST";
 
-		if (response.ok) {
-			fetchItems();
-			setIsEditing(false);
-			setIsCreating(false);
-			setCurrentItem(null);
-			setFormErrors({});
-			if (onSaveSuccess) onSaveSuccess();
-		} else if (response.status === 400) {
-			const errorData = await response.json(); // Captura los errores del backend
-			setFormErrors(errorData); // Actualiza el estado con los errores
-		} else {
-			console.error("Error saving data");
-		}
-		} catch (error) {
-		console.error("Error:", error);
-		}
-	};
+    // Filtrar campos autoGenerados antes de enviar al backend
+    const filteredFormValues = Object.fromEntries(
+      Object.entries(formValues).filter(
+        ([key]) => !fields.find((field) => field.name === key && field.autoGenerated)
+      )
+    );
 
-	const handleDelete = async (itemId) => {
-		if (window.confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
-		try {
-			const response = await fetch(`${apiUrl}${itemId}/`, {
-			method: "DELETE",
-			});
-	
-			if (response.ok) {
-			fetchItems();
-			} else {
-			console.error("Error deleting item");
-			}
-		} catch (error) {
-			console.error("Error:", error);
-		}
-		}
-	};
-	
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(filteredFormValues),
+      });
 
-	const handleCancel = () => {
-		setIsEditing(false);
-		setIsCreating(false);
-		setCurrentItem(null);
-		setFormErrors({});
-	};
+      if (response.ok) {
+        fetchItems();
+        setIsEditing(false);
+        setIsCreating(false);
+        setCurrentItem(null);
+        setFormErrors({});
+        if (onSaveSuccess) onSaveSuccess();
+      } else if (response.status === 400) {
+        const errorData = await response.json(); // Captura los errores del backend
+        setFormErrors(errorData); // Actualiza el estado con los errores
+      } else {
+        console.error("Error saving data");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
-	return (
-		<div className="base-crud-container">
-		<h1>{title}</h1>
+  /**
+   * Elimina un item de la API
+   * @param {string} itemId - ID del item a eliminar
+   */
+  const handleDelete = async (itemId) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
+      try {
+        const response = await fetch(`${apiUrl}${itemId}/`, {
+          method: "DELETE",
+        });
 
-		{/* Lista de elementos */}
-		<div className="item-list">
-			<table>
-			<thead>
-				<tr>
-				{fields
-					.filter((field) => !field.hidden) // Filtrar campos no ocultos
-					.map((field) => (
-					<th key={field.name}>{field.label}</th>
-					))}
-				<th>Acciones</th>
-				</tr>
-			</thead>
-			<tbody>
-				{data.map((item) => (
-				<tr key={item.id}>
-					{fields
-					.filter((field) => !field.hidden) // Filtrar campos no ocultos
-					.map((field) => (
-						<td key={field.name}>{item[field.name] || "N/A"}</td>
-					))}
-					<td>
-					<button onClick={() => handleEdit(item)}>Editar</button>
-					<button onClick={() => handleDelete(item.id)}>Eliminar</button>
-					</td>
-				</tr>
-				))}
-			</tbody>
-			</table>
-		</div>
+        if (response.ok) {
+          fetchItems();
+        } else {
+          console.error("Error deleting item");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+  };
 
-		{/* Botones de acción */}
-		<div className="actions">
-			<button onClick={fetchItems}>Actualizar Lista</button>
-			<button onClick={handleCreate}>Añadir Elemento</button>
-		</div>
+  /**
+   * Cancela las operaciones de edición o creación
+   */
+  const handleCancel = () => {
+    setIsEditing(false);
+    setIsCreating(false);
+    setCurrentItem(null);
+    setFormErrors({});
+  };
 
-		{/* Formulario para crear o editar */}
-		{(isCreating || isEditing) && (
-			<div className="item-form">
-			<h2>{isEditing ? "Editar" : "Crear"}</h2>
-			{fields
-			  .filter((field) => !field.autoGenerated)
-			  .map((field) => (
-				<div className="form-group" key={field.name}>
-				<label>{field.label}:</label>
-				<input
-					type={field.type === "password" && field.showPassword ? "text" : field.type}
-					name={field.name}
-					value={formValues[field.name] || ""}
-					onChange={handleInputChange}
-				/>
-				{field.type === "password" && field.toggleVisibility && (
-					<button type="button" onClick={field.toggleVisibility}>
-					{field.showPassword ? "Ocultar" : "Mostrar"}
-					</button>
-				)}
-				{/* Mostrar errores debajo del campo */}
-				{formErrors[field.name] && (
-					<div className="error-message">
-						{formErrors[field.name][0]}
-					</div>
-					)}
-				</div>
-			))}
-			<div className="form-actions">
-				<button onClick={handleSave}>Guardar</button>
-				<button onClick={handleCancel}>Cancelar</button>
-			</div>
-			</div>
-		)}
-		</div>
-	);
-	};
+  return (
+    <div className="base-crud-container">
+      <h1>{title}</h1>
 
-	export default BaseCRUD;
+      {/* Lista de elementos */}
+      <div className="item-list">
+        <table>
+          <thead>
+            <tr>
+              {fields
+                .filter((field) => !field.hidden)
+                .map((field) => (
+                  <th key={field.name} onClick={() => handleSort(field.name)}>
+                    {field.label}
+                    {sortConfig.key === field.name ? (sortConfig.direction === 'ascending' ? ' 🔼' : ' 🔽') : null}
+                  </th>
+                ))}
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item) => (
+              <tr key={item.id}>
+                {fields
+                  .filter((field) => !field.hidden)
+                  .map((field) => (
+                    <td key={field.name}>{item[field.name] || "N/A"}</td>
+                  ))}
+                <td>
+                  <button onClick={() => handleEdit(item)}>Editar</button>
+                  <button onClick={() => handleDelete(item.id)}>
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
+      {/* Botones de acción */}
+      <div className="actions">
+        <button onClick={fetchItems}>Actualizar Lista</button>
+        <button onClick={handleCreate}>Añadir Elemento</button>
+      </div>
+
+      {/* Formulario para crear o editar */}
+      {(isCreating || isEditing) && (
+        <div className="item-form">
+          <h2>{isEditing ? "Editar" : "Crear"}</h2>
+          {fields
+            .filter((field) => !field.autoGenerated)
+            .map((field) => (
+              <div className="form-group" key={field.name}>
+                <label>{field.label}:</label>
+                <input
+                  type={field.type === "password" && field.showPassword ? "text" : field.type}
+                  name={field.name}
+                  value={formValues[field.name] || ""}
+                  onChange={handleInputChange}
+                />
+                {field.type === "password" && field.toggleVisibility && (
+                  <button type="button" onClick={field.toggleVisibility}>
+                    {field.showPassword ? "Ocultar" : "Mostrar"}
+                  </button>
+                )}
+                {/* Mostrar errores debajo del campo */}
+                {formErrors[field.name] && (
+                  <div className="error-message">
+                    {formErrors[field.name][0]}
+                  </div>
+                )}
+              </div>
+            ))}
+          <div className="form-actions">
+            <button onClick={handleSave}>Guardar</button>
+            <button onClick={handleCancel}>Cancelar</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default BaseCRUD;

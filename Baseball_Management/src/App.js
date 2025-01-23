@@ -6,6 +6,7 @@ import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import AdminPage from './components/admin';
 
+//Importar formularios de Base de Datos
 import BaseballPlayerCRUD from './components/FormulariosCRUD/BaseballPlayerCRUD';
 import BPParticipationCRUD from './components/FormulariosCRUD/BPParticipationCRUD';
 import DirectionTeamCRUD from './components/FormulariosCRUD/DirectionTeamCRUD';
