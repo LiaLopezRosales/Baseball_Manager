@@ -1,3 +1,5 @@
+# api/reports/queries.py
+
 from django.db import connection
 from django.db.models import Count, Sum
 import db_structure.models as db
@@ -6,7 +8,7 @@ from django.db.models import Prefetch, Max, Q, F
 # Obtener nombres de equipos ganadores y directores técnicos en series nacionales por temporada
 def get_final_winner_teams_and_coaches(season_id):  
     # Obtener las series asociadas a la temporada específica
-    series = db.Series.objects.filter(season_id=season_id)  
+    series = db.Series.objects.filter(season_id=season_id, type='National')  
 
     # Prefetch los juegos relacionados y filtrar el último juego de cada serie
     series = series.prefetch_related(
@@ -63,12 +65,12 @@ def get_max_min_game_per_series():
     series_with_counts = db.Series.objects.annotate(games_count=Count('game_series'))
 
     # Seleccionar la serie con mayor cantidad de juegos
-    serie_con_más_juegos = series_with_counts.order_by('-games_count').first()
+    serie_con_más_juegos = series_with_counts.order_by('-games_count').first().__str__()
 
     # Seleccionar la serie con menor cantidad de juegos, excluyendo las que tienen 0 juegos
-    serie_con_menos_juegos = series_with_counts.filter(games_count__gt=0).order_by('games_count').first()
+    serie_con_menos_juegos = series_with_counts.order_by('games_count').first().__str__()
 
-    return serie_con_más_juegos, serie_con_menos_juegos
+    return { "serie con más juegos": serie_con_más_juegos, "serie con menos juegos": serie_con_menos_juegos}
 
 # Listar equipos en primer y último lugar por serie, clasificados por tipo y orden cronológico
 def get_teams_by_series(season_id):
@@ -195,17 +197,17 @@ def get_team_players_at_a_specified_serie(team_id=id):
     # Organizar la información por jugador
     players_series = {}
     for participation in participations:
-        player = participation.BP_id.P_id
+        player =  participation.BP_id.P_id
         series_name = participation.series.name
 
-        if player.P_id not in players_series:
-            players_series[player.P_id] = {
+        if player not in players_series:
+            players_series[player] = {
                 "name": player.name,
                 "lastname": player.lastname,
                 "series": []
             }
         
-        players_series[player.P_id]["series"].append(series_name)
+        players_series[player]["series"].append(series_name)
 
     # Convertir el resultado en una lista
     return list(players_series.values())

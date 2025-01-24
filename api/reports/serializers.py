@@ -4,10 +4,10 @@ from rest_framework import serializers
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Serializador para los reportes.
-class ReportSerializer(serializers.ModelSerializer):
+class ReportSerializer(serializers.Serializer):
     report_id = serializers.IntegerField(
         required=True,
-        validators=[MinValueValidator(0), MaxValueValidator(4)]
+        validators=[MinValueValidator(0), MaxValueValidator(8)]
     )
     season_id = serializers.IntegerField(required=False, allow_null=True)  # Opcional
     pitcher_id = serializers.IntegerField(required=False, allow_null=True)  # Opcional
@@ -25,11 +25,13 @@ class ReportSerializer(serializers.ModelSerializer):
         return data
 
 # Serializador para las obtener de una tabla todos sus campos relacionados
-class TableStructureSerializer(serializers.ModelSerializer):
+class TableStructureSerializer(serializers.Serializer):
     table_name = serializers.CharField(required=True)
+    external_fields = serializers.BooleanField(required=False, default=False) # Opcional
+    show_ids = serializers.BooleanField(required=False, default=False) # Opcional
 
 # Serializador para filtrado dinámico
-class DynamicFilterSerializer(serializers.ModelSerializer):
+class DynamicFilterSerializer(serializers.Serializer):
     table_name = serializers.CharField(required=True)
     fields = serializers.ListField(child=serializers.CharField(), required=True)
-    filters = serializers.DictField()
+    filters = serializers.DictField(required=False, allow_null=True)  # Opcional
