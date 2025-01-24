@@ -2,25 +2,24 @@ import { useState, useEffect, useCallback } from "react";
 
 export const useCRUD = (apiUrl, fields, initialFormValues) => {
   const [data, setData] = useState([]);
-  const [paginatedData, setPaginatedData] = useState([]);
-  const [formValues, setFormValues] = useState(initialFormValues);
-  const [formErrors, setFormErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [formErrors, setFormErrors] = useState({});
+  const [formValues, setFormValues] = useState(initialFormValues);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" });
-
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);  // Control de número total de páginas
 
   const fetchItems = useCallback(async () => {
     try {
       const response = await fetch(apiUrl);
       if (response.ok) {
-        let items = await response.json();
+        let data = await response.json();
+
+        // Lógica de ordenamiento
         if (sortConfig.key) {
-          items = items.sort((a, b) => {
+          data = data.sort((a, b) => {
             if (a[sortConfig.key] < b[sortConfig.key]) {
               return sortConfig.direction === "ascending" ? -1 : 1;
             }
@@ -30,8 +29,9 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
             return 0;
           });
         }
-        setData(items);
-        setCurrentPage(1); // Reinicia a la primera página después de cargar
+
+        setData(data);
+        setTotalPages(Math.ceil(data.length / 10)); // Calcular el total de páginas
       } else {
         console.error("Error fetching data");
       }
@@ -40,15 +40,17 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
     }
   }, [apiUrl, sortConfig]);
 
+  // Ejecutar fetchItems al montar el componente
   useEffect(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    setPaginatedData(data.slice(startIndex, endIndex));
-  }, [data, currentPage, itemsPerPage]);
+    fetchItems();
+  }, [fetchItems]); // Solo se ejecuta cuando `fetchItems` cambia
+
+  // Paginación: obtener los datos de la página actual
+  const paginatedData = data.slice((currentPage - 1) * 10, currentPage * 10);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
+    setFormValues({ ...formValues, [name]: value });
   };
 
   const handleCreate = () => {
@@ -90,7 +92,7 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
         body: JSON.stringify(filteredFormValues),
       });
       if (response.ok) {
-        fetchItems();
+        fetchItems(); // Refrescar datos
         setIsEditing(false);
         setIsCreating(false);
         setCurrentItem(null);
@@ -111,7 +113,7 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
       try {
         const response = await fetch(`${apiUrl}${itemId}/`, { method: "DELETE" });
         if (response.ok) {
-          fetchItems();
+          fetchItems(); // Refrescar datos
         } else {
           console.error("Error deleting item");
         }
@@ -136,13 +138,15 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
     setSortConfig({ key, direction });
   };
 
-  const goToPage = (page) => setCurrentPage(page);
+  const goToPage = (page) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return {
-    paginatedData,
     data,
-    totalPages,
-    currentPage,
+    sortConfig,
     form: { values: formValues, errors: formErrors, isEditing, isCreating },
     actions: {
       fetchItems,
@@ -155,6 +159,8 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
       handleSort,
       goToPage,
     },
-    sortConfig,
+    paginatedData,
+    totalPages,
+    currentPage,
   };
 };
