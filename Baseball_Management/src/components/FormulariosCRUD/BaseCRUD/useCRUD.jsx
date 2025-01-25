@@ -140,6 +140,9 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
       } else if (response.status === 400) {
         const errorData = await response.json();
         setFormErrors(errorData);
+        if (errorData.detail) {
+          alert(errorData.detail);  // Mostrar errores generales en un alerta
+      }
       } else {
         console.error("Error saving data");
       }
