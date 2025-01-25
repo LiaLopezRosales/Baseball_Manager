@@ -1,7 +1,9 @@
+// BaseCRUD.jsx
+
 import React from "react";
 import DataTable from "./BaseCRUD/DataTable";
 import CRUDForm from "./BaseCRUD/CRUDForm";
-import useCRUD from "./BaseCRUD/useCRUD";
+import useCRUD from "./BaseCRUD/useCRUD";  // Asegúrate de que la importación sea correcta
 import "./BaseCRUD.css";
 
 const BaseCRUD = ({ apiUrl, fields, title, initialFormValues }) => {
@@ -24,10 +26,13 @@ const BaseCRUD = ({ apiUrl, fields, title, initialFormValues }) => {
         onSort={actions.handleSort}
         onEdit={actions.handleEdit}
         onDelete={actions.handleDelete}
-        onFilter={actions.handleFilter}  
+        onFilter={actions.handleFilter}  // Agregando el prop onFilter
       />
       <div className="pagination-controls">
-        <button disabled={currentPage === 1} onClick={() => actions.goToPage(currentPage - 1)}>
+        <button
+          disabled={currentPage === 1}
+          onClick={() => actions.goToPage(currentPage - 1)}
+        >
           Anterior
         </button>
         <span>

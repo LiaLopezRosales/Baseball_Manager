@@ -10,13 +10,17 @@ const DataTable = ({ data, fields, sortConfig, onSort, onEdit, onDelete, onFilte
     onFilter(newFilters);
   };
 
+  const isFieldVisible = (field) => {
+    return !field.hidden && field.type !== "password";
+  };
+
   return (
     <div className="item-list">
       <table>
         <thead>
           {/* Fila de Filtros */}
           <tr>
-            {fields.map((field) => (
+            {fields.filter(isFieldVisible).map((field) => (
               <th key={`${field.name}-filter`}>
                 {field.type === "number" && (
                   <>
@@ -30,7 +34,10 @@ const DataTable = ({ data, fields, sortConfig, onSort, onEdit, onDelete, onFilte
                     <input type="date" placeholder="Final" onChange={(e) => handleFilterChange(field.name, e.target.value, 'end')} />
                   </>
                 )}
-                {field.type === "string" && (
+                {field.type === "text" && (
+                  <input type="text" placeholder="Buscar" onChange={(e) => handleFilterChange(field.name, e.target.value, 'search')} />
+                )}
+                {field.type === "email" && (
                   <input type="text" placeholder="Buscar" onChange={(e) => handleFilterChange(field.name, e.target.value, 'search')} />
                 )}
               </th>
@@ -39,7 +46,7 @@ const DataTable = ({ data, fields, sortConfig, onSort, onEdit, onDelete, onFilte
           </tr>
 
           <tr>
-            {fields.map((field) => (
+            {fields.filter(isFieldVisible).map((field) => (
               <th key={field.name}>
                 {field.label}
                 <button onClick={() => onSort(field.name)}>
@@ -57,7 +64,7 @@ const DataTable = ({ data, fields, sortConfig, onSort, onEdit, onDelete, onFilte
         <tbody>
           {data.map((item) => (
             <tr key={item.id}>
-              {fields.map((field) => (
+              {fields.filter(isFieldVisible).map((field) => (
                 <td key={field.name}>{item[field.name] || "N/A"}</td>
               ))}
               <td>
