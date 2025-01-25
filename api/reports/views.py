@@ -12,7 +12,7 @@ from django.apps import apps
 from .queries import *
 from .filters import *
 from django.http import HttpResponse
-from .exports.kernel import ReportExporterKernel
+from .exports.kernel import ExporterKernel
 
 # Vista para manejar diferentes tipos de reportes basados en parámetros proporcionados por el usuario
 class ReportsView(APIView):    
@@ -27,15 +27,15 @@ class ReportsView(APIView):
         
         if validated_data.get('report_id') == 0:
             # Reporte: Obtener equipos ganadores y directores técnicos en series nacionales por temporada
-            result = get_final_winner_teams_and_coaches(validated_data.get('season_id'))
+            result = get_final_winner_teams_and_coaches(validated_data.get('season_name'))
         
         elif validated_data.get('report_id') == 1:
             # Reporte: Obtener nombres y posiciones de jugadores estrella y su efectividad por serie
-            result = get_star_players_for_series(validated_data.get('season_id'))
+            result = get_star_players_for_series(validated_data.get('serie_name'))
         
         elif validated_data.get('report_id') == 2:
             # Reporte: Listar equipos en primer y último lugar por serie, clasificados por tipo
-            result = get_teams_by_series(validated_data.get('season_id'))
+            result = get_teams_by_series(validated_data.get('season_name'))
         
         elif validated_data.get('report_id') == 3:
             # Reporte: Obtener series con mayor y menor cantidad de juegos celebrados
@@ -43,7 +43,7 @@ class ReportsView(APIView):
         
         elif validated_data.get('report_id') == 4:
             # Reporte: Obtener total de juegos ganados y promedio de carreras limpias permitidas por un lanzador
-            result = get_pitcher_wins_and_running_average(validated_data.get('pitcher_id'))
+            result = get_pitcher_wins_and_running_average(validated_data.get('pitcher_name'))
         
         elif validated_data.get('report_id') == 5:
             # Reporte: Obtener los jugadores con mejor promedio de bateo.
@@ -59,7 +59,7 @@ class ReportsView(APIView):
         
         elif validated_data.get('report_id') == 8:
             # Reporte: Obtener los jugadores de un equipo específico. 
-            result = get_team_players_at_a_specified_serie(validated_data.get('team_id'))
+            result = get_team_players_at_a_specified_serie(validated_data.get('team_name'))
         
         else:
             # Si el 'report_id' no coincide con ninguna opción válida, devolver error
@@ -140,11 +140,11 @@ class ExportView(APIView):
         serializer.is_valid(raise_exception=True)  # Levanta una excepción si los datos no son válidos
         
         # Exportar el reporte
-        exporter = ReportExporterKernel()
-        exporter.load_plugins()
-        export_format = serializer.validated_data.get("format")
-        exported_data = exporter.export(export_format, serializer.validated_data.get('data'))
+        kernel = ExporterKernel()
+        kernel.load_plugins()
+        exporter = kernel.get_exporter(serializer.validated_data.get("format"))
+        exported_data = exporter.export(serializer.validated_data.get('data'))
         
-        response = HttpResponse(exported_data, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{serializer.validated_data.get("filename")}.pdf"'
+        response = HttpResponse(exported_data, content_type=exporter.get_content_type())
+        response['Content-Disposition'] = f'attachment; filename="{serializer.validated_data.get("filename")}.{exporter.get_file_extension()}"'
         return response

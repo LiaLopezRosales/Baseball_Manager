@@ -9,19 +9,30 @@ class ReportSerializer(serializers.Serializer):
         required=True,
         validators=[MinValueValidator(0), MaxValueValidator(8)]
     )
-    season_id = serializers.IntegerField(required=False, allow_null=True)  # Opcional
-    pitcher_id = serializers.IntegerField(required=False, allow_null=True)  # Opcional
-    team_id = serializers.IntegerField(required=False, allow_null=True)  # Opcional
+    season_name = serializers.CharField(required=False, allow_null=True)  # Opcional
+    pitcher_name = serializers.CharField(required=False, allow_null=True)  # Opcional
+    pitcher_lastname = serializers.CharField(required=False, allow_null=True)  # Opcional
+    team_name = serializers.CharField(required=False, allow_null=True)  # Opcional
+    serie_name = serializers.CharField(required=False, allow_null=True)
     
     def validate(self, data):
-        # Validar exclusividad entre season_id y pitcher_id
-        season_id = data.get('season_id')
-        pitcher_id = data.get('pitcher_id')
-        team_id = data.get('team_id')
-        if season_id is not None and pitcher_id is not None and team_id is not None:
-            raise serializers.ValidationError(
-                "No se pueden pasar ambos parámetros 'season_id' y 'pitcher_id' al mismo tiempo."
-            )
+        # Validar exclusividad entre season_name y pitcher_name y team_name
+        season_name = data.get('season_name')
+        pitcher_name = data.get('pitcher_name')
+        pitcher_lastname = data.get('pitcher_lastname')
+        team_name = data.get('team_name')
+        serie_name = data.get('serie_name')
+        report_id = data.get('report_id')
+        
+        if season_name and report_id not in [0,2]:
+            raise serializers.ValidationError(f"season_id no es un parámetro del reporte {report_id}")
+        if serie_name and report_id != 1:
+            raise serializers.ValidationError(f"serie_name no es un parámetro del reporte {report_id}")
+        if (pitcher_name or pitcher_lastname) and report_id != 4:
+            raise serializers.ValidationError(f"pitcher_name no es un parámetro del reporte {report_id}")
+        if team_name and report_id != 8:
+            raise serializers.ValidationError(f"team_name no es un parámetro del reporte {report_id}")
+
         return data
 
 # Serializador para las obtener de una tabla todos sus campos relacionados
@@ -40,5 +51,5 @@ class DynamicFilterSerializer(serializers.Serializer):
 
 class ExportSerializer(serializers.Serializer):
     data = serializers.DictField(required=True)
-    format = serializers.CharField(required=False, default="PDFExporter")  # Opcional
+    format = serializers.CharField(required=False, default="pdf")  # Opcional
     filename = serializers.CharField(required=False, default="report")  # Opcional
