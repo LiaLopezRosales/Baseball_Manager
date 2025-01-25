@@ -1,8 +1,12 @@
 import requests
+import mimetypes
+
 
 BASE = "http://0.0.0.0:8000//api/queries/export/"
 
 data = {
+    "filename": "tabla",
+    "format": "csv",
     "data": {
         "Sección 1": [
             {
@@ -100,16 +104,25 @@ data = {
         ]
     }
 }
-
 # Hacer la solicitud POST
 response = requests.post("http://0.0.0.0:8000//api/queries/export/", json=data)
 
 # Verificar que la respuesta sea exitosa
 if response.status_code == 200:
-    # Guardar el contenido del PDF en un archivo
-    with open("output.pdf", "wb") as pdf_file:
-        pdf_file.write(response.content)
-    print("El archivo PDF se ha descargado correctamente como 'output.pdf'.")
+    # Obtener el Content-Type de la respuesta
+    content_type = response.headers.get("Content-Type", "")
+    
+    # Determinar la extensión del archivo basada en el Content-Type
+    extension = mimetypes.guess_extension(content_type) or ".bin"  # .bin como predeterminado para casos desconocidos
+
+    # Nombrar el archivo de salida con la extensión adecuada
+    output_file = f"output{extension}"
+    
+    # Guardar el contenido en un archivo
+    with open(output_file, "wb") as file:
+        file.write(response.content)
+    
+    print(f"El archivo se ha descargado correctamente como '{output_file}'.")
 else:
-    print(f"Error al generar el PDF. Código de estado: {response.status_code}")
+    print(f"Error al generar el archivo. Código de estado: {response.status_code}")
     print("Detalle:", response.text)

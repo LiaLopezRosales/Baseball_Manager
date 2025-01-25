@@ -45,3 +45,9 @@ class PDFExporter(BaseExporter):
 
         buffer.seek(0)
         return buffer.getvalue()
+
+    def get_file_extension(self):
+        return "pdf"
+    
+    def get_content_type(self):
+        return "application/pdf"

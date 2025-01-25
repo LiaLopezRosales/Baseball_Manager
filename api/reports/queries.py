@@ -6,9 +6,10 @@ import db_structure.models as db
 from django.db.models import Prefetch, Max, Q, F
 
 # Obtener nombres de equipos ganadores y directores técnicos en series nacionales por temporada
-def get_final_winner_teams_and_coaches(season_id):  
+def get_final_winner_teams_and_coaches(season_name, season_type='Provincial'):  
+    
     # Obtener las series asociadas a la temporada específica
-    series = db.Series.objects.filter(season_id=season_id, type='National')  
+    series = db.Series.objects.filter(season__name=season_name,type=season_type) 
 
     # Prefetch los juegos relacionados y filtrar el último juego de cada serie
     series = series.prefetch_related(
@@ -31,18 +32,22 @@ def get_final_winner_teams_and_coaches(season_id):
                 technical_director = team.directionteam.technicaldirector
                 result.append({
                     'team_name': team.name,
-                    'coach_name': f"{technical_director.W_id.P_id.name} {technical_director.W_id.P_id.lastname}" if technical_director else "No asignado"
+                    'coach_name': f"{technical_director.W_id.P_id.name} {technical_director.W_id.P_id.lastname}" if technical_director else "No asignado",
+                    'season': serie.season.name,
+                    'serie': serie.name
                 })
 
     return result
 
 # Obtener nombres y posiciones de jugadores del equipo "Todos Estrellas" y su efectividad por serie
-def get_star_players_for_series(series_id):
-    # Filtrar jugadores estrella asociados a la serie específica
-    star_players = db.StarPlayer.objects.filter(series_id=series_id).select_related(
-        'BP_id__P_id', 'position'
-    ).prefetch_related('BP_id__playerinposition_bp')
+def get_star_players_for_series(series_name):
+    
+     # Obtener las series asociadas a la temporada específica
+    star_players = db.StarPlayer.objects.filter(series__name=series_name).select_related(
+        'BP_id__P_id', 'position').prefetch_related('BP_id__playerinposition_bp')
 
+    
+    # Filtrar jugadores estrella asociados a la serie específica
     result = []
     for star_player in star_players:
         player = star_player.BP_id
@@ -73,9 +78,9 @@ def get_max_min_game_per_series():
     return { "serie con más juegos": serie_con_más_juegos, "serie con menos juegos": serie_con_menos_juegos}
 
 # Listar equipos en primer y último lugar por serie, clasificados por tipo y orden cronológico
-def get_teams_by_series(season_id):
+def get_teams_by_series(season_name):
     # Filtrar las series asociadas a la temporada
-    series = db.Series.objects.filter(season_id=season_id)
+    series = db.Series.objects.filter(season__name=season_name)
 
     # Prefetch los juegos relacionados y ordenarlos por fecha
     games_prefetch = Prefetch(
@@ -145,19 +150,37 @@ def get_pitcher_losses(pitcher_id=None, player_id=None):
     return losses
 
 # Obtener el promedio de carreras limpias permitidas por un lanzador
-def get_pitcher_wins_and_running_average(pitcher_id):
-    wins = get_pitcher_wins(pitcher_id)  # Total de juegos ganados
-    # Obtener el promedio de carreras limpias del lanzador
-    running_average = db.Pitcher.objects.filter(id=pitcher_id).values_list('running_average', flat=True).first()
+def get_pitcher_wins_and_running_average(pitcher_name=None, pitcher_lastname=None):
+    if pitcher_name and pitcher_lastname:
+        list = db.Pitcher.objects.filter(P_id__P_id__name=pitcher_name, P_id__P_id__lastname=pitcher_lastname)
+    elif pitcher_name:
+        list = db.Pitcher.objects.filter(P_id__P_id__name=pitcher_name)
+    elif pitcher_name and pitcher_lastname:
+        list = db.Pitcher.objects.filter(P_id__P_id__lastname=pitcher_lastname)
+    else:
+        return []
+    
+    group_list = list.values_list('P_id','id', 'P_id__P_id__name', 'P_id__P_id__lastname')
+    data = []
+    
+    for pitcher_prop in group_list:    
+        # Total de juegos ganados
+        wins = get_pitcher_wins(player_id=pitcher_prop[0])
+        # Obtener el promedio de carreras limpias del lanzador
+        running_average = db.Pitcher.objects.filter(id=pitcher_prop[1]).values_list('running_average', flat=True).first()
 
-    return {
-        "total_wins": wins,
-        "running_average": running_average
-    }
+        data.append({
+            "name": pitcher_prop[2],
+            "lastname": pitcher_prop[3],
+            "total_wins": wins,
+            "running_average": running_average
+        })
+        
+    return data 
 
 # Obtener los jugadores con mejor promedio de bateo.
 def get_top_batting_average_players():
-    players = db.BaseballPlayer.objects.select_related('P_id').order_by('-batting_average')
+    players = db.BaseballPlayer.objects.select_related('P_id').order_by('-batting_average')[:10]
     return [
         {
             "name": player.P_id.name,
@@ -178,7 +201,7 @@ def get_team_score_statistics():
 
 # Obtener los jugadores con mayor efectividad por posición.
 def get_player_effectiveness_by_position():
-    players = db.PlayerInPosition.objects.select_related('BP_id__P_id', 'position').order_by('-effectiveness')
+    players = db.PlayerInPosition.objects.select_related('BP_id__P_id', 'position').order_by('-effectiveness')[:10]
     return [
         {
             "position": player.position.name,
@@ -190,9 +213,9 @@ def get_player_effectiveness_by_position():
     ]
 
 # Obtener los jugadores de un equipo específico que participaron en una serie dada. 
-def get_team_players_at_a_specified_serie(team_id=id): 
+def get_team_players_at_a_specified_serie(team_name): 
     # Obtener todas las participaciones del equipo
-    participations = db.BPParticipation.objects.filter(team_id__id=team_id).select_related('BP_id__P_id', 'series')
+    participations = db.BPParticipation.objects.filter(team_id__name=team_name).select_related('BP_id__P_id', 'series')
 
     # Organizar la información por jugador
     players_series = {}

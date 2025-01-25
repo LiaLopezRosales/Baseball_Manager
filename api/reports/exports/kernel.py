@@ -4,7 +4,7 @@ import importlib
 import os
 from .base_exporter import BaseExporter
 
-class ReportExporterKernel:
+class ExporterKernel:
     def __init__(self):
         self.plugins = {}
 
@@ -17,10 +17,10 @@ class ReportExporterKernel:
                 for attr in dir(module):
                     cls = getattr(module, attr)
                     if isinstance(cls, type) and issubclass(cls, BaseExporter) and cls is not BaseExporter:
-                        self.plugins[cls.__name__] = cls()
+                        self.plugins[cls.get_file_extension(cls)] = cls()
 
-    def export(self, format, data):
+    def get_exporter(self, format) -> BaseExporter:
         if format in self.plugins:
-            return self.plugins[format].export(data)
+            return self.plugins[format]
         else:
             raise ValueError(f'Export format {format} not supported')
