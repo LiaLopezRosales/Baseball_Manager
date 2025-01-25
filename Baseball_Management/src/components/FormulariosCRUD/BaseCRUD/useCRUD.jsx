@@ -1,25 +1,28 @@
 import { useState, useEffect, useCallback } from "react";
 
-export const useCRUD = (apiUrl, fields, initialFormValues) => {
+const useCRUD = (apiUrl, fields, initialFormValues) => {
   const [data, setData] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [currentItem, setCurrentItem] = useState(null);
-  const [formErrors, setFormErrors] = useState({});
-  const [formValues, setFormValues] = useState(initialFormValues);
+  const [filters, setFilters] = useState({});
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" });
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);  // Control de número total de páginas
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Variables para manejar formulario y estados de edición/creación
+  const [formValues, setFormValues] = useState(initialFormValues);
+  const [formErrors, setFormErrors] = useState({});
+  const [isCreating, setIsCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
 
   const fetchItems = useCallback(async () => {
     try {
       const response = await fetch(apiUrl);
       if (response.ok) {
-        let data = await response.json();
+        let rawData = await response.json();
 
         // Lógica de ordenamiento
         if (sortConfig.key) {
-          data = data.sort((a, b) => {
+          rawData = rawData.sort((a, b) => {
             if (a[sortConfig.key] < b[sortConfig.key]) {
               return sortConfig.direction === "ascending" ? -1 : 1;
             }
@@ -30,23 +33,30 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
           });
         }
 
-        setData(data);
-        setTotalPages(Math.ceil(data.length / 10)); // Calcular el total de páginas
+        // Lógica de filtrado local
+        rawData = rawData.filter((item) => 
+          Object.entries(filters).every(([key, filter]) =>
+            (!filter.min || item[key] >= filter.min) &&
+            (!filter.max || item[key] <= filter.max) &&
+            (!filter.start || new Date(item[key]) >= new Date(filter.start)) &&
+            (!filter.end || new Date(item[key]) <= new Date(filter.end)) &&
+            (!filter.search || item[key].toString().startsWith(filter.search))
+          )
+        );
+
+        setData(rawData);
+        setTotalPages(Math.ceil(rawData.length / 10));
       } else {
         console.error("Error fetching data");
       }
     } catch (error) {
       console.error("Error:", error);
     }
-  }, [apiUrl, sortConfig]);
+  }, [apiUrl, sortConfig, filters]);
 
-  // Ejecutar fetchItems al montar el componente
   useEffect(() => {
     fetchItems();
-  }, [fetchItems]); // Solo se ejecuta cuando `fetchItems` cambia
-
-  // Paginación: obtener los datos de la página actual
-  const paginatedData = data.slice((currentPage - 1) * 10, currentPage * 10);
+  }, [fetchItems]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -92,7 +102,7 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
         body: JSON.stringify(filteredFormValues),
       });
       if (response.ok) {
-        fetchItems(); // Refrescar datos
+        fetchItems();  // Refrescar datos
         setIsEditing(false);
         setIsCreating(false);
         setCurrentItem(null);
@@ -113,7 +123,7 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
       try {
         const response = await fetch(`${apiUrl}${itemId}/`, { method: "DELETE" });
         if (response.ok) {
-          fetchItems(); // Refrescar datos
+          fetchItems();  // Refrescar datos
         } else {
           console.error("Error deleting item");
         }
@@ -138,11 +148,17 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
     setSortConfig({ key, direction });
   };
 
+  const handleFilter = (newFilters) => {
+    setFilters(newFilters);
+  };
+
   const goToPage = (page) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
+
+  const paginatedData = data.slice((currentPage - 1) * 10, currentPage * 10);
 
   return {
     data,
@@ -157,6 +173,7 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
       handleCancel,
       handleInputChange,
       handleSort,
+      handleFilter,
       goToPage,
     },
     paginatedData,
@@ -164,3 +181,5 @@ export const useCRUD = (apiUrl, fields, initialFormValues) => {
     currentPage,
   };
 };
+
+export default useCRUD;

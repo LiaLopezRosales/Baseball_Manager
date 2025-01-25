@@ -1,7 +1,7 @@
 import React from "react";
 import DataTable from "./BaseCRUD/DataTable";
 import CRUDForm from "./BaseCRUD/CRUDForm";
-import { useCRUD } from "./BaseCRUD/useCRUD";
+import useCRUD from "./BaseCRUD/useCRUD";
 import "./BaseCRUD.css";
 
 const BaseCRUD = ({ apiUrl, fields, title, initialFormValues }) => {
@@ -24,6 +24,7 @@ const BaseCRUD = ({ apiUrl, fields, title, initialFormValues }) => {
         onSort={actions.handleSort}
         onEdit={actions.handleEdit}
         onDelete={actions.handleDelete}
+        onFilter={actions.handleFilter}  
       />
       <div className="pagination-controls">
         <button disabled={currentPage === 1} onClick={() => actions.goToPage(currentPage - 1)}>
