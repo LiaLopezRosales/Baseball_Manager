@@ -7,11 +7,12 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from ..permissions import IsAdmin, IsDirectorTecnicoAndOwnTeam, IsUsuarioGeneral
-from .serializers import ReportSerializer, TableStructureSerializer, DynamicFilterSerializer
+from .serializers import ReportSerializer, TableStructureSerializer, DynamicFilterSerializer, ExportSerializer
 from django.apps import apps
 from .queries import *
 from .filters import *
-
+from django.http import HttpResponse
+from .exports.kernel import ReportExporterKernel
 
 # Vista para manejar diferentes tipos de reportes basados en parámetros proporcionados por el usuario
 class ReportsView(APIView):    
@@ -130,3 +131,20 @@ class DynamicFilterView(APIView):
             return Response({"error": f"El modelo {table_name} no existe."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)},  status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ExportView(APIView):
+    def post(self, request):
+        
+        # Serializar y validar el cuerpo de la consulta
+        serializer = ExportSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)  # Levanta una excepción si los datos no son válidos
+        
+        # Exportar el reporte
+        exporter = ReportExporterKernel()
+        exporter.load_plugins()
+        export_format = serializer.validated_data.get("format")
+        exported_data = exporter.export(export_format, serializer.validated_data.get('data'))
+        
+        response = HttpResponse(exported_data, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{serializer.validated_data.get("filename")}.pdf"'
+        return response

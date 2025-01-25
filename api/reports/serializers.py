@@ -35,3 +35,10 @@ class DynamicFilterSerializer(serializers.Serializer):
     table_name = serializers.CharField(required=True)
     fields = serializers.ListField(child=serializers.CharField(), required=True)
     filters = serializers.DictField(required=False, allow_null=True)  # Opcional
+
+# Serializador para la exportación de reportes
+
+class ExportSerializer(serializers.Serializer):
+    data = serializers.DictField(required=True)
+    format = serializers.CharField(required=False, default="PDFExporter")  # Opcional
+    filename = serializers.CharField(required=False, default="report")  # Opcional
