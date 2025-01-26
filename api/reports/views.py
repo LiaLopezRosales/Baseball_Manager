@@ -23,8 +23,7 @@ class ReportsView(APIView):
         
         validated_data = serializer.validated_data  # Obtener los datos validados
         
-        # Determinar el tipo de reporte según el valor de 'report_id'
-        
+        # Determinar el tipo de reporte según el valor de 'report_id'   
         if validated_data.get('report_id') == 0:
             # Reporte: Obtener equipos ganadores y directores técnicos en series nacionales por temporada
             result = get_final_winner_teams_and_coaches(validated_data.get('season_name'))
@@ -43,7 +42,7 @@ class ReportsView(APIView):
         
         elif validated_data.get('report_id') == 4:
             # Reporte: Obtener total de juegos ganados y promedio de carreras limpias permitidas por un lanzador
-            result = get_pitcher_wins_and_running_average(validated_data.get('pitcher_name'))
+            result = get_pitcher_wins_and_running_average( pitcher_name=validated_data.get('pitcher_name'), pitcher_lastname=validated_data.get('pitcher_lastname'))
         
         elif validated_data.get('report_id') == 5:
             # Reporte: Obtener los jugadores con mejor promedio de bateo.
