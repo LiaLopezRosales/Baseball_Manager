@@ -7,6 +7,10 @@ from rest_framework import status
 
 
 def get_related_fields(model: Model, external_fields=False, show_ids=False, visited=set(), path_prefix="", table_path=""):
+    
+    if model.__name__ in ['User', 'Rol']:
+        return
+    
     # Agrega el modelo actual al conjunto de modelos visitados para evitar ciclos
     visited.add(model)
     fields = []
@@ -43,6 +47,10 @@ def get_related_fields(model: Model, external_fields=False, show_ids=False, visi
     return fields
 
 def dynamic_filter(model: Model, selected_fields: list, filters={}):
+    
+    if model.__name__ in ['User', 'Rol']:
+        return
+    
     query = Q()  # Inicializa un objeto Q vacío para construir la consulta
     for path, condition in filters.items():
         model_shadow = model
