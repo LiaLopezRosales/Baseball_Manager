@@ -64,7 +64,7 @@ function LoginBoard({ name, isLogged, setLogin, onButtonClick, NameOnChange, upd
 
             if (role_name === 'Director Técnico') { navigate('/DT'); }
 
-            if (role_name === 'Usuario General') { navigate('/UG'); }
+            if (role_name === 'Usuario General') { navigate('/'); }
         } 
         catch (error) {
             console.error('Error capturado:', error.message);

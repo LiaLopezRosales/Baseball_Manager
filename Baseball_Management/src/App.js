@@ -5,7 +5,8 @@ import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import AdminPage from './components/admin';
-import MyComponent from './components/Queries';
+import MainPage from './components/main-page';
+import ReportComponent from './components/report';
 
 //Importar formularios de Base de Datos
 import BaseballPlayerCRUD from './components/FormulariosCRUD/BaseballPlayerCRUD';
@@ -30,8 +31,6 @@ import TechnicalDirectorCRUD from './components/FormulariosCRUD/TechnicalDirecto
 import UserCRUD from './components/FormulariosCRUD/UserCRUD';
 import WorkerCRUD from './components/FormulariosCRUD/WorkerCRUD';
 
-import PlayerSwapForm from './components/PlayerSwapForm';
-
 function App() {
     // Estado para verificar si el usuario está logged in
     const [isLogged, setLogin] = useState(() => {
@@ -48,6 +47,10 @@ function App() {
 
     // Estado para seleccionar la opción actual
     const [selectedOption, setSelectedOption] = useState('');
+
+    const [selectedTeam, setSelectedTeam] = useState('');
+    const [selectedPitcher, setSelectedPitcher] = useState('');
+    const [selectedSeason, setSelectedSeason] = useState('');
 
     // Estado para almacenar el rol del usuario
     const [role, setRole] = useState(() => {
@@ -108,6 +111,18 @@ function App() {
         localStorage.setItem('team', JSON.stringify(newTeam));
     };
 
+    const handleTeamChange = (event) => {
+        setSelectedTeam(event.target.value);
+    };
+
+    const handlePitcherChange = (event) => {
+        setSelectedPitcher(event.target.value);
+    };
+
+    const handleSeasonChange = (event) => {
+        setSelectedSeason(event.target.value);
+    };
+
     // Renderiza la interfaz de la aplicación
     return (
         <Router>
@@ -118,6 +133,12 @@ function App() {
                     <p>Rol Actual: {role}</p>*/}
 
                     <Sidebar role={role} onOptionSelect={handleOptionSelect} onModalOpen={handleModalOpen} />
+
+                    <Routes>
+                        <Route exact path='/' element={<MainPage onTeamChange={handleTeamChange} onPitcherChange={handlePitcherChange} onSeasonChange={handleSeasonChange}/>}/>
+                        <Route path="/admin-dashboard" element={<AdminPage />} />
+                        {/* Define otras rutas aquí según sea necesario */}
+                    </Routes>
 
                     {/* Botones del sidebar */}
                     <div className='content'>
@@ -141,8 +162,15 @@ function App() {
                         {selectedOption === 'Intercambios de Jugadores' && < PlayerSwapCRUD />}
                         {selectedOption === 'Series' && < SeriesCRUD />}
                         {selectedOption === 'Direction Team' && < DirectionTeamCRUD />}
-                        {selectedOption === 'DT' && <PlayerSwapForm teamId={team} />}
-                        {selectedOption === 'Qy' && < MyComponent />}
+                        {selectedOption === 'Winners' && <ReportComponent report_id={0} season_id={selectedSeason}/>}
+                        {selectedOption === 'Star Players' && <ReportComponent report_id={1} season_id={selectedSeason}/>}
+                        {selectedOption === 'First and Last' && <ReportComponent report_id={2} season_id={selectedSeason}/>}
+                        {selectedOption === 'Plays per Series' && <ReportComponent report_id={3}/>}
+                        {selectedOption === 'PitcherStats' && <ReportComponent report_id={4} pitcher_id={selectedPitcher}/>}
+                        {selectedOption === 'Average' && <ReportComponent report_id={5}/>}
+                        {selectedOption === 'Stats' && <ReportComponent report_id={6}/>}
+                        {selectedOption === 'Efectividad' && <ReportComponent report_id={7}/>}
+                        {selectedOption === 'TeamPlayers' && <ReportComponent report_id={8} team_id={selectedTeam}/>}
                     </div>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>
@@ -159,10 +187,6 @@ function App() {
                 </header>
             </div>
 
-            <Routes>
-                <Route path="/admin-dashboard" element={<AdminPage />} />
-                {/* Define otras rutas aquí según sea necesario */}
-            </Routes>
         </Router>
     );
 }

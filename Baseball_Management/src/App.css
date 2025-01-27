@@ -53,6 +53,14 @@ body {
     }
 }
 
+.base-page {
+    background-color: #8fd9f9;
+    /* background-image: url(components/Cuddly_Flying_Spaghetti_Monster.jpg);
+    background-size: cover; */
+    padding : 20px;
+    border-radius: 10px;
+}
+
 /* Estilo pelotero */
 .pelotero {
     background-color: white; /* Color principal */
