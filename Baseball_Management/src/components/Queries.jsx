@@ -58,7 +58,7 @@ const MyComponent = () => {
             <h1>Resultados</h1>
             <label htmlFor="table-select">Elige una tabla:</label>
             <select id="table-select" onChange={handleTableChange} value={selectedTable}>
-                <option value="Person">Person</option>
+                <option value="Team">Team</option>
                 <option value="Game">Games</option>
                 <option value="Series">Series</option>
                 {/* Añade aquí más opciones de tablas */}
@@ -66,8 +66,8 @@ const MyComponent = () => {
 
             <Filters table={selectedTable} fields={fields} setFilters={setFilters} />
 
-            <h2>Query Enviado a la BD:</h2>
-            <pre>{JSON.stringify(query, null, 2)}</pre> {/* Mostrar el query en pantalla */}
+            {/* <h2>Query Enviado a la BD:</h2>
+            <pre>{JSON.stringify(query, null, 2)}</pre>  Mostrar el query en pantalla */}
 
             <table>
                 <thead>
