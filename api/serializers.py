@@ -23,10 +23,3 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return obj.get_role_instance().permissions
 
 
-class CambioSerializer(serializers.ModelSerializer):
-    """
-    Serializador para la tabla de cambios.
-    """
-    class Meta:
-        model = PlayerSwap
-        fields = '__all__'

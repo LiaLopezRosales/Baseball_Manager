@@ -155,10 +155,10 @@ class PlayerSwapSerializer(serializers.ModelSerializer):
     # position = PositionSerializer(read_only=True)  # Detalles de la posición en lectura
     # game_team = TeamOnTheFieldSerializer(read_only=True)  # Detalles del equipo en lectura
 
-    old_player_id = serializers.PrimaryKeyRelatedField(queryset=BaseballPlayer.objects.all(), write_only=True)
-    new_player_id = serializers.PrimaryKeyRelatedField(queryset=BaseballPlayer.objects.all(), write_only=True)
-    position_id = serializers.PrimaryKeyRelatedField(queryset=Position.objects.all(), write_only=True)
-    game_team_id = serializers.PrimaryKeyRelatedField(queryset=TeamOnTheField.objects.all(), write_only=True)
+    # old_player_id = serializers.PrimaryKeyRelatedField(queryset=BaseballPlayer.objects.all(), write_only=True)
+    # new_player_id = serializers.PrimaryKeyRelatedField(queryset=BaseballPlayer.objects.all(), write_only=True)
+    # position_id = serializers.PrimaryKeyRelatedField(queryset=Position.objects.all(), write_only=True)
+    # game_team_id = serializers.PrimaryKeyRelatedField(queryset=TeamOnTheField.objects.all(), write_only=True)
 
     class Meta:
         model = PlayerSwap

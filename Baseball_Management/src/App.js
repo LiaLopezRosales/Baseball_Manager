@@ -29,6 +29,8 @@ import TechnicalDirectorCRUD from './components/FormulariosCRUD/TechnicalDirecto
 import UserCRUD from './components/FormulariosCRUD/UserCRUD';
 import WorkerCRUD from './components/FormulariosCRUD/WorkerCRUD';
 
+import PlayerSwapForm from './components/PlayerSwapForm';
+
 function App() {
     // Estado para verificar si el usuario está logged in
     const [isLogged, setLogin] = useState(() => {
@@ -138,6 +140,7 @@ function App() {
                         {selectedOption === 'Intercambios de Jugadores' && < PlayerSwapCRUD />}
                         {selectedOption === 'Series' && < SeriesCRUD />}
                         {selectedOption === 'Direction Team' && < DirectionTeamCRUD />}
+                        {selectedOption === 'DT' && <PlayerSwapForm teamId={team} />}
                     </div>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>

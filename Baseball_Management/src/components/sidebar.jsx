@@ -26,6 +26,7 @@ function Sidebar({ role, onOptionSelect, onModalOpen }) {
           {role === 'Admin' && <li onClick={() => onOptionSelect('Intercambios de Jugadores')}>Cambios de Jugador</li>}
           {role === 'Admin' && <li onClick={() => onOptionSelect('Series')}>Series</li>}
           {role === 'Admin' && <li onClick={() => onOptionSelect('Direction Team')}>Equipos de Dirección</li>}
+          {role ==='Director Técnico' && <li onClick={() => onOptionSelect('DT')}>Cambios en Alineaciones</li>}
           {/* Añade más opciones aquí según sea necesario */}
         </ul>
       </div>
