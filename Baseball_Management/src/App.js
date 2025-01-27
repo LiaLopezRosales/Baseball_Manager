@@ -173,7 +173,7 @@ function App() {
                         {selectedOption === 'Stats' && <ReportComponent report_id={6}/>}
                         {selectedOption === 'Efectividad' && <ReportComponent report_id={7}/>}
                         {selectedOption === 'TeamPlayers' && <ReportComponent report_id={8} team_id={selectedTeam}/>}
-                        {selectedOption === 'Direction Team' && < PlayerSwapForm />}
+                        {selectedOption === 'DT' && <PlayerSwapForm teamId={team} />}
                         {selectedOption === 'Qy' && < MyComponent />}
                     </div>
 

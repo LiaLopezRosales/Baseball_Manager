@@ -1,7 +1,7 @@
 // Baseball_Management/src/components/PlayerSwapForm.jsx
 
 import React, { useState, useEffect } from 'react';
-import './PlayerSwapForm.css'; // Crear un archivo CSS para estilos
+import './PlayerSwapForm.css';
 
 function PlayerSwapForm({ teamId }) {
     const [teamData, setTeamData] = useState(null);
