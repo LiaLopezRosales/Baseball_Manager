@@ -5,6 +5,7 @@ import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import AdminPage from './components/admin';
+import MyComponent from './components/Queries';
 
 //Importar formularios de Base de Datos
 import BaseballPlayerCRUD from './components/FormulariosCRUD/BaseballPlayerCRUD';
@@ -141,6 +142,7 @@ function App() {
                         {selectedOption === 'Series' && < SeriesCRUD />}
                         {selectedOption === 'Direction Team' && < DirectionTeamCRUD />}
                         {selectedOption === 'DT' && <PlayerSwapForm teamId={team} />}
+                        {selectedOption === 'Qy' && < MyComponent />}
                     </div>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>
