@@ -1,3 +1,5 @@
+// Baseball_Management/src/components/FormulariosCRUD/BaseCRUD/ItemActions.jsx
+
 import React from "react";
 
 const ItemActions = ({ item, onEdit, onDelete }) => (

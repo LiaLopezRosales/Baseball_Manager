@@ -1,3 +1,5 @@
+// Baseball_Management/src/components/FormulariosCRUD/BaseCRUD/DataTable.jsx
+
 import React, { useState } from "react";
 import ItemActions from "./ItemActions";
 
@@ -79,3 +81,6 @@ const DataTable = ({ data, fields, sortConfig, onSort, onEdit, onDelete, onFilte
 };
 
 export default DataTable;
+
+
+

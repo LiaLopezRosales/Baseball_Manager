@@ -1,4 +1,4 @@
-// BaseCRUD.jsx
+// Baseball_Management/src/components/FormulariosCRUD/BaseCRUD.jsx
 
 import React from "react";
 import DataTable from "./BaseCRUD/DataTable";
@@ -62,3 +62,8 @@ const BaseCRUD = ({ apiUrl, fields, title, initialFormValues }) => {
 };
 
 export default BaseCRUD;
+
+
+
+
+
