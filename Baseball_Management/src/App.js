@@ -50,10 +50,6 @@ function App() {
     // Estado para seleccionar la opción actual
     const [selectedOption, setSelectedOption] = useState('');
 
-    const [selectedTeam, setSelectedTeam] = useState('');
-    const [selectedPitcher, setSelectedPitcher] = useState('');
-    const [selectedSeason, setSelectedSeason] = useState('');
-
     // Estado para almacenar el rol del usuario
     const [role, setRole] = useState(() => {
         // Inicializa el estado con el valor de localStorage si existe
@@ -113,18 +109,6 @@ function App() {
         localStorage.setItem('team', JSON.stringify(newTeam));
     };
 
-    const handleTeamChange = (event) => {
-        setSelectedTeam(event.target.value);
-    };
-
-    const handlePitcherChange = (event) => {
-        setSelectedPitcher(event.target.value);
-    };
-
-    const handleSeasonChange = (event) => {
-        setSelectedSeason(event.target.value);
-    };
-
     // Renderiza la interfaz de la aplicación
     return (
         <Router>
@@ -137,13 +121,14 @@ function App() {
                     <Sidebar role={role} onOptionSelect={handleOptionSelect} onModalOpen={handleModalOpen} />
 
                     <Routes>
-                        <Route exact path='/' element={<MainPage onTeamChange={handleTeamChange} onPitcherChange={handlePitcherChange} onSeasonChange={handleSeasonChange}/>}/>
+                        <Route exact path='/' element={selectedOption === "" && <MainPage />}/>
                         <Route path="/admin-dashboard" element={<AdminPage />} />
                         {/* Define otras rutas aquí según sea necesario */}
                     </Routes>
 
                     {/* Botones del sidebar */}
                     <div className='content'>
+                        {selectedOption === 'Main' && < MainPage />}
                         {selectedOption === 'Posiciones' && < PositionCRUD />}
                         {selectedOption === 'Usuarios' && < UserCRUD />}
                         {selectedOption === 'Temporadas' && < SeasonCRUD/>}
@@ -164,16 +149,16 @@ function App() {
                         {selectedOption === 'Intercambios de Jugadores' && < PlayerSwapCRUD />}
                         {selectedOption === 'Series' && < SeriesCRUD />}
                         {selectedOption === 'Direction Team' && < DirectionTeamCRUD />}
-                        {selectedOption === 'Winners' && <ReportComponent report_id={0} season_id={selectedSeason}/>}
-                        {selectedOption === 'Star Players' && <ReportComponent report_id={1} season_id={selectedSeason}/>}
-                        {selectedOption === 'First and Last' && <ReportComponent report_id={2} season_id={selectedSeason}/>}
-                        {selectedOption === 'Plays per Series' && <ReportComponent report_id={3}/>}
-                        {selectedOption === 'PitcherStats' && <ReportComponent report_id={4} pitcher_id={selectedPitcher}/>}
-                        {selectedOption === 'Average' && <ReportComponent report_id={5}/>}
-                        {selectedOption === 'Stats' && <ReportComponent report_id={6}/>}
-                        {selectedOption === 'Efectividad' && <ReportComponent report_id={7}/>}
-                        {selectedOption === 'TeamPlayers' && <ReportComponent report_id={8} team_id={selectedTeam}/>}
-                        {selectedOption === 'DT' && <PlayerSwapForm teamId={team} />}
+                        {selectedOption === 'Equipos ganadores y directores técnicos por temporadas' && <ReportComponent report_id={0} report_name={selectedOption} />}
+                        {selectedOption === 'Jugadores estrellas' && <ReportComponent report_id={1} report_name={selectedOption} />}
+                        {selectedOption === 'Primer y último lugar' && <ReportComponent report_id={2} report_name={selectedOption} />}
+                        {selectedOption === 'Series con más/menos juegos celebrados' && <ReportComponent report_id={3} report_name={selectedOption} />}
+                        {selectedOption === 'Carreras limpias/juegos ganados' && <ReportComponent report_id={4} report_name={selectedOption}  />}
+                        {selectedOption === 'Average' && <ReportComponent report_id={5} report_name={selectedOption} />}
+                        {selectedOption === 'Estadísticas de juegos por equipos' && <ReportComponent report_id={6} report_name={selectedOption} />}
+                        {selectedOption === 'Efectividad por posición' && <ReportComponent report_id={7} report_name={selectedOption} />}
+                        {selectedOption === 'Jugadores de un equipo' && <ReportComponent report_id={8} report_name={selectedOption} />}
+                        {selectedOption === 'Direction Team' && < PlayerSwapForm />}
                         {selectedOption === 'Qy' && < MyComponent />}
                     </div>
 
