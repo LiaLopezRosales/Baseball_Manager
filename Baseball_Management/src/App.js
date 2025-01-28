@@ -8,7 +8,7 @@ import AdminPage from './components/admin';
 import MainPage from './components/main-page';
 import ReportComponent from './components/report';
 import PlayerSwapForm from './components/PlayerSwapForm';
-import MyComponent from './components/Queries';
+import Queries from './components/Queries';
 
 //Importar formularios de Base de Datos
 import BaseballPlayerCRUD from './components/FormulariosCRUD/BaseballPlayerCRUD';
@@ -159,7 +159,7 @@ function App() {
                         {selectedOption === 'Efectividad por posición' && <ReportComponent report_id={7} report_name={selectedOption} />}
                         {selectedOption === 'Jugadores de un equipo' && <ReportComponent report_id={8} report_name={selectedOption} />}
                         {selectedOption === 'Direction Team' && < PlayerSwapForm />}
-                        {selectedOption === 'Qy' && < MyComponent />}
+                        {selectedOption === 'Qy' && < Queries />}
                     </div>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>

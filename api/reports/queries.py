@@ -155,7 +155,7 @@ def get_pitcher_wins_and_running_average(pitcher_name=None, pitcher_lastname=Non
         list = db.Pitcher.objects.filter(P_id__P_id__name=pitcher_name, P_id__P_id__lastname=pitcher_lastname)
     elif pitcher_name:
         list = db.Pitcher.objects.filter(P_id__P_id__name=pitcher_name)
-    elif pitcher_name and pitcher_lastname:
+    elif pitcher_lastname:
         list = db.Pitcher.objects.filter(P_id__P_id__lastname=pitcher_lastname)
     else:
         return []

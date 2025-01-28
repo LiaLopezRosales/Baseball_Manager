@@ -2,11 +2,11 @@ import requests
 import mimetypes
 
 
-BASE = "http://0.0.0.0:8000//api/queries/export/"
+BASE = "http://127.0.0.1:8000//api/queries/export/"
 
 data = {
     "filename": "tabla",
-    "format": "csv",
+    "format": "pdf",
     "data": {
         "Sección 1": [
             {
@@ -104,8 +104,9 @@ data = {
         ]
     }
 }
+
 # Hacer la solicitud POST
-response = requests.post("http://0.0.0.0:8000//api/queries/export/", json=data)
+response = requests.post("http://127.0.0.1:8000//api/queries/export/", json=data)
 
 # Verificar que la respuesta sea exitosa
 if response.status_code == 200:
