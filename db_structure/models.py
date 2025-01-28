@@ -225,15 +225,15 @@ class Pitcher(models.Model):
     
     def save(self, *args, **kwargs):
         from api.reports.queries import get_pitcher_wins, get_pitcher_losses
-        self.No_games_won = get_pitcher_wins(player_id=self.P_id_id)
-        self.No_games_lost = get_pitcher_losses(player_id=self.P_id_id)
+        self.No_games_won += get_pitcher_wins(player_id=self.P_id_id)
+        self.No_games_lost += get_pitcher_losses(player_id=self.P_id_id)
         super().save(*args, **kwargs)
 
     def refresh_from_db(self, using=None, fields=None, **kwargs):
         super().refresh_from_db(using, fields, **kwargs)
         from api.reports.queries import get_pitcher_wins, get_pitcher_losses
-        self.No_games_won = get_pitcher_wins(player_id=self.P_id_id)
-        self.No_games_lost = get_pitcher_losses(player_id=self.P_id_id)
+        self.No_games_won += get_pitcher_wins(player_id=self.P_id_id)
+        self.No_games_lost += get_pitcher_losses(player_id=self.P_id_id)
     
 class BPParticipation(models.Model):
     BP_id = models.ForeignKey(                             

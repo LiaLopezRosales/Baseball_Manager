@@ -19,7 +19,7 @@ const CRUDForm = ({
                 .map((field) => (
                     <div className="form-group" key={field.name}>
                         <label>{field.label}:</label>
-                        <input
+                        {/* <input
                             type={field.type === "password" && field.showPassword ? "text" : field.type}
                             name={field.name}
                             value={formValues[field.name] || ""}
@@ -29,7 +29,49 @@ const CRUDForm = ({
                             <button type="button" onClick={field.toggleVisibility}>
                                 {field.showPassword ? "Ocultar" : "Mostrar"}
                             </button>
+                        )} */}
+
+                        {field.type === "password" ? (
+                            <div className="password-container">
+                                <input
+                                    type={field.showPassword ? "text" : "password"}
+                                    name={field.name}
+                                    value={formValues[field.name] || ""}
+                                    onChange={onChange}
+                                />
+                                {field.toggleVisibility && (
+                                    <button
+                                        type="button"
+                                        onClick={field.toggleVisibility}
+                                        className="toggle-password"
+                                    >
+                                        {field.showPassword ? "Ocultar" : "Mostrar"}
+                                    </button>
+                                )}
+                            </div>
+                        ) : field.type === "select" ? (
+                            <select
+                                name={field.name}
+                                value={formValues[field.name] || ""}
+                                onChange={onChange}
+                            >
+                                <option value="">Seleccione una opción</option>
+                                {field.options.map((option) => (
+                                    <option key={option.id} value={option.id}>
+                                        {option.name}
+                                    </option>
+                                ))}
+                            </select>
+                        ) : (
+                            <input
+                                type={field.type}
+                                name={field.name}
+                                value={formValues[field.name] || ""}
+                                onChange={onChange}
+                            />
                         )}
+
+
                         {formErrors[field.name] && (
                             <div className="error-message">{formErrors[field.name][0]}</div>
                         )}
