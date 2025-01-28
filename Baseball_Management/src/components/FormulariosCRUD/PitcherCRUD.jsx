@@ -41,6 +41,7 @@ const PitcherCRUD = () => {
             options: [
                 { id: "izquierda", name: "Izquierda" },
                 { id: "derecha", name: "Derecha" },
+                { id: "ambas", name: "Ambas"}
             ],
         },
         { name: "No_games_won", label: "Juegos Ganados", type: "number", nullable: false },
