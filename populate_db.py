@@ -110,7 +110,7 @@ class SeasonFactory(DjangoModelFactory):
     class Meta:
         model = Season
         
-    name = factory.Faker('random_element', elements=['Spring-Summer', 'Fall-Winter'])
+    name = factory.Faker('random_element', elements=['Spring-Summer', 'Fall-Winter', 'Spring', 'Winter', 'Summer', 'Fall'])
 
 # Series Factory
 class SeriesFactory(DjangoModelFactory):

@@ -75,7 +75,7 @@ def get_max_min_game_per_series():
     # Seleccionar la serie con menor cantidad de juegos, excluyendo las que tienen 0 juegos
     serie_con_menos_juegos = series_with_counts.order_by('games_count').first().__str__()
 
-    return { "serie con más juegos": serie_con_más_juegos, "serie con menos juegos": serie_con_menos_juegos}
+    return [{ "serie con más juegos": serie_con_más_juegos, "serie con menos juegos": serie_con_menos_juegos}]
 
 # Listar equipos en primer y último lugar por serie, clasificados por tipo y orden cronológico
 def get_teams_by_series(season_name):
