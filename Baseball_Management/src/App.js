@@ -158,7 +158,7 @@ function App() {
                         {selectedOption === 'Estadísticas de juegos por equipos' && <ReportComponent report_id={6} report_name={selectedOption} />}
                         {selectedOption === 'Efectividad por posición' && <ReportComponent report_id={7} report_name={selectedOption} />}
                         {selectedOption === 'Jugadores de un equipo' && <ReportComponent report_id={8} report_name={selectedOption} />}
-                        {selectedOption === 'Direction Team' && < PlayerSwapForm />}
+                        {selectedOption === 'DT' && <PlayerSwapForm teamId={team} />}
                         {selectedOption === 'Qy' && < Queries />}
                     </div>
 

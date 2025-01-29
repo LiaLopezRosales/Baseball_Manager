@@ -189,7 +189,11 @@ function PlayerSwapForm({ teamId }) {
 
             <section className="players-section">
                 <div className="lineup-players">
-                    <h2>Jugadores en Alineación</h2>
+                    <h2>
+                        {changeFields.gameDetails
+                            ? `Jugadores de la Alineación en ${changeFields.gameDetails}`
+                            : `Jugadores en Alineación`} 
+                    </h2>
                     <ul>
                         {lineupPlayers.map((player) => (
                             <li key={player.player_id}>

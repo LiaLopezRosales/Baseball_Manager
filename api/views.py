@@ -77,7 +77,7 @@ class PlayerSwapByDTView(APIView):
                 {
                     "game_id": game.local.id,
                     "date": game.date.strftime("%Y-%m-%d"),
-                    "rival_team": game.rival.lineup_id.team_id.name,
+                    "rival_team": f"{game.rival.lineup_id.team_id.name} ({game.rival.lineup_id.team_id.initials})",
                     "series_name": f"{game.series.type} - {game.series.season.name}",
                     "series_id": game.series.id,
                 }
@@ -90,7 +90,7 @@ class PlayerSwapByDTView(APIView):
                 {
                     "game_id": game.rival.id,
                     "date": game.date.strftime("%Y-%m-%d"),
-                    "rival_team": game.local.lineup_id.team_id.name,
+                    "rival_team": f"{game.local.lineup_id.team_id.name} ({game.local.lineup_id.team_id.initials})",
                     "series_name": f"{game.series.type} - {game.series.season.name}",
                     "series_id": game.series.id,
                 }
