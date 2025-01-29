@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 class User(models.Model):
     id = models.AutoField(primary_key=True)              
-    email = models.CharField(max_length=255, unique=True) 
+    email = models.EmailField(max_length=255, unique=True) 
     rol_id = models.ForeignKey(                           
         'Rol',                                            
         on_delete=models.CASCADE,      
@@ -14,7 +14,7 @@ class User(models.Model):
     
     TD_id = models.ForeignKey(                            
         'TechnicalDirector',                                
-        on_delete=models.SET_NULL,                       
+        on_delete=models.CASCADE,                       
         null=True,                                        
         blank=True                                        
     )
@@ -213,7 +213,8 @@ class Pitcher(models.Model):
         max_length=10,
         choices=[
             ('izquierda', 'Izquierda'),
-            ('derecha', 'Derecha')
+            ('derecha', 'Derecha'),
+            ('ambas','Ambas')
         ]
     )
     No_games_won = models.PositiveIntegerField()                   
@@ -436,13 +437,13 @@ class Game(models.Model):
 class PlayerSwap(models.Model):
     old_player = models.ForeignKey(
         'BaseballPlayer',
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         related_name='old_player_swap'
     )
     date = models.DateTimeField()
     new_player = models.ForeignKey(
         'BaseballPlayer',
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         related_name='new_player_swap'
     )
     position = models.ForeignKey(
