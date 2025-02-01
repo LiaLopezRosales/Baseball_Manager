@@ -133,21 +133,32 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(filteredFormValues),
       });
+
+      const responseData = await response.json();
+
       if (response.ok) {
         fetchItems(); // Refrescar datos
         setIsEditing(false);
         setIsCreating(false);
         setCurrentItem(null);
         setFormErrors({});
-      } else if (response.status === 400) {
-        const errorData = await response.json();
-        setFormErrors(errorData);
-        if (errorData.detail) {
-          alert(errorData.detail);  // Mostrar errores generales en un alerta
-      }
       } else {
-        console.error("Error saving data");
-      }
+        // 🔹 Capturar errores específicos de los campos
+        if (responseData.errors) {
+            setFormErrors(responseData.errors);
+        }
+
+        // 🔹 Capturar errores generales y mostrar alerta
+        if (responseData.detail) {
+
+            setFormErrors({ detail: responseData.detail });
+        }
+
+        // 🔹 Mensaje de error genérico si no hay detalles específicos
+        if (!responseData.errors && !responseData.detail) {
+            alert("Ocurrió un error inesperado.");
+        }
+    }
     } catch (error) {
       console.error("Error:", error);
     }
