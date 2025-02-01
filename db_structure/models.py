@@ -26,7 +26,7 @@ class User(models.Model):
                 check=(
                     ~models.Q(rol_id=2) | ~models.Q(TD_id__isnull=True)
                 ),
-                name='check_td_not_null_when_rol_2'
+                name='El rol no puede ser Director Técnico si el campo está vacío'
             )
         ]
 
@@ -187,7 +187,7 @@ class Series(models.Model):
             ),                              
             models.CheckConstraint(
                 check=models.Q(init_date__lt=models.F('end_date')),
-                name='check_init_date_before_end_date'
+                name='La fecha de inicio debe ser antes de la fecha de finalización'
             )
         ]
         
@@ -375,11 +375,11 @@ class Score(models.Model):
         constraints = [
             models.CheckConstraint(
                 check=~models.Q(winner=models.F('loser')),
-                name='check_winner_not_equal_loser'
+                name='Ganador y Perdedor deben ser diferente'
             ),
             models.CheckConstraint(
                 check=models.Q(w_points__gte=models.F('l_points')),
-                name='check_w_points_gte_l_points'
+                name='Los puntos del ganador deben ser mayores o iguales a los del perdedor'
             )
         ]
         

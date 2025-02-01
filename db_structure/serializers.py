@@ -93,12 +93,12 @@ class TeamOnTheFieldSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ScoreSerializer(serializers.ModelSerializer):
-    def validate(self, data):
-        if data['winner'] == data['loser']:
-            raise serializers.ValidationError("El ganador y el perdedor no pueden ser el mismo equipo.")
-        if data['w_points'] < data['l_points']:
-            raise serializers.ValidationError("Los puntos del ganador deben ser mayores o iguales a los del perdedor.")
-        return data
+    # def validate(self, data):
+    #     if data['winner'] == data['loser']:
+    #         raise serializers.ValidationError("El ganador y el perdedor no pueden ser el mismo equipo.")
+    #     if data['w_points'] < data['l_points']:
+    #         raise serializers.ValidationError("Los puntos del ganador deben ser mayores o iguales a los del perdedor.")
+    #     return data
 
     class Meta:
         model = Score

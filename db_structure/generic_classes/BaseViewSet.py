@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError as DRFValidationError
+import re
+from django.utils.translation import gettext as _
 
 class BaseViewSet(viewsets.ViewSet):
     repository = None  
@@ -26,11 +28,24 @@ class BaseViewSet(viewsets.ViewSet):
             try:
                 obj = self.repository.create(serializer.validated_data)
                 return Response(self.serializer_class(obj).data, status=status.HTTP_201_CREATED)
-            except (DjangoValidationError, DRFValidationError) as e:
-                return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
+
+            except DjangoValidationError as e:
+                return Response({"errors": e.message_dict}, status=status.HTTP_400_BAD_REQUEST)
+
             except IntegrityError as e:
-                return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                error_message = str(e)
+
+                # 🔹 Extraer solo el nombre del constraint usando regex
+                match = re.search(r'check constraint "(.*?)"', error_message)
+                if match:
+                    constraint_name = match.group(1)  # Obtener solo el nombre del constraint
+                    translated_error = _(f"Error de restricción: {constraint_name}")
+                else:
+                    translated_error = _("Ocurrió un error de integridad en la base de datos.")
+
+                return Response({"detail": translated_error}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):#Editar los valores de un dato(PUT)
         obj = self.repository.get_by_id(pk)
@@ -41,12 +56,12 @@ class BaseViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             try:
                 obj = serializer.save()
-                return Response(self.serializer_class(obj).data)
+                return Response(self.serializer_class(obj).data, status=status.HTTP_201_CREATED)
             except (DjangoValidationError, DRFValidationError) as e:
-                return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"errors": e.message_dict}, status=status.HTTP_400_BAD_REQUEST)
             except IntegrityError as e:
-                return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
     def destroy(self, request, pk=None):#Eliminar un dato(DESTROY)
