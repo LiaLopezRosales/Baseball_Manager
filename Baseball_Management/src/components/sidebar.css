@@ -61,3 +61,23 @@
 .sidebar-footer button:hover {
   background-color: #0056b3;
 }
+
+.sidebar ul ul {
+  margin-left: 20px;
+  list-style-type: circle;
+}
+
+.sidebar ul ul li {
+  padding: 5px 0;
+}
+
+.sidebar li {
+  cursor: pointer;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar li:hover {
+  background-color: #f0f0f0;
+}

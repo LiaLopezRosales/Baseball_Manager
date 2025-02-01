@@ -84,11 +84,6 @@ function App() {
         setUserName(newName);
     };
 
-    // Función para seleccionar una opción
-    const handleOptionSelect = (option) => {
-        setSelectedOption(option);
-    };
-
     // Funciones para controlar el estado del modal
     const handleModalOpen = () => {
         setIsModalOpen(true);
@@ -108,6 +103,15 @@ function App() {
         setTeam(newTeam);
         localStorage.setItem('team', JSON.stringify(newTeam));
     };
+
+    // Estado para almacenar la tabla seleccionada en "Consultas"
+  const [selectedTable, setSelectedTable] = useState('');
+
+  // Función para manejar la selección de una opción
+  const handleOptionSelect = (option, table = '') => {
+    setSelectedOption(option);
+    setSelectedTable(table); // Actualizamos la tabla seleccionada si se proporciona
+  };
 
     // Renderiza la interfaz de la aplicación
     return (
@@ -159,7 +163,7 @@ function App() {
                         {selectedOption === 'Efectividad por posición' && <ReportComponent report_id={7} report_name={selectedOption} />}
                         {selectedOption === 'Jugadores de un equipo' && <ReportComponent report_id={8} report_name={selectedOption} />}
                         {selectedOption === 'DT' && <PlayerSwapForm teamId={team} />}
-                        {selectedOption === 'Qy' && < Queries />}
+                        {selectedOption === 'Qy' && <Queries selectedTable={selectedTable}/>}
                     </div>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>
@@ -181,4 +185,3 @@ function App() {
 }
 
 export default App;
-
