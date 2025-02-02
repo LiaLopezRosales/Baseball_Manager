@@ -1,19 +1,11 @@
+// Baseball_Management/src/components/FormulariosCRUD/BaseCRUD/ItemActions.jsx
+
 import React from "react";
 
 const ItemActions = ({ item, onEdit, onDelete }) => (
-  <div className="item-actions">
-    <button 
-      onClick={() => onEdit(item)}
-      className="edit-button"
-    >
-      Editar
-    </button>
-    <button 
-      onClick={() => onDelete(item.id)}
-      className="delete-button"
-    >
-      Eliminar
-    </button>
+  <div>
+    <button className="edit-button" onClick={() => onEdit(item)}>Editar</button>
+    <button className="delete-button" onClick={() => onDelete(item.id)}>Eliminar</button>
   </div>
 );
 

@@ -7,6 +7,15 @@
   width: 250px;
 }
 
+.logo {
+  position: relative;
+  left: 30%;
+  height: 80px;
+  width: 80px;
+  clip-path: circle(50%);
+  margin-bottom: 10px;
+}
+
 .sidebar-footer { margin-top: auto; /* Empuja el footer hacia la parte inferior */ 
   margin-bottom: 40px; /* Añade un poco de espacio desde el borde inferior */
 }
