@@ -61,7 +61,7 @@
     \newpage
 
     \begin{center}
-        \section*{Description General}
+        \section*{Descripción General}
     \end{center}
 
         \subsection*{Perspectiva del Producto}
@@ -80,9 +80,12 @@
         \item \textbf{Descripción de los Actores}
 
             \begin{itemize}
-                \item \textbf{Administrador:} Responsable de gestionar los datos de series, equipos y jugadores, además de configurar el sistema y generar reportes.
-                \item \textbf{Director Técnico:} Encargado de gestionar las alineaciones de los equipos y consultar estadísticas específicas.
-                \item \textbf{Periodista/Usuario General:} Consulta las estadísticas y genera reportes basados en los datos almacenados en el sistema.
+                \item \textbf{Administrador:} Responsable de gestionar los datos de series, equipos y jugadores, 
+                además de configurar el sistema y generar reportes.
+                \item \textbf{Director Técnico:} Encargado de gestionar las alineaciones de los equipos y consultar 
+                estadísticas específicas.
+                \item \textbf{Periodista/Usuario General:} Consulta las estadísticas y genera reportes basados en 
+                los datos almacenados en el sistema.
             \end{itemize}
 
         \item \textbf{Casos de Uso del Sistema} (que se muestran ilustrados en la Figura 1)
@@ -90,49 +93,57 @@
             \subsubsection{Registrar datos en el sistema}
             \begin{itemize}
                 \item \textbf{Actor:} Administrador
-                \item \textbf{Descripción:} El administrador registra datos de series, equipos y jugadores mediante formularios en la aplicación web.
+                \item \textbf{Descripción:} El administrador registra datos de series, equipos y jugadores mediante 
+                formularios en la aplicación web.
             \end{itemize}
 
             \subsubsection{Gestionar alineaciones de equipos}
             \begin{itemize}
                 \item \textbf{Actor:} Director Técnico y Administrador
-                \item \textbf{Descripción:} Permite al director técnico modificar la posición de los jugadores en la alineación inicial y realizar ajustes durante una serie.
+                \item \textbf{Descripción:} Permite al director técnico modificar la posición de los jugadores en 
+                la alineación inicial y realizar ajustes durante una serie.
             \end{itemize}
 
             \subsubsection{Consultar estadísticas de jugadores y equipos}
             \begin{itemize}
                 \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
-                \item \textbf{Descripción:} El sistema permite acceder a estadísticas detalladas, como promedios de bateo, efectividad de los lanzadores y resultados de los equipos.
+                \item \textbf{Descripción:} El sistema permite acceder a estadísticas detalladas, como promedios de 
+                bateo, efectividad de los lanzadores y resultados de los equipos.
             \end{itemize}
 
             \subsubsection{Obtener reportes personalizados}
             \begin{itemize}
                 \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
-                \item \textbf{Descripción:} Genera reportes en formato PDF o gráficos que resumen el desempeño de jugadores y equipos en una serie.
+                \item \textbf{Descripción:} Genera reportes en formato PDF o gráficos que resumen el desempeño de 
+                jugadores y equipos en una serie.
             \end{itemize}
 
             \subsubsection{Visualizar datos tabulares y gráficos}
             \begin{itemize}
                 \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
-                \item \textbf{Descripción:} Presentación visual de estadísticas mediante tablas y gráficos para un análisis claro y rápido.
+                \item \textbf{Descripción:} Presentación visual de estadísticas mediante tablas y gráficos para un 
+                análisis claro y rápido.
             \end{itemize}
 
             \subsubsection{Listar equipos por clasificación}
             \begin{itemize}
                 \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
-                \item \textbf{Descripción:} Permite obtener la clasificación de los equipos según los resultados de cada serie.
+                \item \textbf{Descripción:} Permite obtener la clasificación de los equipos según los resultados de 
+                cada serie.
             \end{itemize}
 
             \subsubsection{Modificar roles de usuarios}
             \begin{itemize}
                 \item \textbf{Actor:} Administrador
-                \item \textbf{Descripción:} El administrador puede asignar o modificar roles para los usuarios del sistema.
+                \item \textbf{Descripción:} El administrador puede asignar o modificar roles para los usuarios del 
+                sistema.
             \end{itemize}
 
             \subsubsection{Exportar reportes a formato PDF}
             \begin{itemize}
                 \item \textbf{Actor:} Administrador, Director Técnico, Periodista/Usuario General
-                \item \textbf{Descripción:} Funcionalidad para guardar reportes generados en formato PDF, con soporte para otros formatos adicionales.
+                \item \textbf{Descripción:} Funcionalidad para guardar reportes generados en formato PDF, con 
+                soporte para otros formatos adicionales.
             \end{itemize}
 
         \end{enumerate}
@@ -160,6 +171,11 @@
         \end{itemize}
 
         \subsection*{Dependencias y suposiciones}
+        El software no estará sujeto a ningún SO pues se podrá acceder a él a través de cualquier navegador web que 
+        el usuario posea.
+        
+        El lenguaje a utilizar será técnico referente al béisbol pues los usuarios están acontumbrados a él y es 
+        necesario para un correcto manejo de los datos guardados.
 
     \newpage
     
@@ -171,24 +187,27 @@
 
         \subsection*{Requerimientos Funcionales}
             \begin{enumerate}
-                \item Registrar datos por el administrador mediante formularios.
+                \item Registrar, editar, eliminar y listar datos por el administrador mediante formularios.
                 \item Generar modelos tabulares y gráficos.
                 \item Gestionar los roles de la base de datos que son los usuarios especiales (administrador), los 
                 directores técnicos y los usuarios normales (periodista).
-                \item Obtener nombres de equipos ganadores y directores técnicos en series nacionales por temporada.
-                \item Obtener nombres y posiciones de jugadores del equipo "Todos Estrellas" y su efectividad por 
-                serie.
-                \item Obtener series con mayor y menor cantidad de juegos celebrados.
+                \item Listar y filtrar según sus categorías definidas, nombres de equipos ganadores y directores 
+                técnicos en series nacionales por temporada.
+                \item Listar y filtrar según sus categorías definidas, nombres y posiciones de jugadores del equipo 
+                "Todos Estrellas" y su efectividad por serie.
+                \item Listar y filtrar según sus categorías definidas, series con mayor y menor cantidad de juegos 
+                celebrados.
                 \item Listar equipos en primer y último lugar por serie, clasificados por tipo y orden cronológico.
-                \item Obtener total de juegos ganados por un lanzador y su promedio de carreras limpias permitidas.
+                \item Listar y filtrar según sus categorías definidas, total de juegos ganados por un lanzador y su 
+                promedio de carreras limpias permitidas.
                 \item Modificar posición de un jugador en la alineación inicial de un juego específico.
-                \item Obtener estadísticas de un jugador.
+                \item Listar y filtrar según sus categorías definidas, estadísticas de un jugador.
                 \item Exportar reportes a formato PDF con soporte para la agregación de otros formatos.
                 \item Presentar diferentes vistas para los distintos tipos de roles.
                 \item Generar formularios para ingresar los datos a la base de datos por parte del administrador 
                 (distintos formularios para las distintas tablas de la base de datos).
-                \item Tener un formulario para el director técnico que le permita realizar los cambios en  la 
-                alineación.
+                \item Tener un formulario para el director técnico que le permita crear, eliminar y listar los 
+                cambios en  la alineación.
                 \item Mostrar un formulario con opciones de filtrado y solicitudes para la generación de los reportes.
             \end{enumerate}
 
@@ -264,9 +283,9 @@
             \subsubsection{Software}
             \begin{itemize}
                 \item Para la base de datos se ha de utilizar la tecnología PostgreSQL.
-                \item En cuanto al backend de la aplicación web, este de desarrollará en python con DjangoRest como 
+                \item En cuanto al backend de la aplicación web, este de desarrollará en Python con DjangoRest como 
                 librería principal, omitiendo la función de admin que viene ya preparada.
-                \item El frontend se realizará en React.
+                \item El frontend se realizará en JavaScript con el framework de React.
             \end{itemize}
 
     \newpage
