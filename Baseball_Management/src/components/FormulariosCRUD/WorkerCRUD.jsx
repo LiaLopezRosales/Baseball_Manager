@@ -38,13 +38,13 @@ const WorkerCRUD = () => {
                                 return { id: td.id, name: `${person.name} ${person.lastname}` };
                             }
                         }
-                        return { id: td.id, name: "Unknown" };
+                        return { id: td.id, name: "Desconocido" };
                     })
                 );
                 setTechnicalDirectors(directorsWithNames);
             }
         } catch (error) {
-            console.error("Error fetching technical directors:", error);
+            console.error("Error obteniendo directores técnicos:", error);
         }
     };
 

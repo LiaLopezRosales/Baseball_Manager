@@ -25,7 +25,7 @@ const TechnicalDirectorCRUD = () => {
                 setDirectionTeams(teamsNames);
             }
         } catch (error) {
-            console.error("Error fetching direction teams:", error);
+            console.error("Error obteniendo equipos de dirección:", error);
         }
     };
 
@@ -42,13 +42,13 @@ const TechnicalDirectorCRUD = () => {
                             const person = await personResponse.json();
                             return { id: worker.id, name: `${person.name} ${person.lastname}` };
                         }
-                        return { id: worker.id, name: "Unknown" };
+                        return { id: worker.id, name: "Desconocido" };
                     })
                 );
                 setWorkers(workersWithNames);
             }
         } catch (error) {
-            console.error("Error fetching workers:", error);
+            console.error("Error obteniendo trabajadores:", error);
         }
     };
 

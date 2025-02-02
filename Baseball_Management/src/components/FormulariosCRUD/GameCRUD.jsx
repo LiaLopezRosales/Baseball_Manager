@@ -17,7 +17,7 @@ const GameCRUD = () => {
                 setTeams(data.map(team => ({ id: team.id, name: team.name })));
             }
         } catch (error) {
-            console.error("Error fetching teams:", error);
+            console.error("Error obteniendo equipos:", error);
         }
     };
 
@@ -30,7 +30,7 @@ const GameCRUD = () => {
                 setSeriesList(data.map(series => ({ id: series.id, name: `${series.name} (${series.type}) en Temporada ${series.season}` })));
             }
         } catch (error) {
-            console.error("Error fetching series:", error);
+            console.error("Error obteniendo series:", error);
         }
     };
 
@@ -43,7 +43,7 @@ const GameCRUD = () => {
                 setScores(data.map(score => ({ id: score.id, name: `Score ${score.id}` })));
             }
         } catch (error) {
-            console.error("Error fetching scores:", error);
+            console.error("Error obteniendo marcadores:", error);
         }
     };
 

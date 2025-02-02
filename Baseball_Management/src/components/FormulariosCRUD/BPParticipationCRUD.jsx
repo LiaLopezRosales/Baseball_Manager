@@ -22,13 +22,13 @@ const BPParticipationCRUD = () => {
                             const person = await personResponse.json();
                             return { id: player.id, name: `${person.name} ${person.lastname}` };
                         }
-                        return { id: player.id, name: "Unknown" };
+                        return { id: player.id, name: "Desconocido" };
                     })
                 );
                 setBaseballPlayers(playersWithNames);
             }
         } catch (error) {
-            console.error("Error fetching baseball players:", error);
+            console.error("Error obteniendo jugadores:", error);
         }
     };
 
@@ -41,7 +41,7 @@ const BPParticipationCRUD = () => {
                 setTeams(data.map(team => ({ id: team.id, name: team.name })));
             }
         } catch (error) {
-            console.error("Error fetching teams:", error);
+            console.error("Error obteniendo equipos:", error);
         }
     };
 
@@ -54,7 +54,7 @@ const BPParticipationCRUD = () => {
                 setSeriesList(data.map(series => ({ id: series.id, name: `${series.name} (${series.type}) en Temporada ${series.season}` })));
             }
         } catch (error) {
-            console.error("Error fetching series:", error);
+            console.error("Error obteniendo series:", error);
         }
     };
 

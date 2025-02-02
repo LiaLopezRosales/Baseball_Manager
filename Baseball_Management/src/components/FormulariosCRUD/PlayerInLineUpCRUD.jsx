@@ -26,7 +26,7 @@ const PlayerInLineUpCRUD = () => {
                 setLineups(teamsNames);
             };
         } catch (error) {
-            console.error("Error fetching lineups:", error);
+            console.error("Error obteniendo alineaciones:", error);
         }
     };
 
@@ -47,13 +47,13 @@ const PlayerInLineUpCRUD = () => {
                                 return { id: player.id, name: `${person.name} ${person.lastname}` };
                             }
                         }
-                        return { id: player.id, name: "Unknown" };
+                        return { id: player.id, name: "Desconocido" };
                     })
                 );
                 setPlayerInPositions(playersWithNames);
             }
         } catch (error) {
-            console.error("Error fetching players in position:", error);
+            console.error("Error obteniendo jugadores en posición:", error);
         }
     };
 

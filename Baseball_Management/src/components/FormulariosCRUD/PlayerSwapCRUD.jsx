@@ -22,13 +22,13 @@ const PlayerSwapCRUD = () => {
                             const person = await personResponse.json();
                             return { id: player.id, name: `${person.name} ${person.lastname}` };
                         }
-                        return { id: player.id, name: "Unknown" };
+                        return { id: player.id, name: "Desconocido" };
                     })
                 );
                 setBaseballPlayers(playersWithNames);
             }
         } catch (error) {
-            console.error("Error fetching baseball players:", error);
+            console.error("Error obteniendo jugadores:", error);
         }
     };
 
@@ -41,7 +41,7 @@ const PlayerSwapCRUD = () => {
                 setPositions(data.map(poss => ({ id: poss.id, name: `${poss.name} - ${poss.id}` })));
             }
         } catch (error) {
-            console.error("Error fetching teams:", error);
+            console.error("Error obteniendo equipos:", error);
         }
     };
 
@@ -62,13 +62,13 @@ const PlayerSwapCRUD = () => {
                                     return { id: teams.id, name: `${team.name} - Equipo en el campo # ${teams.id}`};
                                 }
                             }
-                            return { id: teams.id, name: "Unknoun" };
+                            return { id: teams.id, name: "Desconocidos" };
                         })
                     );
                     setGameTeams(teamsWithName);
                 }
         } catch (error) {
-            console.error("Error fetching game teams:", error);
+            console.error("Error obteniendo equipos en el campo:", error);
         }
     };
 

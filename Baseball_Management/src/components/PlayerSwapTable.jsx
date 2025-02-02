@@ -80,7 +80,7 @@ const PlayerSwapTable = ({ teamId }) => {
                     <table>
                         <thead>
                             <tr>
-                                <th onClick={() => handleSort("game_team")}>ID Equipo</th>
+                                <th onClick={() => handleSort("game_team")}>ID Equipo en el Campo</th>
                                 <th onClick={() => handleSort("old_player_name")}>Jugador Anterior</th>
                                 <th onClick={() => handleSort("new_player_name")}>Jugador Nuevo</th>
                                 <th onClick={() => handleSort("position_name")}>Posición</th>

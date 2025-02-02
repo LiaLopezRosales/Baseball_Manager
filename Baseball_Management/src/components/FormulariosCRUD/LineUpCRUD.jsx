@@ -16,7 +16,7 @@ const LineUpCRUD = () => {
                 setTeams(data.map(team => ({ id: team.id, name: team.name })));
             }
         } catch (error) {
-            console.error("Error fetching teams:", error);
+            console.error("Error obteniendo equipos:", error);
         }
     };
 

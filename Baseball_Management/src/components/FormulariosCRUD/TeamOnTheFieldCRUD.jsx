@@ -24,7 +24,7 @@ const TeamOnTheFieldCRUD = () => {
                 setLineups(teamsNames);
             };
         } catch (error) {
-            console.error("Error fetching lineups:", error);
+            console.error("Error obteniendo alineaciones:", error);
         }
     };
 
