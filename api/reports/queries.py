@@ -6,10 +6,13 @@ import db_structure.models as db
 from django.db.models import Prefetch, Max, Q, F
 
 # Obtener nombres de equipos ganadores y directores técnicos en series nacionales por temporada
-def get_final_winner_teams_and_coaches(season_name, season_type='Provincial'):  
+def get_final_winner_teams_and_coaches(season_name, season_type='National'):  
     
-    # Obtener las series asociadas a la temporada específica
-    series = db.Series.objects.filter(season__name=season_name,type=season_type) 
+    if not season_name:
+       series = db.Series.objects.filter(type=season_type)  
+    else:
+        # Obtener las series asociadas a la temporada específica
+        series = db.Series.objects.filter(season__name=season_name,type=season_type) 
 
     # Prefetch los juegos relacionados y filtrar el último juego de cada serie
     series = series.prefetch_related(
@@ -31,10 +34,10 @@ def get_final_winner_teams_and_coaches(season_name, season_type='Provincial'):
                 team = final_game.score.winner
                 technical_director = team.directionteam.technicaldirector
                 result.append({
-                    'team_name': team.name,
-                    'coach_name': f"{technical_director.W_id.P_id.name} {technical_director.W_id.P_id.lastname}" if technical_director else "No asignado",
-                    'season': serie.season.name,
-                    'serie': serie.name
+                    'Equipo': team.name,
+                    'Director Técnico': f"{technical_director.W_id.P_id.name} {technical_director.W_id.P_id.lastname}" if technical_director else "No asignado",
+                    'Temporada': serie.season.name,
+                    'Serie': serie.name,
                 })
 
     return result
@@ -42,8 +45,12 @@ def get_final_winner_teams_and_coaches(season_name, season_type='Provincial'):
 # Obtener nombres y posiciones de jugadores del equipo "Todos Estrellas" y su efectividad por serie
 def get_star_players_for_series(series_name):
     
+    if not series_name:
+       star_players = db.StarPlayer.objects.select_related(
+        'BP_id__P_id', 'position').prefetch_related('BP_id__playerinposition_bp') 
+    else:
      # Obtener las series asociadas a la temporada específica
-    star_players = db.StarPlayer.objects.filter(series__name=series_name).select_related(
+        star_players = db.StarPlayer.objects.filter(series__name=series_name).select_related(
         'BP_id__P_id', 'position').prefetch_related('BP_id__playerinposition_bp')
 
     
@@ -56,12 +63,13 @@ def get_star_players_for_series(series_name):
         effectiveness = player.playerinposition_bp.filter(position=position).first().effectiveness
 
         result.append({
-            "name": player.P_id.name,
-            "lastname": player.P_id.lastname,
-            "position": position.name,
-            "effectiveness": effectiveness,
+            "Nombre": player.P_id.name,
+            "Apellido": player.P_id.lastname,
+            "Posición": position.name,
+            "Efectividad": effectiveness,
+            "Serie": star_player.series.name
         })
-
+        
     return result
 
 # Obtener series con mayor y menor cantidad de juegos celebrados
@@ -75,12 +83,17 @@ def get_max_min_game_per_series():
     # Seleccionar la serie con menor cantidad de juegos, excluyendo las que tienen 0 juegos
     serie_con_menos_juegos = series_with_counts.order_by('games_count').first().__str__()
 
-    return [{ "serie con más juegos": serie_con_más_juegos, "serie con menos juegos": serie_con_menos_juegos}]
+    return [{ "serie con más juegos": serie_con_más_juegos, 
+             "serie con menos juegos": serie_con_menos_juegos}]
 
 # Listar equipos en primer y último lugar por serie, clasificados por tipo y orden cronológico
 def get_teams_by_series(season_name):
     # Filtrar las series asociadas a la temporada
-    series = db.Series.objects.filter(season__name=season_name)
+    
+    if not season_name:
+        series = db.Series.objects
+    else:
+        series = db.Series.objects.filter(season__name=season_name)
 
     # Prefetch los juegos relacionados y ordenarlos por fecha
     games_prefetch = Prefetch(
@@ -106,10 +119,11 @@ def get_teams_by_series(season_name):
             last_place_team = sorted_teams[-1]  # Equipo en último lugar
 
             result.append({
-                'serie_name': serie.name,
-                'serie_type': serie.type,
-                'first_place_team': first_place_team.name,
-                'last_place_team': last_place_team.name,
+                'Temporada': serie.season.name,
+                'Serie': serie.name,
+                'Tipo': serie.type,
+                'Equipo en Primer Lugar': first_place_team.name,
+                'Equipo en Ultimo Lugar': last_place_team.name,
             })
 
     return result
@@ -152,13 +166,13 @@ def get_pitcher_losses(pitcher_id=None, player_id=None):
 # Obtener el promedio de carreras limpias permitidas por un lanzador
 def get_pitcher_wins_and_running_average(pitcher_name=None, pitcher_lastname=None):
     if pitcher_name and pitcher_lastname:
-        list = db.Pitcher.objects.filter(P_id__P_id__name=pitcher_name, P_id__P_id__lastname=pitcher_lastname)
+        list = db.Pitcher.objects.filter(P_id__P_id__name__startswith=pitcher_name, P_id__P_id__lastnam__startswith=pitcher_lastname)
     elif pitcher_name:
-        list = db.Pitcher.objects.filter(P_id__P_id__name=pitcher_name)
+        list = db.Pitcher.objects.filter(P_id__P_id__name__startswith=pitcher_name)
     elif pitcher_lastname:
-        list = db.Pitcher.objects.filter(P_id__P_id__lastname=pitcher_lastname)
+        list = db.Pitcher.objects.filter(P_id__P_id__lastname__startswith=pitcher_lastname)
     else:
-        return []
+        list = db.Pitcher.objects
     
     group_list = list.values_list('P_id','id', 'P_id__P_id__name', 'P_id__P_id__lastname')
     data = []
@@ -170,10 +184,10 @@ def get_pitcher_wins_and_running_average(pitcher_name=None, pitcher_lastname=Non
         running_average = db.Pitcher.objects.filter(id=pitcher_prop[1]).values_list('running_average', flat=True).first()
 
         data.append({
-            "name": pitcher_prop[2],
-            "lastname": pitcher_prop[3],
-            "total_wins": wins,
-            "running_average": running_average
+            "Nombre": pitcher_prop[2],
+            "Apellido": pitcher_prop[3],
+            "Juegos Ganados": wins,
+            "Promedio de Carreras Limpias": running_average
         })
         
     return data 
@@ -183,9 +197,9 @@ def get_top_batting_average_players():
     players = db.BaseballPlayer.objects.select_related('P_id').order_by('-batting_average')[:10]
     return [
         {
-            "name": player.P_id.name,
-            "lastname": player.P_id.lastname,
-            "batting_average": player.batting_average,
+            "Nombre": player.P_id.name,
+            "Apellido": player.P_id.lastname,
+            "Promedio de Bateo": player.batting_average,
         }
         for player in players
     ]
@@ -204,18 +218,22 @@ def get_player_effectiveness_by_position():
     players = db.PlayerInPosition.objects.select_related('BP_id__P_id', 'position').order_by('-effectiveness')[:10]
     return [
         {
-            "position": player.position.name,
-            "name": player.BP_id.P_id.name,
-            "lastname": player.BP_id.P_id.lastname,
-            "effectiveness": player.effectiveness,
+            "Posición": player.position.name,
+            "Nombre": player.BP_id.P_id.name,
+            "Apellido": player.BP_id.P_id.lastname,
+            "Efectividad": player.effectiveness,
         }
         for player in players
     ]
 
 # Obtener los jugadores de un equipo específico que participaron en una serie dada. 
 def get_team_players_at_a_specified_serie(team_name): 
-    # Obtener todas las participaciones del equipo
-    participations = db.BPParticipation.objects.filter(team_id__name=team_name).select_related('BP_id__P_id', 'series')
+    
+    if not team_name:
+        participations = db.BPParticipation.objects.select_related('BP_id__P_id', 'series')
+    else:
+        # Obtener todas las participaciones del equipo
+        participations = db.BPParticipation.objects.filter(team_id__name=team_name).select_related('BP_id__P_id', 'series')
 
     # Organizar la información por jugador
     players_series = {}
@@ -225,12 +243,12 @@ def get_team_players_at_a_specified_serie(team_name):
 
         if player not in players_series:
             players_series[player] = {
-                "name": player.name,
-                "lastname": player.lastname,
-                "series": []
+                "Nombre": player.name,
+                "Apellido": player.lastname,
+                "Series": []
             }
         
-        players_series[player]["series"].append(series_name)
+        players_series[player]["Series"].append(series_name)
 
     # Convertir el resultado en una lista
     return list(players_series.values())

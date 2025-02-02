@@ -223,7 +223,7 @@ class PlayerInLineUpFactory(DjangoModelFactory):
     player_in_position = factory.SubFactory(PlayerInPositionFactory)
 
 
-def populate_users_and_workers():
+def populate_users_and_workers(team_numbers=6):
     # Crear roles predefinidos
     roles = {
         "Admin": RolFactory(type="Admin"),
@@ -232,7 +232,7 @@ def populate_users_and_workers():
     }
 
     # Crear equipos y equipos de dirección
-    teams = TeamFactory.create_batch(4)
+    teams = TeamFactory.create_batch(team_numbers)
     direction_teams = [DirectionTeamFactory(Team_id=team) for team in teams]
 
     # Crear usuarios y directores técnicos
@@ -317,9 +317,9 @@ def populate_baseball_players_and_positions(teams):
     return {"positions": positions, "baseball_players": baseball_players, "team_player_mapping": team_player_mapping, "pitcher_list": pitcher_list}
 
 
-def simulate_championship_with_participations(positions, team_player_mapping):
+def simulate_championship_with_participations(positions, team_player_mapping, season_numbers=4):
     # Crear temporadas y series
-    seasons = SeasonFactory.create_batch(2)  # Dos temporadas
+    seasons = SeasonFactory.create_batch(season_numbers)
     series = []
 
     for i, season in enumerate(seasons):
@@ -463,11 +463,12 @@ def simulate_championship_with_participations(positions, team_player_mapping):
 
 
 def simulate_full_championship():
-    user_worker_data = populate_users_and_workers()
+    user_worker_data = populate_users_and_workers(team_numbers=6)
     player_position_data = populate_baseball_players_and_positions(user_worker_data["teams"])
     championship_data = simulate_championship_with_participations(
         positions=player_position_data["positions"],
-        team_player_mapping=player_position_data["team_player_mapping"]
+        team_player_mapping=player_position_data["team_player_mapping"],
+        season_numbers=4
     )
     
     for pitcher in player_position_data['pitcher_list']:
