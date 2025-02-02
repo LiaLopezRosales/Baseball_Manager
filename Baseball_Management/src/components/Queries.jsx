@@ -28,7 +28,6 @@ const fetchData = async (url, data) => {
 
 const getQueryFields = (fields) => fields.map((field) => field[1]);
 
-// Mapeo de nombres de tablas en inglés a español
 const tableNameMap = {
   Team: 'Equipos',
   Game: 'Juegos',
@@ -47,10 +46,23 @@ const tableNameMap = {
   PlayerInLineUp: 'Jugadores en Alineación',
 };
 
-// Lista de campos numéricos que pueden tener decimales
 const numericFields = [
   'running_average',
   'effectiveness',
+  'batting_average',
+  'years_of_experience',
+  'No_games_won',
+  'No_games_lost',
+  'w_points',
+  'l_points',
+];
+
+const dateFields = [
+  'init_date',
+  'end_date',
+  'date',
+  'series__init_date',
+  'series__end_date',
 ];
 
 const Queries = ({ selectedTable }) => {
@@ -58,6 +70,8 @@ const Queries = ({ selectedTable }) => {
   const [fields, setFields] = useState([]);
   const [filters, setFilters] = useState({});
   const [query, setQuery] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const getData = async () => {
@@ -68,8 +82,10 @@ const Queries = ({ selectedTable }) => {
           filters: filters,
         };
         setQuery(query);
+
         const result = await fetchData('http://127.0.0.1:8000/api/queries/dinamic-filter/', query);
         setData(result);
+        setCurrentPage(1); // Resetear a la primera página con nuevos datos
       }
     };
 
@@ -87,21 +103,37 @@ const Queries = ({ selectedTable }) => {
     }
   }, [selectedTable]);
 
-  // Obtener el nombre de la tabla en español
   const tableDisplayName = tableNameMap[selectedTable] || selectedTable;
 
-  // Función para formatear valores numéricos
-  const formatNumericValue = (value, field) => {
+  const formatValue = (value, field) => {
     if (numericFields.includes(field) && typeof value === 'number') {
-      return value.toFixed(3); // Limita a 3 decimales
+      return value.toFixed(3);
     }
-    return value; // Devuelve el valor sin cambios si no es numérico
+    if (dateFields.includes(field) && value) {
+      const date = new Date(value);
+      return !isNaN(date) ? date.toLocaleDateString() : value;
+    }
+    return value;
+  };
+
+  // Calcular datos paginados
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = data.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+
+  // Manejadores de paginación
+  const goToPreviousPage = () => {
+    setCurrentPage((prev) => Math.max(1, prev - 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage((prev) => Math.min(totalPages, prev + 1));
   };
 
   return (
     <div>
       <h2>{tableDisplayName}</h2>
-
       <Filters table={selectedTable} fields={fields} setFilters={setFilters} />
 
       <table>
@@ -113,18 +145,28 @@ const Queries = ({ selectedTable }) => {
           </tr>
         </thead>
         <tbody>
-          {data.map((row, index) => (
+          {paginatedData.map((row, index) => (
             <tr key={index}>
               {fields.map(([, field]) => (
-                <td key={field}>
-                  {/* Formatea el valor si el campo es numérico */}
-                  {formatNumericValue(row[field], field)}
-                </td>
+                <td key={field}>{formatValue(row[field], field)}</td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Controles de paginación */}
+      <div className="pagination-controls">
+        <button onClick={goToPreviousPage} disabled={currentPage === 1}>
+          Anterior
+        </button>
+        <span>
+          Página {currentPage} de {totalPages}
+        </span>
+        <button onClick={goToNextPage} disabled={currentPage === totalPages || data.length === 0}>
+          Siguiente
+        </button>
+      </div>
     </div>
   );
 };

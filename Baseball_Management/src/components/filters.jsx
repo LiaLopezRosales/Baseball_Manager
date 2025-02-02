@@ -1,101 +1,127 @@
 import React from 'react';
 
-// Componente `Filters` que recibe tres props: `table`, `fields` y `setFilters`.
+// Generador de opciones de meses
+const generateMonthOptions = () => {
+  const months = [];
+  for (let i = 0; i < 12; i++) {
+    const date = new Date(0, i);
+    months.push({
+      value: i + 1,  // Los meses van de 1 a 12
+      name: date.toLocaleString('es-ES', { month: 'long' })
+    });
+  }
+  return months;
+};
+
+// Generador de opciones de años
+const generateYearOptions = () => {
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let year = currentYear; year >= 1900; year--) {
+    years.push(year);
+  }
+  return years;
+};
+
 const Filters = ({ table, fields, setFilters }) => {
+  const months = generateMonthOptions();
+  const years = generateYearOptions();
 
-    // Función `handleFilterChange` que se ejecuta cuando cambia el valor de un filtro.
-    const handleFilterChange = (field, value, filterType) => {
-        // Convierte el valor a número si el tipo de filtro es 'gte', 'lte', 'month' o 'year'.
-        // Si el valor está vacío, se asigna una cadena vacía.
-        const parsedValue = value ? (filterType === 'gte' || filterType === 'lte' || filterType === 'month' || filterType === 'year' ? parseInt(value, 10) : value) : "";
-
-        // Actualiza el estado de los filtros usando la función `setFilters`.
-        setFilters(prevFilters => {
-            // Crea una copia de los filtros anteriores y actualiza el filtro actual.
-            const newFilters = {
-                ...prevFilters,
-                [field]: {
-                    ...prevFilters[field],
-                    [filterType]: parsedValue
-                }
-            };
-
-            // Si el valor del filtro está vacío, elimina ese filtro.
-            if (!parsedValue) {
-                delete newFilters[field][filterType];
-
-                // Si el campo ya no tiene filtros, elimina el campo completo.
-                if (Object.keys(newFilters[field]).length === 0) {
-                    delete newFilters[field];
-                }
-            }
-
-            // Retorna el nuevo objeto de filtros actualizado.
-            return newFilters;
-        });
-    };
-
-    // Función `renderFilter` que decide qué tipo de input mostrar según el campo.
-    const renderFilter = (field) => {
-        // Si el campo es 'age', 'score', 'series', 'local' o 'rival', muestra inputs para valores mínimos y máximos.
-        if (field === 'age' || field === "P_id__age" || field === 'score' || field === "score__w_points" || field === "score__l_points" || field === "years_of_experience" || field === "No_games_won" || field === "No_games_lost" || field === "running_average" || field === "effectiveness" || field === "w_points" || field === "l_points") {
-            return (
-                <div>
-                    <label>Mínimo:</label>
-                    <input
-                        type="number"
-                        onChange={(e) => handleFilterChange(field, e.target.value, 'gte')} // Filtro "mayor o igual que"
-                    />
-                    <label>Máximo:</label>
-                    <input
-                        type="number"
-                        onChange={(e) => handleFilterChange(field, e.target.value, 'lte')} // Filtro "menor o igual que"
-                    />
-                </div>
-            );
+  const handleFilterChange = (field, value, filterType) => {
+    const parsedValue = value ? parseInt(value, 10) : "";
+    
+    setFilters(prevFilters => {
+      const newFilters = {
+        ...prevFilters,
+        [field]: {
+          ...prevFilters[field],
+          [filterType]: parsedValue
         }
-        // Si el campo es 'init_date' o 'date', muestra inputs para mes y año.
-        else if (field === 'init_date' || field === 'end_date' || field === 'series__init_date' || field === 'series__end_date' || field === 'date') {
-            return (
-                <div>
-                    <label>Mes:</label>
-                    <input
-                        type="number"
-                        onChange={(e) => handleFilterChange(field, e.target.value, 'month')} // Filtro por mes
-                    />
-                    <label>Año:</label>
-                    <input
-                        type="number"
-                        onChange={(e) => handleFilterChange(field, e.target.value, 'year')} // Filtro por año
-                    />
-                </div>
-            );
-        }
-        // Para cualquier otro campo, muestra un input de texto.
-        else {
-            return (
-                <input
-                    type="text"
-                    onChange={(e) => handleFilterChange(field, e.target.value, 'icontains')} // Filtro que busca coincidencias parciales
-                />
-            );
-        }
-    };
+      };
 
-    // Renderiza el componente.
-    return (
+      if (!parsedValue) {
+        delete newFilters[field][filterType];
+        if (Object.keys(newFilters[field]).length === 0) {
+          delete newFilters[field];
+        }
+      }
+
+      return newFilters;
+    });
+  };
+
+  const renderFilter = (field) => {
+    if (field === 'age' || field === "P_id__age" || field === 'score' || field === "score__w_points" || field === "score__l_points" || field === "years_of_experience" || field === "No_games_won" || field === "No_games_lost" || field === "running_average" || field === "effectiveness" || field === "w_points" || field === "l_points") {
+      return (
         <div>
-            {/* Itera sobre el array `fields`, donde cada elemento es una tupla. */}
-            {fields.map(([displayText, fieldValue]) => (
-                <div key={fieldValue}>
-                    {/* Muestra el texto que se verá en pantalla (primer elemento de la tupla). */}
-                    <label>{displayText}:</label>
-                    {/* Llama a `renderFilter` con el valor del campo (segundo elemento de la tupla). */}
-                    {renderFilter(fieldValue)}
-                </div>
-            ))}
+          <label>Mínimo:</label>
+          <input
+            type="number"
+            onChange={(e) => handleFilterChange(field, e.target.value, 'gte')}
+          />
+          <label>Máximo:</label>
+          <input
+            type="number"
+            onChange={(e) => handleFilterChange(field, e.target.value, 'lte')}
+          />
         </div>
-    );
+      );
+    }
+    else if (field === 'init_date' || field === 'end_date' || field === 'series__init_date' || field === 'series__end_date' || field === 'date') {
+      return (
+        <div>
+          <div className="filter-group">
+            <label>Mes:</label>
+            <select
+              onChange={(e) => handleFilterChange(field, e.target.value, 'month')}
+            >
+              <option value="">Seleccionar mes</option>
+              {months.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.name.charAt(0).toUpperCase() + month.name.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="filter-group">
+            <label>Año:</label>
+            <select
+              onChange={(e) => handleFilterChange(field, e.target.value, 'year')}
+            >
+              <option value="">Seleccionar año</option>
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      );
+    }
+    else {
+      return (
+        <input
+          type="text"
+          onChange={(e) => handleFilterChange(field, e.target.value, 'icontains')}
+        />
+      );
+    }
+  };
+
+  return (
+    <div className="filters-container">
+      {fields.map(([displayText, fieldValue]) => (
+        <div key={fieldValue} className="filter-item">
+          <label>{displayText}:</label>
+          <div className="filter-controls">
+            {renderFilter(fieldValue)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default Filters;
