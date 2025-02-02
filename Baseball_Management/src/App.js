@@ -11,7 +11,7 @@ import PlayerSwapForm from './components/PlayerSwapForm';
 import PlayerSwapTable from './components/PlayerSwapTable';
 import Queries from './components/Queries';
 
-//Importar formularios de Base de Datos
+// Importar formularios de Base de Datos
 import BaseballPlayerCRUD from './components/FormulariosCRUD/BaseballPlayerCRUD';
 import BPParticipationCRUD from './components/FormulariosCRUD/BPParticipationCRUD';
 import DirectionTeamCRUD from './components/FormulariosCRUD/DirectionTeamCRUD';
@@ -23,7 +23,6 @@ import PlayerInLineUpCRUD from './components/FormulariosCRUD/PlayerInLineUpCRUD'
 import PlayerInPositionCRUD from './components/FormulariosCRUD/PlayerInPositionCRUD';
 import PlayerSwapCRUD from './components/FormulariosCRUD/PlayerSwapCRUD';
 import PositionCRUD from './components/FormulariosCRUD/PositionCRUD';
-// import RolCRUD from './components/FormulariosCRUD/RolCRUD';
 import ScoreCRUD from './components/FormulariosCRUD/ScoreCRUD';
 import SeasonCRUD from './components/FormulariosCRUD/SeasonCRUD';
 import SeriesCRUD from './components/FormulariosCRUD/SeriesCRUD';
@@ -49,7 +48,11 @@ function App() {
     const [isModalOpen, setIsModalOpen] = useState(false);  
 
     // Estado para seleccionar la opción actual
-    const [selectedOption, setSelectedOption] = useState('');
+    const [selectedOption, setSelectedOption] = useState(() => {
+        // Inicializa el estado con el valor de localStorage si existe
+        const savedSelectedOption = localStorage.getItem('selectedOption') || '';
+        return savedSelectedOption;
+    });
 
     // Estado para almacenar el rol del usuario
     const [role, setRole] = useState(() => {
@@ -72,6 +75,9 @@ function App() {
 
         const savedRole = localStorage.getItem('role') || '';
         setRole(savedRole);
+
+        const savedSelectedOption = localStorage.getItem('selectedOption') || '';
+        setSelectedOption(savedSelectedOption);
     }, []);
 
     // Función para cambiar el estado de logged in
@@ -106,13 +112,14 @@ function App() {
     };
 
     // Estado para almacenar la tabla seleccionada en "Consultas"
-  const [selectedTable, setSelectedTable] = useState('');
+    const [selectedTable, setSelectedTable] = useState('');
 
-  // Función para manejar la selección de una opción
-  const handleOptionSelect = (option, table = '') => {
-    setSelectedOption(option);
-    setSelectedTable(table); // Actualizamos la tabla seleccionada si se proporciona
-  };
+    // Función para manejar la selección de una opción
+    const handleOptionSelect = (option, table = '') => {
+        setSelectedOption(option);
+        localStorage.setItem('selectedOption', option); // Guarda la opción seleccionada en localStorage
+        setSelectedTable(table); // Actualizamos la tabla seleccionada si se proporciona
+    };
 
     // Renderiza la interfaz de la aplicación
     return (
@@ -181,7 +188,6 @@ function App() {
                     </Modal>
                 </header>
             </div>
-
         </Router>
     );
 }
