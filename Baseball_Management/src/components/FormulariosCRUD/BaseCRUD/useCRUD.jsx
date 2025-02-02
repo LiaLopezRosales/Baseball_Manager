@@ -1,99 +1,141 @@
-// Baseball_Management/src/components/FormulariosCRUD/BaseCRUD/useCRUD.jsx
-
 import { useState, useEffect, useCallback } from "react";
 
 const useCRUD = (apiUrl, fields, initialFormValues) => {
-  const [data, setData] = useState([]);
+  const [rawData, setRawData] = useState([]);
   const [filters, setFilters] = useState({});
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" });
+  const [sortConfig, setSortConfig] = useState({ 
+    key: null, 
+    direction: "ascending" 
+  });
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [personData, setPersonData] = useState({});
 
-  // Variables para manejar formulario y estados de edición/creación
+  // Estados del formulario
   const [formValues, setFormValues] = useState(initialFormValues);
   const [formErrors, setFormErrors] = useState({});
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
+  // Obtener datos principales
   const fetchItems = useCallback(async () => {
     try {
       const response = await fetch(apiUrl);
       if (response.ok) {
-        let rawData = await response.json();
-
-        // Lógica de ordenamiento
-        if (sortConfig.key) {
-          rawData = rawData.sort((a, b) => {
-            if (a[sortConfig.key] < b[sortConfig.key]) {
-              return sortConfig.direction === "ascending" ? -1 : 1;
-            }
-            if (a[sortConfig.key] > b[sortConfig.key]) {
-              return sortConfig.direction === "ascending" ? 1 : -1;
-            }
-            return 0;
-          });
-        }
-
-        // Lógica de filtrado local
-        rawData = rawData.filter((item) =>
-          Object.entries(filters).every(([key, filter]) => {
-            const fieldValue = item[key];
-            const field = fields.find(f => f.name === key);
-
-            if (!field) return true; // Campo no encontrado, no filtrar
-
-            // Filtrado para campos numéricos
-            if (field.type === "number") {
-              const minValid = filter.min ? fieldValue >= parseFloat(filter.min) : true;
-              const maxValid = filter.max ? fieldValue <= parseFloat(filter.max) : true;
-              return minValid && maxValid;
-            }
-
-            // Filtrado para campos de fecha
-            if (field.type === "date") {
-              const dateValue = new Date(fieldValue);
-              const startValid = filter.start ? dateValue >= new Date(filter.start) : true;
-              const endValid = filter.end ? dateValue <= new Date(filter.end) : true;
-              return startValid && endValid;
-            }
-
-            // Filtrado para campos de texto
-            if (field.type === "text") {
-              return filter.search
-                ? fieldValue.toLowerCase().startsWith(filter.search.toLowerCase())
-                : true;
-            }
-
-            // Filtrado para campos de email
-            if (field.type === "email") {
-              return filter.search
-                ? fieldValue.toLowerCase().startsWith(filter.search.toLowerCase())
-                : true;
-            }
-
-            return true; // Si el tipo de campo no coincide, no filtrar
-          })
-        );
-
-        setData(rawData);
-        setTotalPages(Math.ceil(rawData.length / 10));
-        setCurrentPage(1); // Reiniciar a la primera página al filtrar
-      } else {
-        console.error("Error fetching data");
+        const data = await response.json();
+        setRawData(data);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error fetching data:", error);
     }
-  }, [apiUrl, sortConfig, filters, fields]);
+  }, [apiUrl]);
 
+  // Carga inicial de datos
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
 
+  // Obtener datos de personas relacionadas
+  const fetchPersonData = useCallback(async (P_id) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/persons/${P_id}/`);
+      if (response.ok) {
+        const person = await response.json();
+        setPersonData(prev => ({ ...prev, [P_id]: person }));
+      }
+    } catch (error) {
+      console.error("Error fetching person data:", error);
+    }
+  }, []);
+
+  // Cargar solo IDs de personas no existentes
+  useEffect(() => {
+    if (fields.some(f => f.name === "P_id")) {
+      const newPersonIds = rawData
+        .map(item => item.P_id)
+        .filter(id => id && !personData[id]);
+      
+      newPersonIds.forEach(id => {
+        fetchPersonData(id);
+      });
+    }
+  }, [rawData, personData, fetchPersonData, fields]);
+
+  // Procesar datos (filtrado y ordenamiento)
+  const processedData = useCallback(() => {
+    let result = [...rawData];
+
+    // Ordenamiento
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        const aVal = a[sortConfig.key];
+        const bVal = b[sortConfig.key];
+        
+        if (aVal === null) return 1;
+        if (bVal === null) return -1;
+        
+        if (aVal < bVal) return sortConfig.direction === "ascending" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "ascending" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // Filtrado unificado
+    result = result.filter(item => {
+      return Object.entries(filters).every(([fieldName, filter]) => {
+        const field = fields.find(f => f.name === fieldName);
+        if (!field || !filter) return true;
+
+        // Filtro para relaciones (P_id)
+        if (fieldName === "P_id") {
+          const person = personData[item.P_id] || {};
+          const searchText = (filter.search || "").toLowerCase();
+          return (
+            person.name?.toLowerCase().includes(searchText) ||
+            person.lastname?.toLowerCase().includes(searchText)
+          );
+        }
+
+        // Filtros estándar
+        const value = item[fieldName];
+        
+        if (field.type === "number") {
+          const min = parseFloat(filter.min || -Infinity);
+          const max = parseFloat(filter.max || Infinity);
+          return value >= min && value <= max;
+        }
+
+        if (field.type === "date") {
+          const date = new Date(value);
+          const start = new Date(filter.start || "1970-01-01");
+          const end = new Date(filter.end || "2100-01-01");
+          return date >= start && date <= end;
+        }
+
+        if (field.type === "text" || field.type === "email") {
+          const searchText = (filter.search || "").toLowerCase();
+          return value?.toString().toLowerCase().includes(searchText);
+        }
+
+        return true;
+      });
+    });
+
+    return result;
+  }, [rawData, sortConfig, filters, fields, personData]);
+
+  // Datos paginados
+  const totalItems = processedData().length;
+  const totalPages = Math.ceil(totalItems / 10) || 1;
+  const paginatedData = processedData().slice(
+    (currentPage - 1) * 10,
+    currentPage * 10
+  );
+
+  // Handlers CRUD
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormValues({ ...formValues, [name]: value });
+    setFormValues(prev => ({ ...prev, [name]: value }));
   };
 
   const handleCreate = () => {
@@ -103,75 +145,57 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
   };
 
   const handleEdit = (item) => {
-    const updatedFormValues = {};
-    fields.forEach((field) => {
-      updatedFormValues[field.name] =
-        item[field.name] !== null
-          ? item[field.name]
-          : field.nullable
-          ? ""
-          : item[field.name];
-    });
+    const values = fields.reduce((acc, field) => {
+      acc[field.name] = item[field.name] ?? (field.nullable ? "" : null);
+      return acc;
+    }, {});
+    
     setIsEditing(true);
     setCurrentItem(item);
-    setFormValues(updatedFormValues);
+    setFormValues(values);
     setFormErrors({});
   };
 
   const handleSave = async () => {
-    const baseUrl = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
-    const url = isEditing ? `${baseUrl}/${currentItem.id}/` : apiUrl;
-    const method = isEditing ? "PUT" : "POST";
-    const filteredFormValues = Object.fromEntries(
-      Object.entries(formValues).filter(
-        ([key]) => !fields.find((field) => field.name === key && field.autoGenerated)
-      )
-    );
+    const isEdit = !!currentItem?.id;
+    const url = isEdit 
+      ? `${apiUrl}${currentItem.id}/`
+      : apiUrl;
+
     try {
       const response = await fetch(url, {
-        method,
+        method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(filteredFormValues),
+        body: JSON.stringify(formValues),
       });
 
-      const responseData = await response.json();
+      const data = await response.json();
 
       if (response.ok) {
-        fetchItems(); // Refrescar datos
-        setIsEditing(false);
+        await fetchItems();
         setIsCreating(false);
-        setCurrentItem(null);
+        setIsEditing(false);
         setFormErrors({});
       } else {
-        // 🔹 Capturar errores específicos de los campos
-        if (responseData.errors) {
-            setFormErrors(responseData.errors);
-        }
-
-        // 🔹 Capturar errores generales y mostrar alerta
-        if (responseData.detail) {
-
-            setFormErrors({ detail: responseData.detail });
-        }
-
-        // 🔹 Mensaje de error genérico si no hay detalles específicos
-        if (!responseData.errors && !responseData.detail) {
-            alert("Ocurrió un error inesperado.");
-        }
-    }
+        setFormErrors(data.errors || { detail: data.detail || "Error desconocido" });
+      }
     } catch (error) {
       console.error("Error:", error);
+      setFormErrors({ detail: "Error de conexión" });
     }
   };
 
-  const handleDelete = async (itemId) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
+  const handleDelete = async (id) => {
+    if (window.confirm("¿Estás seguro de eliminar este elemento?")) {
       try {
-        const response = await fetch(`${apiUrl}${itemId}/`, { method: "DELETE" });
+        const response = await fetch(`${apiUrl}${id}/`, { 
+          method: "DELETE" 
+        });
+        
         if (response.ok) {
-          fetchItems(); // Refrescar datos
+          await fetchItems();
         } else {
-          console.error("Error deleting item");
+          console.error("Error deleting item:", response.status);
         }
       } catch (error) {
         console.error("Error:", error);
@@ -180,18 +204,18 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
   };
 
   const handleCancel = () => {
-    setIsEditing(false);
     setIsCreating(false);
-    setCurrentItem(null);
+    setIsEditing(false);
     setFormErrors({});
   };
 
   const handleSort = (key) => {
-    let direction = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === "ascending" 
+        ? "descending" 
+        : "ascending"
+    }));
   };
 
   const handleFilter = (newFilters) => {
@@ -199,17 +223,22 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
   };
 
   const goToPage = (page) => {
-    if (page > 0 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    const newPage = Math.max(1, Math.min(page, totalPages));
+    setCurrentPage(newPage);
   };
 
-  const paginatedData = data.slice((currentPage - 1) * 10, currentPage * 10);
-
   return {
-    data,
+    paginatedData,
+    totalPages,
+    currentPage,
     sortConfig,
-    form: { values: formValues, errors: formErrors, isEditing, isCreating },
+    personData,
+    form: { 
+      values: formValues, 
+      errors: formErrors, 
+      isCreating, 
+      isEditing 
+    },
     actions: {
       fetchItems,
       handleCreate,
@@ -220,11 +249,8 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
       handleInputChange,
       handleSort,
       handleFilter,
-      goToPage,
-    },
-    paginatedData,
-    totalPages,
-    currentPage,
+      goToPage
+    }
   };
 };
 

@@ -1,73 +1,75 @@
 import React from "react";
-import DataTable from "./BaseCRUD/DataTable"; // Importa el componente DataTable
-import CRUDForm from "./BaseCRUD/CRUDForm"; // Importa el componente CRUDForm
-import useCRUD from "./BaseCRUD/useCRUD"; // Importa el hook personalizado useCRUD
-import "./BaseCRUD.css"; // Importa los estilos CSS
+import DataTable from "./BaseCRUD/DataTable";
+import CRUDForm from "./BaseCRUD/CRUDForm";
+import useCRUD from "./BaseCRUD/useCRUD";
+import "./BaseCRUD.css";
 
-// Componente BaseCRUD
 const BaseCRUD = ({ apiUrl, fields, title, initialFormValues }) => {
-  // Usa el hook useCRUD para manejar la lógica de CRUD
   const {
-    paginatedData, // Datos paginados para mostrar en la tabla
-    actions, // Funciones para manejar acciones (crear, editar, eliminar, etc.)
-    form, // Estado del formulario (valores, errores, si está en modo creación/edición)
-    sortConfig, // Configuración de ordenación (clave y dirección)
-    totalPages, // Número total de páginas
-    currentPage, // Página actual
+    paginatedData,
+    totalPages,
+    currentPage,
+    sortConfig,
+    personData,
+    form,
+    actions,
   } = useCRUD(apiUrl, fields, initialFormValues);
+
+  const hasPIdField = fields.some(f => f.name === "P_id");
+
+  // Determinar si es la tabla de "Personas"
+  const isPersonasTable = title === "Personas";
 
   return (
     <div className="base-crud-container">
-      {/* Título del CRUD */}
       <h1>{title}</h1>
 
-      {/* Tabla de datos */}
+      <div className="crud-actions">
+        <button onClick={actions.handleCreate}>Añadir Elemento</button>
+        <button onClick={actions.fetchItems}>Actualizar Lista</button>
+      </div>
+
       <DataTable
-        data={paginatedData} // Datos paginados
-        fields={fields} // Campos de la tabla
-        sortConfig={sortConfig} // Configuración de ordenación
-        onSort={actions.handleSort} // Función para manejar la ordenación
-        onEdit={actions.handleEdit} // Función para manejar la edición
-        onDelete={actions.handleDelete} // Función para manejar la eliminación
-        onFilter={actions.handleFilter} // Función para manejar el filtrado
+        data={paginatedData}
+        fields={fields}
+        sortConfig={sortConfig}
+        onSort={actions.handleSort}
+        onEdit={actions.handleEdit}
+        onDelete={actions.handleDelete}
+        onFilter={actions.handleFilter}
+        hasPIdField={hasPIdField}
+        personData={personData}
+        isPersonasTable={isPersonasTable} // Pasar la propiedad
       />
 
-      {/* Controles de paginación */}
       <div className="pagination-controls">
         <button
-          disabled={currentPage === 1} // Deshabilita el botón si estamos en la primera página
-          onClick={() => actions.goToPage(currentPage - 1)} // Va a la página anterior
+          disabled={currentPage === 1}
+          onClick={() => actions.goToPage(currentPage - 1)}
         >
           Anterior
         </button>
-        <span>
-          Página {currentPage} de {totalPages} {/* Muestra la página actual y el total */}
-        </span>
+        <span>Página {currentPage} de {totalPages}</span>
         <button
-          disabled={currentPage === totalPages} // Deshabilita el botón si estamos en la última página
-          onClick={() => actions.goToPage(currentPage + 1)} // Va a la página siguiente
+          disabled={currentPage === totalPages}
+          onClick={() => actions.goToPage(currentPage + 1)}
         >
           Siguiente
         </button>
       </div>
 
-      {/* Botones para actualizar la lista y añadir un nuevo elemento */}
-      <button onClick={actions.fetchItems}>Actualizar Lista</button>
-      <button onClick={actions.handleCreate}>Añadir Elemento</button>
-
-      {/* Formulario CRUD (se muestra solo en modo creación o edición) */}
       {(form.isCreating || form.isEditing) && (
         <CRUDForm
-          fields={fields} // Campos del formulario
-          formValues={form.values} // Valores actuales del formulario
-          formErrors={form.errors} // Errores de validación del formulario
-          onChange={actions.handleInputChange} // Función para manejar cambios en los inputs
-          onSave={actions.handleSave} // Función para guardar el formulario
-          onCancel={actions.handleCancel} // Función para cancelar el formulario
+          fields={fields}
+          formValues={form.values}
+          formErrors={form.errors}
+          onChange={actions.handleInputChange}
+          onSave={actions.handleSave}
+          onCancel={actions.handleCancel}
         />
       )}
     </div>
   );
 };
 
-export default BaseCRUD; // Exporta el componente BaseCRUD
+export default BaseCRUD;

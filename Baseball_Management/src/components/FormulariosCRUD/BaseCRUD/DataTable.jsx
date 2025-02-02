@@ -1,104 +1,77 @@
-import React, { useState } from "react";
-import ItemActions from "./ItemActions"; // Importa el componente ItemActions
+import React, { useState, useEffect } from "react";
+import ItemActions from "./ItemActions";
 
-// Componente DataTable
-const DataTable = ({ data, fields, sortConfig, onSort, onEdit, onDelete, onFilter }) => {
-  const [filters, setFilters] = useState({});
+const DataTable = ({
+  data,
+  fields,
+  sortConfig,
+  onSort,
+  onEdit,
+  onDelete,
+  onFilter,
+  hasPIdField,
+  personData = {},
+  isPersonasTable,
+}) => {
+  const [localFilters, setLocalFilters] = useState({});
+  const [nombreFilter, setNombreFilter] = useState("");
+  const [apellidoFilter, setApellidoFilter] = useState("");
 
-  // Función para manejar cambios en los filtros
-  const handleFilterChange = (field, value, filterType) => {
-    const newFilters = { ...filters, [field]: { ...filters[field], [filterType]: value } };
-    setFilters(newFilters); // Actualiza el estado de los filtros
-    onFilter(newFilters); // Llama a la función onFilter pasada como prop
-  };
+  // Sincronizar filtros principales con debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onFilter(localFilters);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [localFilters, onFilter]);
 
-  // Función para determinar si un campo debe ser visible
+  // Determinar visibilidad de campos
   const isFieldVisible = (field) => {
-    return !field.hidden && field.type !== "password"; // Oculta campos marcados como hidden o de tipo password
+    if (isPersonasTable && field.name === "P_id") return false;
+    return !field.hidden && field.type !== "password";
   };
 
-  // Función para formatear números
+  // Formateadores de datos
   const formatNumber = (value) => {
-    if (typeof value === 'number') {
-      // Si el número es entero, lo devuelve sin decimales
-      if (Number.isInteger(value)) {
-        return value.toString();
-      } else {
-        // Si el número tiene decimales, lo limita a 3 decimales
-        return value.toFixed(3);
+    if (typeof value !== "number") return value;
+    return Number.isInteger(value) ? value.toString() : value.toFixed(3);
+  };
+
+  const formatDate = (value) => {
+    if (!value) return "N/A";
+    const date = new Date(value);
+    return isNaN(date) ? "Fecha inválida" : date.toLocaleDateString();
+  };
+
+  // Filtrar datos combinando todos los filtros
+  const filteredData = data.filter(item => {
+    // Filtros para campos normales
+    const mainFieldsMatch = Object.entries(localFilters).every(([fieldName, filter]) => {
+      const field = fields.find(f => f.name === fieldName);
+      const value = item[fieldName];
+      
+      if (!filter) return true;
+      if (field?.type === "number") {
+        return (!filter.min || value >= filter.min) && 
+               (!filter.max || value <= filter.max);
       }
-    }
-    return value; // Devuelve el valor original si no es un número
-  };
-
-  // Función para formatear fechas según la configuración regional del navegador
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A"; // Si no hay fecha, devuelve "N/A"
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "N/A"; // Si la fecha no es válida, devuelve "N/A"
-
-    // Usa Intl.DateTimeFormat para formatear la fecha según la configuración regional
-    const formatter = new Intl.DateTimeFormat(undefined, {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
+      if (field?.type === "date") {
+        const dateValue = new Date(value);
+        return (!filter.start || dateValue >= new Date(filter.start)) &&
+               (!filter.end || dateValue <= new Date(filter.end));
+      }
+      return !filter.search || value.toString().toLowerCase().includes(filter.search.toLowerCase());
     });
-    return formatter.format(date); // Formato dependiente de la configuración regional
-  };
 
-  // Función para obtener el nombre de la persona a partir del P_id
-  const getPersonName = (P_id, field) => {
-    if (!field.options) return "N/A"; // Si no hay opciones, devuelve "N/A"
-    const person = field.options.find((option) => option.id === P_id);
-    return person ? person.name : "N/A"; // Devuelve el nombre de la persona o "N/A" si no se encuentra
-  };
+    // Filtros para campos relacionados (Persona)
+    const nombrePersona = personData[item.P_id]?.name?.toLowerCase() || "";
+    const apellidoPersona = personData[item.P_id]?.lastname?.toLowerCase() || "";
+    
+    const nombreMatch = nombrePersona.includes(nombreFilter.toLowerCase());
+    const apellidoMatch = apellidoPersona.includes(apellidoFilter.toLowerCase());
 
-  // Función para aplicar el filtro de búsqueda en campos de tipo string
-  const applyStringFilter = (item, field, filterValue) => {
-    if (field.name === "P_id") {
-      // Si el campo es P_id, busca en el nombre de la persona
-      const personName = getPersonName(item[field.name], field).toLowerCase();
-      return personName.includes(filterValue.toLowerCase());
-    } else {
-      // Para otros campos de tipo string, busca directamente en el valor
-      const fieldValue = item[field.name] ? item[field.name].toString().toLowerCase() : "";
-      return fieldValue.includes(filterValue.toLowerCase());
-    }
-  };
-
-  // Función para filtrar los datos según los filtros aplicados
-  const filterData = (data) => {
-    return data.filter((item) => {
-      return Object.keys(filters).every((fieldName) => {
-        const field = fields.find((f) => f.name === fieldName);
-        if (!field) return true; // Si el campo no existe, no se aplica filtro
-
-        const filter = filters[fieldName];
-        if (field.type === "number") {
-          // Filtro para campos numéricos
-          const value = item[fieldName];
-          return (
-            (!filter.min || value >= parseFloat(filter.min)) &&
-            (!filter.max || value <= parseFloat(filter.max))
-          );
-        } else if (field.type === "date") {
-          // Filtro para campos de fecha
-          const date = new Date(item[fieldName]);
-          return (
-            (!filter.start || date >= new Date(filter.start)) &&
-            (!filter.end || date <= new Date(filter.end))
-          );
-        } else if (field.type === "text" || field.type === "email") {
-          // Filtro para campos de tipo string
-          return applyStringFilter(item, field, filter.search || "");
-        }
-        return true; // Si no hay filtro, se incluye el elemento
-      });
-    });
-  };
-
-  // Datos filtrados
-  const filteredData = filterData(data);
+    return mainFieldsMatch && nombreMatch && apellidoMatch;
+  });
 
   return (
     <div className="item-list">
@@ -107,84 +80,133 @@ const DataTable = ({ data, fields, sortConfig, onSort, onEdit, onDelete, onFilte
           {/* Fila de Filtros */}
           <tr>
             {fields.filter(isFieldVisible).map((field) => (
-              <th key={`${field.name}-filter`}>
-                {/* Renderiza inputs de filtro según el tipo de campo */}
-                {field.type === "number" && (
+              <th key={`filter-${field.name}`}>
+                {field.type === "text" || field.type === "email" ? (
+                  <input
+                    type="text"
+                    placeholder={`Buscar ${field.label}`}
+                    onChange={(e) => setLocalFilters(prev => ({
+                      ...prev,
+                      [field.name]: { search: e.target.value }
+                    }))}
+                  />
+                ) : field.type === "number" ? (
                   <>
                     <input
                       type="number"
-                      placeholder="Min"
-                      onChange={(e) => handleFilterChange(field.name, e.target.value, 'min')}
+                      placeholder="Mín"
+                      onChange={(e) => setLocalFilters(prev => ({
+                        ...prev,
+                        [field.name]: { 
+                          ...prev[field.name], 
+                          min: e.target.value 
+                        }
+                      }))}
                     />
                     <input
                       type="number"
-                      placeholder="Max"
-                      onChange={(e) => handleFilterChange(field.name, e.target.value, 'max')}
+                      placeholder="Máx"
+                      onChange={(e) => setLocalFilters(prev => ({
+                        ...prev,
+                        [field.name]: { 
+                          ...prev[field.name], 
+                          max: e.target.value 
+                        }
+                      }))}
                     />
                   </>
-                )}
-                {field.type === "date" && (
+                ) : field.type === "date" ? (
                   <>
                     <input
                       type="date"
                       placeholder="Inicio"
-                      onChange={(e) => handleFilterChange(field.name, e.target.value, 'start')}
+                      onChange={(e) => setLocalFilters(prev => ({
+                        ...prev,
+                        [field.name]: { 
+                          ...prev[field.name], 
+                          start: e.target.value 
+                        }
+                      }))}
                     />
                     <input
                       type="date"
-                      placeholder="Final"
-                      onChange={(e) => handleFilterChange(field.name, e.target.value, 'end')}
+                      placeholder="Fin"
+                      onChange={(e) => setLocalFilters(prev => ({
+                        ...prev,
+                        [field.name]: { 
+                          ...prev[field.name], 
+                          end: e.target.value 
+                        }
+                      }))}
                     />
                   </>
-                )}
-                {(field.type === "text" || field.type === "email") && (
-                  <input
-                    type="text"
-                    placeholder="Buscar"
-                    onChange={(e) => handleFilterChange(field.name, e.target.value, 'search')}
-                  />
-                )}
+                ) : null}
               </th>
             ))}
-            <th></th> {/* Celda vacía para las acciones */}
+            
+            {/* Filtros para columnas relacionadas */}
+            {hasPIdField && !isPersonasTable && (
+              <>
+                <th>
+                  <input
+                    type="text"
+                    placeholder="Buscar Nombre"
+                    onChange={(e) => setNombreFilter(e.target.value)}
+                  />
+                </th>
+                <th>
+                  <input
+                    type="text"
+                    placeholder="Buscar Apellido"
+                    onChange={(e) => setApellidoFilter(e.target.value)}
+                  />
+                </th>
+              </>
+            )}
+            <th></th>
           </tr>
 
-          {/* Fila de Encabezados */}
+          {/* Encabezados */}
           <tr>
             {fields.filter(isFieldVisible).map((field) => (
               <th key={field.name}>
-                {field.label} {/* Muestra la etiqueta del campo */}
+                {field.label}
                 <button onClick={() => onSort(field.name)}>
-                  {/* Muestra un ícono de ordenación si el campo está siendo ordenado */}
-                  {sortConfig.key === field.name
-                    ? sortConfig.direction === "ascending"
-                      ? "🔼"
-                      : "🔽"
-                    : null}
+                  {sortConfig.key === field.name && (
+                    sortConfig.direction === "ascending" ? "🔼" : "🔽"
+                  )}
                 </button>
               </th>
             ))}
-            <th>Acciones</th> {/* Encabezado para la columna de acciones */}
+            {hasPIdField && !isPersonasTable && (
+              <>
+                <th>Nombre (Persona)</th>
+                <th>Apellido (Persona)</th>
+              </>
+            )}
+            <th>Acciones</th>
           </tr>
         </thead>
+        
         <tbody>
-          {/* Renderiza las filas de datos filtrados */}
           {filteredData.map((item) => (
             <tr key={item.id}>
               {fields.filter(isFieldVisible).map((field) => (
                 <td key={field.name}>
-                  {/* Muestra el nombre de la persona si el campo es P_id, de lo contrario formatea el valor */}
-                  {field.name === "P_id"
-                    ? getPersonName(item[field.name], field)
-                    : field.type === "number"
+                  {field.type === "number" 
                     ? formatNumber(item[field.name])
                     : field.type === "date"
                     ? formatDate(item[field.name])
-                    : item[field.name] || "N/A"}
+                    : item[field.name]}
                 </td>
               ))}
+              {hasPIdField && !isPersonasTable && (
+                <>
+                  <td>{personData[item.P_id]?.name || "N/A"}</td>
+                  <td>{personData[item.P_id]?.lastname || "N/A"}</td>
+                </>
+              )}
               <td>
-                {/* Componente para acciones (editar, eliminar) */}
                 <ItemActions item={item} onEdit={onEdit} onDelete={onDelete} />
               </td>
             </tr>
@@ -195,4 +217,4 @@ const DataTable = ({ data, fields, sortConfig, onSort, onEdit, onDelete, onFilte
   );
 };
 
-export default DataTable; // Exporta el componente DataTable
+export default DataTable;
