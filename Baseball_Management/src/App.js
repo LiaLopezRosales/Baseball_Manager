@@ -8,6 +8,7 @@ import AdminPage from './components/admin';
 import MainPage from './components/main-page';
 import ReportComponent from './components/report';
 import PlayerSwapForm from './components/PlayerSwapForm';
+import PlayerSwapTable from './components/PlayerSwapTable';
 import Queries from './components/Queries';
 
 //Importar formularios de Base de Datos
@@ -162,7 +163,8 @@ function App() {
                         {selectedOption === 'Estadísticas de juegos por equipos' && <ReportComponent report_id={6} report_name={selectedOption} />}
                         {selectedOption === 'Efectividad por posición' && <ReportComponent report_id={7} report_name={selectedOption} />}
                         {selectedOption === 'Jugadores de un equipo' && <ReportComponent report_id={8} report_name={selectedOption} />}
-                        {selectedOption === 'DT' && <PlayerSwapForm teamId={team} />}
+                        {selectedOption === 'Definir Cambios' && <PlayerSwapForm teamId={team} />}
+                        {selectedOption === 'Listar Cambios' && <PlayerSwapTable teamId={team} />}
                         {selectedOption === 'Qy' && <Queries selectedTable={selectedTable}/>}
                     </div>
 

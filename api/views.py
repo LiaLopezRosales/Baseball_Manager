@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
-from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition
+from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition, PlayerSwap
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 # from datetime import datetime
@@ -223,7 +223,70 @@ class PlayersAvailableInPosition(APIView):
         except Exception as e:
             return Response({"error": f"Error al obtener jugadores disponibles: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class PlayerSwapsForTeamView(APIView):
+    """
+    Obtiene los cambios de jugadores asociados a un equipo específico y permite eliminarlos.
+    """
 
+    def get(self, request, team_id):
+        """
+        Obtiene los cambios de jugadores del equipo basado en su team_id.
+        """
+        try:
+            # Obtener información del equipo
+            team = Team.objects.get(id=team_id)
+            team_data = {
+                "name": team.name,
+                "initials": team.initials,
+                "representative_entity": team.representative_entity,
+            }
 
+            # Obtener alineación del equipo
+            lineup = LineUp.objects.get(team_id=team_id)
 
+            # Obtener todos los equipos en el campo asociados a la alineación
+            team_on_field_ids = TeamOnTheField.objects.filter(lineup_id=lineup).values_list('id', flat=True)
 
+            # Obtener cambios de jugador que involucren estos equipos en el campo
+            swaps = PlayerSwap.objects.filter(game_team__in=team_on_field_ids)
+
+            # Serializar los datos
+            swaps_data = [
+                {
+                    "id": swap.id,
+                    "old_player_id": swap.old_player.id,
+                    "old_player_name": f"{swap.old_player.P_id.name} {swap.old_player.P_id.lastname}",
+                    "new_player_id": swap.new_player.id,
+                    "new_player_name": f"{swap.new_player.P_id.name} {swap.new_player.P_id.lastname}",
+                    "position_id": swap.position.id,
+                    "position_name": swap.position.name,
+                    "date": swap.date.strftime("%Y-%m-%d"),
+                    "game_team": swap.game_team.id,
+                }
+                for swap in swaps
+            ]
+
+            return Response({
+                "team_data": team_data,
+                "player_swaps": swaps_data,
+            }, status=status.HTTP_200_OK)
+
+        except Team.DoesNotExist:
+            return Response({"error": "Equipo no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        except LineUp.DoesNotExist:
+            return Response({"error": "No se encontró alineación para el equipo"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": f"Error interno: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, swap_id):
+        """
+        Elimina un cambio de jugador específico.
+        """
+        try:
+            swap = PlayerSwap.objects.get(id=swap_id)
+            swap.delete()
+            return Response({"message": "Cambio de jugador eliminado exitosamente."}, status=status.HTTP_200_OK)
+        except PlayerSwap.DoesNotExist:
+            return Response({"error": "Cambio de jugador no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": f"Error interno: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

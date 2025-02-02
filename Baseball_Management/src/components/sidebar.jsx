@@ -124,7 +124,8 @@ function Sidebar({ role, onOptionSelect, onModalOpen }) {
             </>
           )}
 
-          {role === 'Director Técnico' && <li onClick={() => onOptionSelect('DT')}>Cambios en Alineaciones</li>}
+          {role === 'Director Técnico' && <li onClick={() => onOptionSelect('Definir Cambios')}>Establecer Cambios en Alineaciones</li>}
+          {role === 'Director Técnico' && <li onClick={() => onOptionSelect('Listar Cambios')}>Mostrar Cambios en Alineaciones</li>}
         </ul>
       </div>
 

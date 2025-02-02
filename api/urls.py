@@ -2,7 +2,7 @@
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import LoginView, PlayerSwapByDTView, PlayersAvailableInPosition, LineUpForTheGameView
+from .views import LoginView, PlayerSwapByDTView, PlayersAvailableInPosition, LineUpForTheGameView, PlayerSwapsForTeamView
 
 # Definición del router para los ViewSets (CRUD automático)
 router = DefaultRouter()
@@ -14,6 +14,8 @@ urlpatterns = [
     path('player-swap/', PlayerSwapByDTView.as_view(), name='player_swap_post'),  # Para guardar cambios
     path('player-swap/lineup/<int:team_on_the_field>/', LineUpForTheGameView.as_view(), name='players_in_lineup'),
     path('player-swap/available/<int:team_id>/<int:position_id>/<int:series_id>/<int:lineup_id>/', PlayersAvailableInPosition.as_view(), name='available_players'),
+    path("player-swaps/team/<int:team_id>/", PlayerSwapsForTeamView.as_view(), name="player-swaps"),
+    path("player-swaps/delete/<int:swap_id>/", PlayerSwapsForTeamView.as_view(), name="delete-player-swap"),
     path('queries/', include('api.reports.urls')),
 ] + router.urls  # Agrega automáticamente las rutas CRUD para el ViewSet
 
