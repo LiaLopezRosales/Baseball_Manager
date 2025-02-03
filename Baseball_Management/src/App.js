@@ -135,6 +135,7 @@ function App() {
                     <Routes>
                         <Route exact path='/' element={selectedOption === "" && <MainPage />}/>
                         <Route path="/admin-dashboard" element={<AdminPage />} />
+                        <Route exact path='/DT' element={selectedOption === "" && <MainPage />}/>
                         {/* Define otras rutas aquí según sea necesario */}
                     </Routes>
 
