@@ -29,7 +29,7 @@ function Sidebar({ role, onOptionSelect, onModalOpen }) {
     <img src={Logo} alt="Logo" className='logo'/>
       <div className='sidebar-content'>
         <ul>
-          <li onClick={() => onOptionSelect('Main')}>Main</li>
+          <li onClick={() => onOptionSelect('Main')}>Inicio</li>
 
           {/* Botón "Consultas" con una flecha que cambia de dirección */}
           <li onClick={handleQueriesClick}>

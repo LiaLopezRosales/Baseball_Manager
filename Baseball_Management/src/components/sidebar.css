@@ -1,92 +1,126 @@
+/* Estilos base del Sidebar */
 .sidebar {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 250px;
+  width: 280px;
+  /* background-color: #ffffff; */
+  border-right: 1px solid #77a9f3;
+  box-shadow: 2px 0 5px rgba(27, 42, 112, 0.554);
+  overflow: hidden;
 }
+
+/* Encabezado con Logo */
 
 .logo {
   position: relative;
   left: 30%;
-  height: 80px;
-  width: 80px;
+  height: 130px;
+  width: 130px;
   clip-path: circle(50%);
   margin-bottom: 10px;
 }
 
-.sidebar-footer { margin-top: auto; /* Empuja el footer hacia la parte inferior */ 
-  margin-bottom: 40px; /* Añade un poco de espacio desde el borde inferior */
-}
-
+/* Contenedor del Sidebar */
 .sidebar-content {
   flex: 1;
-  overflow-y: auto; /* Hacer que esta sección sea desplazable */
-}
-
-.sidebar ul {
-  list-style-type: none; padding: 0; 
-  padding: 0;
-  margin: 0; /* Asegúrate de que no haya margen para el ul */
-}
-
-.sidebar li {
+  overflow-y: auto;
   padding: 10px;
+}
+
+/* Lista Principal */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Elementos principales alineados a la izquierda */
+.sidebar li {
+  display: flex;
+  align-items: center;
+  padding: 14px 15px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #081726;
   cursor: pointer;
+  transition: background-color 0.3s ease-in-out, color 0.3s;
+  border-radius: 5px;
+  text-align: left;  /* Mantiene alineación a la izquierda */
 }
 
-
-.sidebar ul li { 
-  text-align: left; /* Alinear el texto a la izquierda */ 
-  font-size: 18px; /* Ajustar el tamaño de la letra */ 
-  padding: 10px 0; cursor: 
-  pointer; transition: background-color 0.3s; 
-  padding-left: 10px;
-} 
-
-.sidebar ul li:hover { 
-  background-color: rgba(47, 79, 79, 0.3); /* Añadir un efecto al pasar el ratón */
+/* Íconos en los elementos */
+.sidebar li i {
+  margin-right: 10px;
+  font-size: 20px;
+  color: #081726;
 }
 
+/* Hover sobre los elementos */
+.sidebar li:hover {
+  background-color: rgba(0, 123, 255, 0.15);
+  color: #0044ff;
+}
+
+/* Submenús alineados al centro */
+.sidebar ul ul {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
+  text-align: center;
+}
+
+/* Elementos del Submenú centrados */
+.sidebar ul ul li {
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+  text-align: center; /* Asegura que el texto también esté centrado */
+  padding: 10px 15px;
+  font-size: 20px;
+  color: #07192b;
+}
+
+.sidebar ul ul li:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+}
+
+/* Flechas de los menús desplegables */
+.sidebar li span {
+  margin-left: auto;
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar li span.open {
+  transform: rotate(180deg);
+}
+
+/* Footer del Sidebar */
 .sidebar-footer {
   padding: 10px;
-  background-color: rgba(155, 19, 19, 0); /* Puedes ajustar el estilo según tus necesidades */
-  position: sticky;
-  bottom: 0;
-  z-index: 1000; /* Asegúrate de que esté sobre el contenido desplazable */
+  border-top: 1px solid #1956c8;
+  background-color: rgba(155, 19, 19, 0);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-top: 25px; /* Ajusta esta propiedad para moverlo más arriba o abajo */
+  margin-bottom: 20px;
 }
 
+/* Botón en el Footer */
 .sidebar-footer button {
-  width: 100%;
-  padding: 10px;
-  cursor: pointer;
+  width: 85%;
+  padding: 20px;
   background-color: #007bff;
   color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 55px;
+  font-size: 22px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .sidebar-footer button:hover {
   background-color: #0056b3;
-}
-
-.sidebar ul ul {
-  margin-left: 20px;
-  list-style-type: circle;
-}
-
-.sidebar ul ul li {
-  padding: 5px 0;
-}
-
-.sidebar li {
-  cursor: pointer;
-  padding: 8px 0;
-  display: flex;
-  align-items: center;
-}
-
-.sidebar li:hover {
-  background-color: #f0f0f0;
 }
