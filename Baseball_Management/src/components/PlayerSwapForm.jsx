@@ -17,6 +17,14 @@ function PlayerSwapForm({ teamId }) {
     const [positionName, setPositionName] = useState(null);
 
 
+    // useEffect(() => {
+    //     setSelectedGame(null);
+    //     setSelectedLineupPlayer(null);
+    //     setSelectedParticipation(null);
+    //     setPositionName(null);
+    //     setParticipations([]);
+    // }, []);
+
     useEffect(() => {
         if (!teamId) {
             console.log("No se recibió un teamId válido.");
@@ -86,6 +94,12 @@ function PlayerSwapForm({ teamId }) {
 
     const handleParticipationSelect = (player) => {
         setSelectedParticipation(player);
+    };
+
+    const handleGoBack = () => {
+        if (selectedGame != null && selectedLineupPlayer == null){ setSelectedGame(null) }    
+        if (selectedGame != null && selectedLineupPlayer != null && selectedParticipation == null){ setSelectedLineupPlayer(null) }
+        if (selectedGame != null && selectedLineupPlayer != null && selectedParticipation != null){ setSelectedParticipation(null) }
     };
 
     // Actualización automática de los campos de cambio
@@ -159,7 +173,7 @@ function PlayerSwapForm({ teamId }) {
                 <h3>{teamData.representative_entity}</h3>
             </header>
 
-            <section className="games-section">
+            <section className="games-section" hidden={!(selectedGame == null)}>
                 <h2>Juegos Disponibles</h2>
                 <table className="games-table">
                     <thead>
@@ -187,8 +201,8 @@ function PlayerSwapForm({ teamId }) {
                 </table>
             </section>
 
-            <section className="players-section">
-                <div className="lineup-players">
+            <section className="players-section" >
+                <div className="lineup-players" hidden={!(selectedGame != null && selectedLineupPlayer == null)}>
                     <h2>
                         {changeFields.gameDetails
                             ? `Jugadores de la Alineación en ${changeFields.gameDetails}`
@@ -206,7 +220,7 @@ function PlayerSwapForm({ teamId }) {
                     </ul>
                 </div>
 
-                <div className="participation-players">
+                <div className="participation-players" hidden={!(selectedGame != null && selectedLineupPlayer != null && selectedParticipation == null)}>
                     <h2>
                         {positionName
                             ? `Jugadores Disponibles en ${positionName}`
@@ -238,7 +252,12 @@ function PlayerSwapForm({ teamId }) {
                     <p><strong>Jugador Nuevo:</strong> {changeFields.participationPlayer}</p>
                     <p><strong>Posición:</strong> {changeFields.position}</p>
                 </div>
-                <button onClick={handleSaveChanges}>Guardar Cambios</button>
+
+                { (selectedGame != null && selectedLineupPlayer != null && selectedParticipation != null) ?
+                    <button onClick={handleSaveChanges} style={{ marginRight: 15, backgroundColor: 'green'}}>Guardar Cambios</button> : ""
+                }
+                <button onClick={handleGoBack} hidden={selectedGame == null} style={{backgroundColor: 'purple'}}>Atrás</button>
+                
             </section>
         </div>
     );
