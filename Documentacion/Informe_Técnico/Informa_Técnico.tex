@@ -449,7 +449,7 @@
     
     ---
     
-    \section*{Esquema con el diseño de la aplicación}
+    \section*{Esquema de las clases definidas}
     \begin{figure}[h]
         \centering
         \includegraphics[width=0.8\textwidth]{Copy of Gestion_de_campeonatos_de_beisbol.png}
@@ -558,9 +558,217 @@
             \item React recibe la respuesta, actualiza el estado de la aplicación y re-renderiza los componentes para mostrar los datos al usuario.
         \end{itemize}
     \end{enumerate}
-    \section*{Esquema de las clases definidas}
+    \section*{Esquema con el diseño de la aplicación}
+    El diseño de la aplicación de Gestión de Campeonatos de Béisbol se fundamenta en la interacción 
+    entre los distintos actores y los casos de uso definidos a continuación. \\ 
 
+    Los actores principales de la aplicación son:
+    \begin{itemize}
+        \item \textbf{Administrador:} Responsable de gestionar los datos de series, equipos y jugadores, además de configurar el sistema y generar reportes.
+        \item \textbf{Director Técnico:} Encargado de gestionar las alineaciones de los equipos y consultar estadísticas específicas.
+        \item \textbf{Periodista/Usuario General:} Consulta las estadísticas y genera reportes basados en los datos almacenados en el sistema.
+    \end{itemize}
+
+    Y entre los principales casos de usos se encuentran:
+    \begin{itemize}
+        \item \textbf{Registrar datos en el sistema}
+        \begin{itemize}
+            \item \textbf{Actor:} Administrador
+            \item \textbf{Descripción:} El administrador registra datos de temporadas, series, equipos y jugadores mediante formularios en la aplicación web.
+        \end{itemize}
+    
+        \item \textbf{Gestionar alineaciones de equipos}
+        \begin{itemize}
+            \item \textbf{Actores:} Director Técnico y Administrador
+            \item \textbf{Descripción:} Permite al director técnico modificar la posición de los jugadores en la alineación inicial y realizar ajustes durante una serie.
+        \end{itemize}
+    
+        \item \textbf{Consultar estadísticas de jugadores y equipos}
+        \begin{itemize}
+            \item \textbf{Actores:} Administrador, Director Técnico, Periodista/Usuario General
+            \item \textbf{Descripción:} El sistema permite acceder a estadísticas detalladas, como promedios de bateo, efectividad de los lanzadores y resultados de los equipos.
+        \end{itemize}
+    
+        \item \textbf{Obtener reportes personalizados}
+        \begin{itemize}
+            \item \textbf{Actores:} Administrador, Director Técnico, Periodista/Usuario General
+            \item \textbf{Descripción:} Genera reportes que resumen el desempeño de jugadores y equipos en una serie.
+        \end{itemize}
+    
+        \item \textbf{Visualizar datos tabulares y gráficos}
+        \begin{itemize}
+            \item \textbf{Actores:} Administrador, Director Técnico, Periodista/Usuario General
+            \item \textbf{Descripción:} Presentación visual de estadísticas mediante tablas y gráficos para un análisis claro y rápido.
+        \end{itemize}
+    
+        \item \textbf{Listar equipos por clasificación}
+        \begin{itemize}
+            \item \textbf{Actores:} Administrador, Director Técnico, Periodista/Usuario General
+            \item \textbf{Descripción:} Permite obtener la clasificación de los equipos según los resultados de cada serie.
+        \end{itemize}
+    
+        \item \textbf{Modificar roles de usuarios}
+        \begin{itemize}
+            \item \textbf{Actores:} Administrador
+            \item \textbf{Descripción:} El administrador puede asignar o modificar roles para los usuarios del sistema.
+        \end{itemize}
+    
+        \item \textbf{Exportar reportes a formato PDF}
+        \begin{itemize}
+            \item \textbf{Actores:} Administrador, Director Técnico, Periodista/Usuario General
+            \item \textbf{Descripción:} Funcionalidad para guardar reportes generados en formato PDF, con soporte para otros formatos adicionales.
+        \end{itemize}
+    \end{itemize}
+    
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.8\textwidth]{diagrama.png}
+        \caption{Diagrama de casos de uso}
+        \label{fig:gestion_campeonatos1}
+    \end{figure}
     \section*{Solución propuesta}
+    El presente sistema ha sido diseñado para optimizar la gestión de campeonatos de béisbol, 
+    facilitando el registro y administración de datos clave como equipos, jugadores, alineaciones y 
+    estadísticas de desempeño. Con el objetivo de mejorar la eficiencia en la organización y análisis 
+    de la información, la solución implementa una aplicación web con una interfaz intuitiva y herramientas 
+    avanzadas de procesamiento de datos.\\
+
+    La propuesta se fundamenta en una arquitectura N-Capas combinada con un Microkernel, permitiendo escalabilidad y 
+    modularidad en la funcionalidad del sistema. A través de un enfoque estructurado, se garantiza la seguridad y consistencia de 
+    la información, ofreciendo a cada actor del sistema (administradores, directores técnicos y periodistas) las herramientas necesarias 
+    para interactuar con los datos de manera eficiente.\\
+
+    Las capas propuestas son:
+
+    \begin{enumerate}
+        \item Capa de Presentación: Interfaz de Usuario
+        
+        La capa de presentación es el punto de contacto entre el sistema y los usuarios. En este caso, incluiría 
+        formularios, vistas y \textit{dashboards} personalizados según los roles del usuario.
+        
+        \begin{itemize}
+            \item \textbf{Responsabilidades:}
+            \begin{itemize}
+                \item Diseñar formularios dinámicos para el ingreso de datos por parte del administrador.
+                \item Ofrecer vistas diferenciadas para administradores, directores técnicos y periodistas.
+                \item Implementar filtros interactivos para que los usuarios consulten estadísticas y generen 
+                reportes personalizados.
+                \item Mostrar datos tabulares, como resultados históricos y estadísticas en tiempo real.
+            \end{itemize}
+        \end{itemize}
+        
+        \item Capa de Negocio: Lógica del Sistema
+        
+        La capa de negocio maneja toda la lógica que regula el funcionamiento del sistema, separando las reglas de 
+        negocio de las funcionalidades específicas de la interfaz o los datos.
+        
+        \begin{itemize}
+            \item \textbf{Responsabilidades:}
+            \begin{itemize}
+                \item Cálculo de estadísticas avanzadas como promedios de bateo o efectividad de lanzadores.
+                \item Validación de alineaciones en tiempo real para garantizar la coherencia de los equipos.
+                \item Gestión de roles y permisos, asegurando que cada usuario acceda únicamente a sus funcionalidades 
+                específicas.
+                \item Coordinación de las solicitudes de reportes y actualización de datos en la base de datos.
+            \end{itemize}
+            \item \textbf{Importancia:} 
+            Esta capa es el núcleo funcional del sistema, asegurando que las operaciones se realicen de manera 
+            eficiente y coherente.
+        \end{itemize}
+
+        \item Capa de Acceso a Datos: Persistencia
+        
+        La capa de acceso a datos es responsable de interactuar directamente con la base de datos. Esto incluye la 
+        consulta, modificación y almacenamiento de datos relevantes para el proyecto.
+        
+        \begin{itemize}
+            \item \textbf{Responsabilidades:}
+            \begin{itemize}
+                \item Almacenar datos históricos y en tiempo real, como estadísticas de jugadores, resultados de 
+                partidos y alineaciones.
+                \item Proveer acceso a consultas complejas, como listar los equipos ganadores por temporada o generar 
+                reportes sobre las series con mayor cantidad de juegos.
+                \item Optimizar las operaciones de base de datos para soportar consultas frecuentes y minimizar 
+                tiempos de respuesta.
+            \end{itemize}
+        \end{itemize}
+    \end{enumerate}
+
+    Y a su vez la implementación de Microkernel se encargaría:
+
+    \begin{itemize}
+        \item \textbf{Generación de Reportes:}
+        \begin{itemize}
+            \item Los \textit{plugins} generarían reportes en diferentes formatos, comenzando por PDF y con capacidad para añadir formatos como Excel o CVC.
+        \end{itemize}
+
+        \item \textbf{Carga Dinámica de Plugins:}
+        \begin{itemize}
+            \item Los \textit{plugins} se detectan en tiempo de ejecución, permitiendo al sistema integrarlos sin interrupciones.
+        \end{itemize}
+
+        \item \textbf{Integración con N-Capas:}
+        \begin{itemize}
+            \item La capa de negocio gestiona las solicitudes de reportes, mientras que el núcleo del Microkernel se comunica con los \textit{plugins} para entregar los resultados.
+        \end{itemize}
+    \end{itemize}
+
+    Además, se han seleccionado patrones específicos para mejorar aspectos clave como la gestión de datos, la comunicación entre capas y la presentación de información. 
+    Estos patrones proporcionan una estructura flexible que facilita la evolución del sistema y permite futuras mejoras sin comprometer su estabilidad. \\
+
+    Entre los patrones implementados se encuentran:
+
+    \begin{itemize}
+        \item \textbf{Repository Pattern} el cual que actúa como una capa intermedia entre la lógica de negocio y el acceso a datos. Entre sus principales caracteristicas se ecuentran:
+        \begin{enumerate}
+            \item \textbf{Abstracción del acceso a datos:}
+            \begin{itemize}
+                \item La capa de repositorio encapsula la lógica de consulta, lo que permite desacoplar los modelos y el acceso a la base de datos de la lógica de negocio.
+                \item Esto facilita realizar cambios en la estructura de la base de datos o en el mecanismo de almacenamiento sin afectar el resto del sistema.
+            \end{itemize}
+
+            \item \textbf{Interfaz unificada:}
+            \begin{itemize}
+                \item Proporciona una API consistente para las operaciones CRUD (Crear, Leer, Actualizar, Eliminar) y consultas personalizadas.
+            \end{itemize}
+
+            \item \textbf{Centralización de la lógica de acceso a datos:}
+            \begin{itemize}
+                \item Todo el código relacionado con la interacción con la base de datos está centralizado, haciendo que sea más mantenible.
+            \end{itemize}
+
+            \item \textbf{Facilidad de pruebas:}
+            \begin{itemize}
+                \item Como la lógica de acceso a datos está encapsulada, es posible usar simulaciones (mocks) en las pruebas unitarias para probar la lógica de negocio sin depender de la base de datos real.
+            \end{itemize}
+        \end{enumerate}
+
+        \item \textbf{MVC Pattern} el cual se encuentra distribuido entre un cliente desarrollado en React y un servidor desarrollado en Django, siguiendo un enfoque RESTful. Esto implica una separación clara entre las responsabilidades del frontend y del backend:
+
+        En el backend desarrollado con Django, los elementos del patrón MVC se distribuyen de la siguiente manera:
+
+        \begin{itemize}
+            \item \textbf{Model:} Define los modelos de datos y la lógica de negocio asociada. Cada clase de modelo representa una tabla en la base de datos y permite realizar operaciones CRUD mediante el ORM.
+            
+            \item \textbf{View:} En una aplicación RESTful, las vistas de Django (a través de Django REST Framework) funcionan como una capa de presentación de datos en formato JSON, no como vistas tradicionales en MVC que generan HTML.
+
+            \item \textbf{Controller:} En el contexto de Django, el rol de ``Controlador'' en el patrón MVC es desempeñado por las vistas (\texttt{views.py}). Estas se encargan de:
+                \begin{itemize}
+                    \item \textit{Recibir solicitudes HTTP:} Las vistas manejan solicitudes del cliente como \texttt{GET}, \texttt{POST}, \texttt{PUT} o \texttt{DELETE}.
+                    \item \textit{Interactuar con el Modelo:} Realizan operaciones sobre los datos, como consultas o actualizaciones, utilizando los modelos definidos en el ORM de Django.
+                    \item \textit{Generar una Respuesta:} Transforman los datos en una respuesta adecuada (por ejemplo, JSON) que es enviada al cliente.
+                \end{itemize}
+        \end{itemize}
+
+        En el frontend desarrollado con React, los elementos del patrón MVC se adaptan de la siguiente manera:
+
+        \begin{itemize}
+            \item \textbf{View:} Renderiza la interfaz de usuario (UI) en el navegador del usuario, basándose en los datos obtenidos del backend. Los componentes de React representan esta capa de la arquitectura.
+
+            \item \textbf{Controller:} En React, no hay un controlador explícito como en el MVC clásico, pero ciertas partes de una aplicación React pueden desempeñar funciones similares a un controlador como los componentes. Los componentes pueden manejar la lógica de presentación y también gestionar interacciones del usuario, como clics, envíos de formularios o cambios en el estado. Además, los componentes suelen enviar solicitudes a la API (backend) para obtener datos.
+        \end{itemize}
+    \end{itemize}
 
     \section*{Otras informaciones relevantes}
 
