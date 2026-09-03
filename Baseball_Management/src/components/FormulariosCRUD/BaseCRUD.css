@@ -1,410 +1,545 @@
-/* ================== RESET GLOBAL ================== */
-html, 
-body, header {
-    height: 100%;
-    margin: 0;
-}
+/* ============================================================
+   CRUD Base — Diamond Plate
+   Tabla dark, búsqueda global, filtros por columna, paginación,
+   skeleton loading y empty state acordes al tema.
+   ============================================================ */
 
-body, header {
-    background: linear-gradient(45deg, #49a09d, #5f2c82); /* Fondo azul degradado original */
-    font-family: sans-serif;
-    font-weight: 100;
-    background-size: cover;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-}
-
-/* ================== CONTENEDOR PRINCIPAL ================== */
+/* ---------- Contenedor ---------- */
 .base-crud-container {
-    font-family: 'Times New Roman', Times, serif;
-    padding: 20px;
-    max-width: 1400px;
-    min-width: 800px;
-    margin: 0 auto;
-    text-align: center;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: left;
 }
 
-.base-crud-container h1 {
-    font-size: 64px;  /* Aumenta el tamaño */
-    font-weight: bold; /* Hace el título más prominente */
-    margin-bottom: 40px; /* Agrega espacio debajo */
-    color: rgb(235, 237, 243); /* Asegura visibilidad sobre el fondo */
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Da un efecto de sombra para mejor contraste */
+.base-crud-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
-/* ================== TABLA ================== */
-.item-list {
-    margin: 20px auto;
-    overflow-x: auto;
-    background: linear-gradient(45deg, #0e599b, #6f3fa8); /* Degradado más claro para integrar con el fondo */
-    padding: 20px;
-    border-radius: 30px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 100%;
+.base-crud-title {
+  font-family: var(--font-sans);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0;
 }
 
-.item-list table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 50rem;
-    background: rgba(255, 255, 255, 0.1); /* Fondo semi-transparente para mejorar legibilidad */
+.base-crud-actions {
+  display: flex;
+  gap: 10px;
 }
 
-.item-list th, .item-list td {
-    text-align: center;
-    border: 1px solid #ccc;
-    padding: 10px;
-    color: white; /* Mejor contraste */   /*8*/
-}
-
-.item-list th {
-    background-color: rgba(95, 44, 130, 0.9);
-    font-weight: bold;
-}
-
-/* ================== ORDENAMIENTO (SORTABLE) ================== */
-.item-list th.sortable {
-    cursor: pointer;
-    position: relative;
-    padding-right: 25px;
-}
-
-.item-list th.sortable button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    color: white;
-    font-weight: bold;
-    margin-left: 5px;
-}
-
-.item-list th.sortable button:hover {
-    background-color: #7a3fb9;
-}
-
-/* Icono de ordenamiento */
-.item-list th.sortable button::after {
-    content: "⇅";
-    font-size: 14px;
-    margin-left: 5px;
-    color: rgb(0, 0, 0);
-    opacity: 0.6;
-    position: absolute;
-}
-
-/* Estado de orden ascendente */
-.item-list th.sortable.asc button::after {
-    content: "🔼";
-    opacity: 1;
-}
-
-/* Estado de orden descendente */
-.item-list th.sortable.desc button::after {
-    content: "🔽";
-    opacity: 1;
-}
-
-/* ================== FILTROS DE BÚSQUEDA ================== */
-.item-list input[type="text"], 
-.item-list input[type="number"], 
-.item-list input[type="date"] {
-    width: calc(100% - 50px);
-    padding: 6px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    font-size: 16px;
-    text-align: center;
-    margin-top: 5px;
-}
-
-.item-list input[type="text"]:focus, 
-.item-list input[type="number"]:focus, 
-.item-list input[type="date"]:focus {
-    border-color: rgb(176, 46, 223);
-    outline: none;
-    box-shadow: 0 0 5px rgba(60, 211, 206, 0.5);
-}
-
-/* ================== PAGINADOR ================== */
-.pagination-controls {
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.pagination-controls button {
-    background-color: #5f2c82;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 45px;
-    margin: 0 10px;
-    font-weight: bold;
-}
-
-.pagination-controls button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-.pagination-controls span {
-    font-size: 16px;
-    color: #fff;
-    font-weight: bold;
-    background-color: rgba(0, 0, 0, 0.3); /* Fondo semi-transparente para mayor visibilidad */
-    padding: 5px 10px;
-    border-radius: 20px;
-}
-
-/* ================== BOTONES ================== */
-.edit-button, .delete-button, .add-button, .refresh-button {
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 55px;
-    font-weight: bold;
-}
-
-.edit-button {
-    background-color: #1ed81b;
-}
-
-.delete-button {
-    background-color: #cc1f12;
-}
-
+.refresh-button,
 .add-button {
-    background-color: rgb(54, 183, 34);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
 .refresh-button {
-    background-color: rgb(30, 43, 227);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
 }
 
-.edit-button:hover, .delete-button:hover, .add-button:hover, .refresh-button:hover {
-    opacity: 0.8;
+.refresh-button:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  box-shadow: none;
+  transform: none;
 }
 
-/* ================== ERRORES ================== */
-.error-message {
-    color: red;
-    font-size: 0.8em;
-    margin-top: 5px;
+.add-button {
+  background: var(--accent);
+  color: var(--text-inverse);
 }
 
-/* ================== FORMULARIO ================== */
+.add-button:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ---------- Tabla ---------- */
+.item-list {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* Toolbar de búsqueda global */
+.dt-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-tertiary);
+}
+
+.dt-search {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+}
+
+.dt-search__icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.dt-search__input {
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dt-search__input::placeholder {
+  color: var(--text-muted);
+}
+
+.dt-search__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Wrapper scroll horizontal */
+.dt-table-wrap {
+  overflow-x: auto;
+}
+
+.dt-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 48rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.dt-th {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-tertiary);
+  white-space: nowrap;
+}
+
+.dt-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  padding: 0;
+}
+
+.dt-sort-btn:hover {
+  color: var(--accent);
+  box-shadow: none;
+  transform: none;
+}
+
+.dt-sort-idle {
+  color: var(--border-strong);
+}
+
+.dt-sort-active {
+  color: var(--accent);
+}
+
+.dt-actions-head {
+  width: 110px;
+  text-align: center;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Fila de filtros */
+.dt-filter-row th {
+  padding: 8px 10px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dt-filter-range {
+  display: flex;
+  gap: 6px;
+}
+
+.dt-filter-row input[type="text"],
+.dt-filter-row input[type="number"],
+.dt-filter-row input[type="date"] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-family: var(--font-sans);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dt-filter-row input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.dt-cell {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.dt-row:hover .dt-cell {
+  background: var(--bg-tertiary);
+}
+
+/* Acciones */
+.dt-actions {
+  text-align: center;
+}
+
+.dt-actions-group {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.dt-action-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.dt-action-btn:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.dt-action-btn--edit:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.dt-action-btn--delete:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* Skeleton loading */
+.dt-skeleton-row .dt-cell {
+  height: 46px;
+}
+
+.dt-skeleton-cell {
+  height: 12px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    100deg,
+    var(--bg-tertiary) 40%,
+    var(--bg-elevated) 50%,
+    var(--bg-tertiary) 60%
+  );
+  background-size: 200% 100%;
+  animation: dt-shimmer 1.4s infinite linear;
+}
+
+.dt-skeleton-actions {
+  width: 72px;
+  height: 32px;
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+}
+
+/* Empty state */
+.dt-empty {
+  text-align: center;
+  padding: 48px 20px !important;
+}
+
+.dt-empty__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.dt-empty__inner svg {
+  color: var(--border-strong);
+}
+
+.dt-empty__inner p {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+}
+
+.dt-empty__inner span {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+}
+
+@keyframes dt-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ---------- Paginación ---------- */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.page-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: none;
+  transform: none;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.page-info {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.page-info strong {
+  color: var(--text-primary);
+}
+
+/* ---------- Formulario ---------- */
 .item-form {
-    margin-top: 20px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.15); /* Transparencia para que se integre */
-    border-radius: 55px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-    color: white;
+  margin-top: 24px;
+  padding: 28px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
 }
 
 .item-form h2 {
-    text-align: center;
-    margin-bottom: 15px;
+  text-align: center;
+  margin: 0 0 20px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
 .form-group {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Distribuye el label e input */
-    margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .form-group label {
-    width: 30%; /* Ajusta el ancho del label */
-    font-weight: bold;
-    color: white;
-    text-align: left;
-    min-width: 120px; /* Asegura que los labels no sean demasiado pequeños */
+  width: 30%;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+  min-width: 120px;
+  font-size: 0.9rem;
 }
 
-.form-group input, 
+.form-group input,
 .form-group select {
-    width: 65%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 55px;
-    font-size: 16px;
-    background-color: rgba(255, 255, 255, 0.2);  /**/
-    color: white;
+  width: 65%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.form-group input:focus, 
+.form-group input:focus,
 .form-group select:focus {
-    border-color: #5f2c82;
-    outline: none;
-    box-shadow: 0 0 5px rgba(95, 44, 130, 0.5);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-/* ================== AJUSTE ESPECÍFICO PARA INPUTS NUMÉRICOS ================== */
-.form-group input[type="number"] {
-    text-align: left; /* Para mejor legibilidad de números */
-}
-
-/* ================== FORMULARIO - ACCIONES ================== */
-.form-actions {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.form-actions button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 55px;
-    cursor: pointer;
-    font-size: 16px;
-    margin: 0 10px;
-    font-weight: bold;
-}
-
-.form-actions button:first-child {
-    background-color: #3cd3ce;
-    color: white;
-}
-
-.form-actions button:last-child {
-    background-color: #cc1f12;
-    color: white;
-}
-
-.form-actions button:hover {
-    opacity: 0.8;
-}
-
-/* ================== SELECTOR (DROPDOWN) ================== */
 .form-group select {
-    width: 65%;
-    max-width: 500px;
-    min-width: 250px;
-    padding-right: 30px; /* Espacio para la flecha */
-    padding-left: (100% - 30px) ;
-    appearance: none;
-    background-size: 20px;
-    border-radius: 45px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aa5b1' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
 }
 
-/* ================== INPUTS NUMÉRICOS EN FORMULARIO ================== */
-.form-group input[type="number"] {
-    width: calc(100% - 40px); /* Ajusta el ancho sin que choque con los labels */
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 55px;
-    font-size: 16px;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-/* Cuando el input está en foco */
-.form-group input[type="number"]:focus {
-    border-color: #3cd3ce;
-    outline: none;
-    box-shadow: 0 0 5px rgba(60, 211, 206, 0.5);
-}
-
-/* ================== INPUTS NUMÉRICOS CON BOTONES (MIN/MAX) ================== */
-.number-input-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 65%;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 55px;
-    padding: 5px;
-}
-
-.number-input-container input {
-    width: 70%; /* Ajusta el ancho para que no ocupe todo el espacio */
-    text-align: center;
-    border: none;
-    background: transparent;
-    color: white;
-    font-size: 16px;
-}
-
-/* Botones de incremento y decremento */
-.number-input-container button {
-    background-color: #3cd3ce;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-.number-input-container button:hover {
-    background-color: #2ba5a0;
-}
-
-/* ================== INPUT DE CONTRASEÑA ================== */
+/* Campo de contraseña */
 .form-group.password {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    position: relative;
+  position: relative;
 }
 
-.form-group.password label {
-    width: 30%;
-    font-weight: bold;
-    color: white;
-    text-align: left;
-    min-width: 120px;
-}
-
-/* Contenedor que envuelve el input y el botón */
 .password-container {
-    display: flex;
-    align-items: center;
-    width: 65%;
-    position: relative;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 55px;
-    border: 1px solid #ccc;
-    padding: 0 10px;
+  display: flex;
+  align-items: center;
+  width: 65%;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0 8px;
 }
 
-/* Input de contraseña */
 .password-container input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    color: white;
-    font-size: 16px;
-    padding: 10px;
-    outline: none;
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  padding: 10px;
+  outline: none;
+  width: auto;
 }
 
-/* Elimina el borde duplicado */
 .password-container input:focus {
-    border: none;
-    box-shadow: none;
+  border: none;
+  box-shadow: none;
 }
 
-/* Botón de visibilidad de contraseña */
 .toggle-password {
-    cursor: pointer;
-    color: white;
-    font-size: 14px;
-    background: rgba(255, 255, 255, 0.3);
-    padding: 5px 10px;
-    border-radius: 55px;
-    margin-left: 10px;
-    transition: background 0.3s ease;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
 }
 
 .toggle-password:hover {
-    background: rgba(255, 255, 255, 0.5);
+  background: var(--bg-elevated);
+  color: var(--accent);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Acciones del formulario */
+.form-actions {
+  margin-top: 22px;
+  text-align: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-sans);
+}
+
+.form-actions button:first-child {
+  background-color: var(--accent);
+  color: var(--text-inverse);
+}
+
+.form-actions button:first-child:hover {
+  background-color: var(--accent-hover);
+}
+
+.form-actions button:last-child {
+  background-color: var(--danger);
+  color: #fff;
+}
+
+.form-actions button:last-child:hover {
+  background-color: #dc2626;
+}
+
+/* Errores de formulario */
+.error-message {
+  color: var(--danger);
+  font-size: 0.8em;
+  margin-top: 6px;
 }

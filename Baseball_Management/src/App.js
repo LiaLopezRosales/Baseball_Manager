@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import './App.css';
 import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
@@ -114,6 +116,17 @@ function App() {
     // Estado para almacenar la tabla seleccionada en "Consultas"
     const [selectedTable, setSelectedTable] = useState('');
 
+    // Estado para el overlay de la sidebar en móvil
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+    const toggleMobileSidebar = () => {
+      setMobileSidebarOpen((o) => {
+        const next = !o;
+        document.body.classList.toggle('sidebar-mobile-open', next);
+        return next;
+      });
+    };
+
     // Función para manejar la selección de una opción
     const handleOptionSelect = (option, table = '') => {
         setSelectedOption(option);
@@ -130,6 +143,14 @@ function App() {
                     <p>{isLogged ? 'Welcome ' + userName : ''}</p>
                     <p>Rol Actual: {role}</p>*/}
 
+                    <button
+                      className="mobile-menu-btn"
+                      onClick={toggleMobileSidebar}
+                      aria-label="Abrir menú"
+                    >
+                      {mobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
+
                     <Sidebar role={role} onOptionSelect={handleOptionSelect} onModalOpen={handleModalOpen} />
 
                     <Routes>
@@ -140,7 +161,15 @@ function App() {
                     </Routes>
 
                     {/* Botones del sidebar */}
-                    <div className='content'>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={selectedOption || (selectedTable ? 'Qy' : 'Main')}
+                        className='content'
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -12 }}
+                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                      >
                         {selectedOption === 'Main' && < MainPage />}
                         {selectedOption === 'Posiciones' && < PositionCRUD />}
                         {selectedOption === 'Usuarios' && < UserCRUD />}
@@ -174,7 +203,8 @@ function App() {
                         {selectedOption === 'Definir Cambios' && <PlayerSwapForm teamId={team} />}
                         {selectedOption === 'Listar Cambios' && <PlayerSwapTable teamId={team} />}
                         {selectedOption === 'Qy' && <Queries selectedTable={selectedTable}/>}
-                    </div>
+                      </motion.div>
+                    </AnimatePresence>
 
                     <Modal isOpen={isModalOpen} onClose={handleModalClose}>
                         <LoginBoard

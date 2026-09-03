@@ -3,3 +3,29 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+
+// Polyfills necesarios para framer-motion (useInView) y observadores en jsdom
+if (typeof global.IntersectionObserver === 'undefined') {
+  global.IntersectionObserver = class {
+    constructor(callback, options) {}
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
+if (typeof global.ResizeObserver === 'undefined') {
+  global.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
+// mock de fetch para evitar peticiones reales en tests
+global.fetch = global.fetch || jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve([]),
+  })
+);

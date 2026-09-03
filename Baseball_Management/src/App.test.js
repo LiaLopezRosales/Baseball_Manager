@@ -6,7 +6,9 @@ test('renders the sidebar with Inicio option', () => {
   expect(screen.getByText('Inicio')).toBeInTheDocument();
 });
 
-test('renders the main page welcome heading', () => {
+test('renders the main page welcome subtitle', () => {
   render(<App />);
-  expect(screen.getByText(/Bienvenido a la Plataforma de Gestión/i)).toBeInTheDocument();
+  expect(
+    screen.getByText(/Datos, estadísticas y gestión en tiempo real/i)
+  ).toBeInTheDocument();
 });

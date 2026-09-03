@@ -1,198 +1,270 @@
-import React, { useState } from "react";
-import ItemActions from "./ItemActions"; // Importa el componente ItemActions
+import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import ItemActions from "./ItemActions";
 
-// Componente DataTable
-const DataTable = ({ data, fields, sortConfig, onSort, onEdit, onDelete, onFilter }) => {
+const DataTable = ({
+  data,
+  fields,
+  sortConfig,
+  onSort,
+  onEdit,
+  onDelete,
+  onFilter,
+  loading,
+}) => {
   const [filters, setFilters] = useState({});
+  const [globalSearch, setGlobalSearch] = useState("");
 
-  // Función para manejar cambios en los filtros
+  const fieldsVisible = useMemo(
+    () => fields.filter((f) => !f.hidden && f.type !== "password"),
+    [fields]
+  );
+
   const handleFilterChange = (field, value, filterType) => {
-    const newFilters = { ...filters, [field]: { ...filters[field], [filterType]: value } };
-    setFilters(newFilters); // Actualiza el estado de los filtros
-    onFilter(newFilters); // Llama a la función onFilter pasada como prop
+    const newFilters = {
+      ...filters,
+      [field]: { ...filters[field], [filterType]: value },
+    };
+    setFilters(newFilters);
+    onFilter(newFilters);
   };
 
-  // Función para determinar si un campo debe ser visible
-  const isFieldVisible = (field) => {
-    return !field.hidden && field.type !== "password"; // Oculta campos marcados como hidden o de tipo password
-  };
-
-  // Función para formatear números
-  const formatNumber = (value) => {
-    if (typeof value === 'number') {
-      // Si el número es entero, lo devuelve sin decimales
-      if (Number.isInteger(value)) {
-        return value.toString();
-      } else {
-        // Si el número tiene decimales, lo limita a 3 decimales
-        return value.toFixed(3);
-      }
+  const formatNumber = (value) => {    if (typeof value === "number") {
+      return Number.isInteger(value) ? value.toString() : value.toFixed(3);
     }
-    return value; // Devuelve el valor original si no es un número
+    return value;
   };
 
-  // Función para formatear fechas según la configuración regional del navegador
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A"; // Si no hay fecha, devuelve "N/A"
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "N/A"; // Si la fecha no es válida, devuelve "N/A"
-
-    // Usa Intl.DateTimeFormat para formatear la fecha según la configuración regional
-    const formatter = new Intl.DateTimeFormat(undefined, {
+    if (isNaN(date.getTime())) return "N/A";
+    return new Intl.DateTimeFormat(undefined, {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-    });
-    return formatter.format(date); // Formato dependiente de la configuración regional
+    }).format(date);
   };
 
-  // Función para obtener el nombre de la persona a partir del P_id
   const getPersonName = (P_id, field) => {
-    if (!field.options) return "N/A"; // Si no hay opciones, devuelve "N/A"
+    if (!field.options) return "N/A";
     const person = field.options.find((option) => option.id === P_id);
-    return person ? person.name : "N/A"; // Devuelve el nombre de la persona o "N/A" si no se encuentra
+    return person ? person.name : "N/A";
   };
 
-  // Función para aplicar el filtro de búsqueda en campos de tipo string
   const applyStringFilter = (item, field, filterValue) => {
     if (field.name === "P_id") {
-      // Si el campo es P_id, busca en el nombre de la persona
-      const personName = getPersonName(item[field.name], field).toLowerCase();
-      return personName.includes(filterValue.toLowerCase());
-    } else {
-      // Para otros campos de tipo string, busca directamente en el valor
-      const fieldValue = item[field.name] ? item[field.name].toString().toLowerCase() : "";
-      return fieldValue.includes(filterValue.toLowerCase());
+      return getPersonName(item[field.name], field)
+        .toLowerCase()
+        .includes(filterValue.toLowerCase());
     }
+    const fieldValue = item[field.name]
+      ? item[field.name].toString().toLowerCase()
+      : "";
+    return fieldValue.includes(filterValue.toLowerCase());
   };
 
-  // Función para filtrar los datos según los filtros aplicados
   const filterData = (data) => {
     return data.filter((item) => {
       return Object.keys(filters).every((fieldName) => {
         const field = fields.find((f) => f.name === fieldName);
-        if (!field) return true; // Si el campo no existe, no se aplica filtro
+        if (!field) return true;
 
         const filter = filters[fieldName];
         if (field.type === "number") {
-          // Filtro para campos numéricos
           const value = item[fieldName];
           return (
             (!filter.min || value >= parseFloat(filter.min)) &&
             (!filter.max || value <= parseFloat(filter.max))
           );
         } else if (field.type === "date") {
-          // Filtro para campos de fecha
           const date = new Date(item[fieldName]);
           return (
             (!filter.start || date >= new Date(filter.start)) &&
             (!filter.end || date <= new Date(filter.end))
           );
         } else if (field.type === "text" || field.type === "email") {
-          // Filtro para campos de tipo string
           return applyStringFilter(item, field, filter.search || "");
         }
-        return true; // Si no hay filtro, se incluye el elemento
+        return true;
       });
     });
   };
 
-  // Datos filtrados
-  const filteredData = filterData(data);
+  const matchesGlobal = (item) => {
+    if (!globalSearch.trim()) return true;
+    const q = globalSearch.toLowerCase();
+    return fieldsVisible.some((field) => {
+      const raw = item[field.name];
+      if (field.name === "P_id") {
+        return getPersonName(item[field.name], field)
+          .toLowerCase()
+          .includes(q);
+      }
+      return raw !== null && raw !== undefined
+        ? String(raw).toLowerCase().includes(q)
+        : false;
+    });
+  };
+
+  const filteredData = filterData(data).filter(matchesGlobal);
+
+  const renderSortIcon = (field) => {
+    if (sortConfig.key !== field.name)
+      return <ChevronsUpDown size={14} className="dt-sort-idle" />;
+    return sortConfig.direction === "ascending" ? (
+      <ChevronUp size={14} className="dt-sort-active" />
+    ) : (
+      <ChevronDown size={14} className="dt-sort-active" />
+    );
+  };
 
   return (
     <div className="item-list">
-      <table>
-        <thead>
-          {/* Fila de Filtros */}
-          <tr>
-            {fields.filter(isFieldVisible).map((field) => (
-              <th key={`${field.name}-filter`}>
-                {/* Renderiza inputs de filtro según el tipo de campo */}
-                {field.type === "number" && (
-                  <>
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      onChange={(e) => handleFilterChange(field.name, e.target.value, 'min')}
-                    />
-                    <input
-                      type="number"
-                      placeholder="Max"
-                      onChange={(e) => handleFilterChange(field.name, e.target.value, 'max')}
-                    />
-                  </>
-                )}
-                {field.type === "date" && (
-                  <>
-                    <input
-                      type="date"
-                      placeholder="Inicio"
-                      onChange={(e) => handleFilterChange(field.name, e.target.value, 'start')}
-                    />
-                    <input
-                      type="date"
-                      placeholder="Final"
-                      onChange={(e) => handleFilterChange(field.name, e.target.value, 'end')}
-                    />
-                  </>
-                )}
-                {(field.type === "text" || field.type === "email") && (
-                  <input
-                    type="text"
-                    placeholder="Buscar"
-                    onChange={(e) => handleFilterChange(field.name, e.target.value, 'search')}
-                  />
-                )}
-              </th>
-            ))}
-            <th></th> {/* Celda vacía para las acciones */}
-          </tr>
+      {/* Barra de búsqueda global */}
+      <div className="dt-toolbar">
+        <div className="dt-search">
+          <Search size={16} className="dt-search__icon" />
+          <input
+            type="text"
+            placeholder="Buscar en todos los campos…"
+            value={globalSearch}
+            onChange={(e) => setGlobalSearch(e.target.value)}
+            className="dt-search__input"
+          />
+        </div>
+      </div>
 
-          {/* Fila de Encabezados */}
-          <tr>
-            {fields.filter(isFieldVisible).map((field) => (
-              <th key={field.name}>
-                {field.label} {/* Muestra la etiqueta del campo */}
-                <button onClick={() => onSort(field.name)}>
-                  {/* Muestra un ícono de ordenación si el campo está siendo ordenado */}
-                  {sortConfig.key === field.name
-                    ? sortConfig.direction === "ascending"
-                      ? "🔼"
-                      : "🔽"
-                    : null}
-                </button>
-              </th>
-            ))}
-            <th>Acciones</th> {/* Encabezado para la columna de acciones */}
-          </tr>
-        </thead>
-        <tbody>
-          {/* Renderiza las filas de datos filtrados */}
-          {filteredData.map((item) => (
-            <tr key={item.id}>
-              {fields.filter(isFieldVisible).map((field) => (
-                <td key={field.name}>
-                  {/* Muestra el nombre de la persona si el campo es P_id, de lo contrario formatea el valor */}
-                  {field.name === "P_id"
-                    ? getPersonName(item[field.name], field)
-                    : field.type === "number"
-                    ? formatNumber(item[field.name])
-                    : field.type === "date"
-                    ? formatDate(item[field.name])
-                    : item[field.name] || "N/A"}
-                </td>
+      <div className="dt-table-wrap">
+        <table className="dt-table">
+          <thead>
+            <tr className="dt-filter-row">
+              {fieldsVisible.map((field) => (
+                <th key={`${field.name}-filter`}>
+                  {field.type === "number" && (
+                    <div className="dt-filter-range">
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        onChange={(e) =>
+                          handleFilterChange(field.name, e.target.value, "min")
+                        }
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        onChange={(e) =>
+                          handleFilterChange(field.name, e.target.value, "max")
+                        }
+                      />
+                    </div>
+                  )}
+                  {field.type === "date" && (
+                    <div className="dt-filter-range">
+                      <input
+                        type="date"
+                        placeholder="Inicio"
+                        onChange={(e) =>
+                          handleFilterChange(field.name, e.target.value, "start")
+                        }
+                      />
+                      <input
+                        type="date"
+                        placeholder="Final"
+                        onChange={(e) =>
+                          handleFilterChange(field.name, e.target.value, "end")
+                        }
+                      />
+                    </div>
+                  )}
+                  {(field.type === "text" || field.type === "email") && (
+                    <input
+                      type="text"
+                      placeholder="Buscar"
+                      onChange={(e) =>
+                        handleFilterChange(field.name, e.target.value, "search")
+                      }
+                    />
+                  )}
+                </th>
               ))}
-              <td>
-                {/* Componente para acciones (editar, eliminar) */}
-                <ItemActions item={item} onEdit={onEdit} onDelete={onDelete} />
-              </td>
+              <th className="dt-actions-head"></th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+
+            <tr className="dt-header-row">
+              {fieldsVisible.map((field) => (
+                <th key={field.name} className="dt-th">
+                  <button
+                    className="dt-sort-btn"
+                    onClick={() => onSort(field.name)}
+                    title={`Ordenar por ${field.label}`}
+                  >
+                    {field.label} {renderSortIcon(field)}
+                  </button>
+                </th>
+              ))}
+              <th className="dt-actions-head">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={`skeleton-${i}`} className="dt-skeleton-row">
+                  {fieldsVisible.map((f, j) => (
+                    <td key={j} className="dt-cell">
+                      <div className="dt-skeleton-cell" />
+                    </td>
+                  ))}
+                  <td className="dt-cell">
+                    <div className="dt-skeleton-actions" />
+                  </td>
+                </tr>
+              ))
+            ) : filteredData.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={fieldsVisible.length + 1}
+                  className="dt-empty"
+                >
+                  <div className="dt-empty__inner">
+                    <Search size={32} />
+                    <p>No se encontraron registros</p>
+                    <span>Prueba ajustando la búsqueda o los filtros.</span>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredData.map((item, index) => (
+                <motion.tr
+                  key={item.id}
+                  className="dt-row"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.4) }}
+                >
+                  {fieldsVisible.map((field) => (
+                    <td key={field.name} className="dt-cell">
+                      {field.name === "P_id"
+                        ? getPersonName(item[field.name], field)
+                        : field.type === "number"
+                        ? formatNumber(item[field.name])
+                        : field.type === "date"
+                        ? formatDate(item[field.name])
+                        : item[field.name] || "—"}
+                    </td>
+                  ))}
+                  <td className="dt-cell dt-actions">
+                    <ItemActions item={item} onEdit={onEdit} onDelete={onDelete} />
+                  </td>
+                </motion.tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
 
-export default DataTable; // Exporta el componente DataTable
+export default DataTable;

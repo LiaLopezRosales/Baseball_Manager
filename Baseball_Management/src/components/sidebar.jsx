@@ -1,154 +1,287 @@
-import React, { useState } from 'react';
-import Logo from '../logo.jpg'
+import React, { useState, useEffect } from 'react';
+import {
+  Home,
+  Database,
+  BarChart3,
+  ChevronDown,
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
+  FolderOpen,
+  User,
+  LayoutGrid,
+  Sun,
+  Moon,
+} from 'lucide-react';
+import Logo from '../logo.jpg';
+import { getInitialTheme, applyTheme } from '../theme';
 import './sidebar.css';
 
+const CONSULTAS = [
+  { value: 'Team', label: 'Equipos' },
+  { value: 'Game', label: 'Juegos' },
+  { value: 'Series', label: 'Series' },
+  { value: 'Worker', label: 'Trabajadores' },
+  { value: 'DirectionTeam', label: 'Equipos de Dirección' },
+  { value: 'BaseballPlayer', label: 'Jugadores de Baseball' },
+  { value: 'Season', label: 'Temporadas' },
+  { value: 'Pitcher', label: 'Pitchers' },
+  { value: 'TeamOnTheField', label: 'Equipo en Campo' },
+  { value: 'StarPlayer', label: 'Jugador Estrella' },
+  { value: 'PlayerInPosition', label: 'Jugadores en Posición' },
+  { value: 'Score', label: 'Puntuaciones' },
+  { value: 'BPParticipation', label: 'Participación de los Jugadores' },
+  { value: 'PlayerSwap', label: 'Cambio de Jugador' },
+  { value: 'PlayerInLineUp', label: 'Jugadores en Alineación' },
+];
+
+const REPORTS = [
+  'Equipos ganadores y directores técnicos por temporadas',
+  'Jugadores estrellas',
+  'Primer y último lugar',
+  'Series con más/menos juegos celebrados',
+  'Carreras limpias/juegos ganados',
+  'Average',
+  'Estadísticas de juegos por equipos',
+  'Efectividad por posición',
+  'Jugadores de un equipo',
+];
+
+const ADMIN_FORMS = [
+  { option: 'Usuarios', label: 'Usuarios' },
+  { option: 'Personas', label: 'Personas' },
+  { option: 'Trabajadores', label: 'Trabajadores' },
+  { option: 'Jugadores', label: 'Jugadores' },
+  { option: 'Pitchers', label: 'Lanzadores' },
+  { option: 'Direction Team', label: 'Equipos de Dirección' },
+  { option: 'Directores Técnicos', label: 'Directores Técnicos' },
+  { option: 'Temporadas', label: 'Temporadas' },
+  { option: 'Series', label: 'Series' },
+  { option: 'Juegos', label: 'Juegos' },
+  { option: 'Puntuaciones', label: 'Marcadores' },
+  { option: 'Equipos', label: 'Equipos' },
+  { option: 'Alineaciones', label: 'Alineaciones' },
+  { option: 'Jugadores en Alineación', label: 'Jugadores en Alineación' },
+  { option: 'Intercambios de Jugadores', label: 'Cambios de Jugador' },
+  { option: 'Equipos en el Campo', label: 'Equipos en el Campo' },
+  { option: 'BP Participations', label: 'Participación de Jugadores' },
+  { option: 'Posiciones', label: 'Posiciones' },
+  { option: 'Jugadores en Posición', label: 'Jugadores en Posición' },
+  { option: 'Jugadores Estrella', label: 'Jugadores Estrella' },
+];
+
 function Sidebar({ role, onOptionSelect, onModalOpen }) {
-    const [showReports, setShowReports] = useState(false);
-    const [showForms, setShowForms] = useState(false);
-    const [showQueries, setShowQueries] = useState(false); // Nuevo estado para las consultas
+  const [collapsed, setCollapsed] = useState(false);
+  const [showReports, setShowReports] = useState(false);
+  const [showForms, setShowForms] = useState(false);
+  const [showQueries, setShowQueries] = useState(false);
+  const [theme, setTheme] = useState(getInitialTheme());
 
-    const handleReportsClick = () => {
-        setShowReports(!showReports);
-    };
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
-    const handleFormsClick = () => {
-        setShowForms(!showForms);
-    };
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
-    const handleQueriesClick = () => {
-        setShowQueries(!showQueries); // Función para manejar el clic en "Consultas"
-    };
+  const toggleCollapse = () => {
+    setCollapsed((c) => {
+      const next = !c;
+      document.body.classList.toggle('sidebar-collapsed', next);
+      return next;
+    });
+  };
+  const handleReportsClick = () => setShowReports((s) => !s);
+  const handleFormsClick = () => setShowForms((s) => !s);
+  const handleQueriesClick = () => setShowQueries((s) => !s);
+  const handleQuerySelect = (table) => onOptionSelect('Qy', table);
 
-    // Función para manejar la selección de una consulta
-    const handleQuerySelect = (table) => {
-        onOptionSelect('Qy', table); // Pasamos 'Qy' como selectedOption y la tabla como valor adicional
-    };
-
-    return (
-        <div className='sidebar'>
-            <img src={Logo} alt="Logo" className='logo' />
-            <div className='sidebar-content'>
-                <ul>
-                    <li onClick={() => onOptionSelect('Main')}>Inicio</li>
-
-                    {/* Botón "Consultas" con una flecha que cambia de dirección */}
-                    <li onClick={handleQueriesClick}>
-                        Consultas {showQueries ? '▼' : '▶'}
-                    </li>
-
-                    {/* Lista de consultas (se muestra solo si showQueries es true) */}
-                    {showQueries && (
-                        <ul>
-                            <li onClick={() => handleQuerySelect('Team')}>Equipos</li>
-                            <li onClick={() => handleQuerySelect('Game')}>Juegos</li>
-                            <li onClick={() => handleQuerySelect('Series')}>Series</li>
-                            <li onClick={() => handleQuerySelect('Worker')}>Trabajadores</li>
-                            <li onClick={() => handleQuerySelect('DirectionTeam')}>Equipos de Dirección</li>
-                            <li onClick={() => handleQuerySelect('BaseballPlayer')}>Jugadores de Baseball</li>
-                            <li onClick={() => handleQuerySelect('Season')}>Temporadas</li>
-                            <li onClick={() => handleQuerySelect('Pitcher')}>Pitchers</li>
-                            <li onClick={() => handleQuerySelect('TeamOnTheField')}>Equipo en Campo</li>
-                            <li onClick={() => handleQuerySelect('StarPlayer')}>Jugador Estrella</li>
-                            <li onClick={() => handleQuerySelect('PlayerInPosition')}>Jugadores en Posición</li>
-                            <li onClick={() => handleQuerySelect('Score')}>Puntuaciones</li>
-                            <li onClick={() => handleQuerySelect('BPParticipation')}>Participación de los Jugadores</li>
-                            <li onClick={() => handleQuerySelect('PlayerSwap')}>Cambio de Jugador</li>
-                            <li onClick={() => handleQuerySelect('PlayerInLineUp')}>Jugadores en Alineación</li>
-                        </ul>
-                    )}
-
-                    <li onClick={handleReportsClick}>
-                        Estadísticas {showReports ? '▼' : '▶'}
-                    </li>
-
-                    {showReports && (
-                        <ul>
-                            <li onClick={() => onOptionSelect('Equipos ganadores y directores técnicos por temporadas')}>
-                                Equipos ganadores y directores técnicos por temporadas
-                            </li>
-                            <li onClick={() => onOptionSelect('Jugadores estrellas')}>
-                                Jugadores estrella por serie
-                            </li>
-                            <li onClick={() => onOptionSelect('Primer y último lugar')}>
-                                Primer y último lugar por serie/temporada
-                            </li>
-                            <li onClick={() => onOptionSelect('Series con más/menos juegos celebrados')}>
-                                Series con más/menos juegos celebrados
-                            </li>
-                            <li onClick={() => onOptionSelect('Carreras limpias/juegos ganados')}>
-                                Carreras limpias/juegos ganados por un pitcher
-                            </li>
-                            <li onClick={() => onOptionSelect('Average')}>
-                                Average de bateo de cada Jugador
-                            </li>
-                            <li onClick={() => onOptionSelect('Estadísticas de juegos por equipos')}>
-                                Estadísticas de juegos por equipos
-                            </li>
-                            <li onClick={() => onOptionSelect('Efectividad por posición')}>
-                                Jugadores con más efectividad por posición
-                            </li>
-                            <li onClick={() => onOptionSelect('Jugadores de un equipo')}>
-                                Jugadores de un equipo
-                            </li>
-                        </ul>
-                    )}
-
-                    {role === 'Admin' && (
-                        <>
-                            <li onClick={handleFormsClick}>
-                                Formularios {showForms ? '▼' : '▶'}
-                            </li>
-
-                            {showForms && (
-                                <ul>
-                                    <li onClick={() => onOptionSelect('Usuarios')}>Usuarios</li>
-                                    <li onClick={() => onOptionSelect('Personas')}>Personas</li>
-                                    <li onClick={() => onOptionSelect('Trabajadores')}>Trabajadores</li>
-                                    <li onClick={() => onOptionSelect('Jugadores')}>Jugadores</li>
-                                    <li onClick={() => onOptionSelect('Pitchers')}>Lanzadores</li>
-                                    <li onClick={() => onOptionSelect('Direction Team')}>Equipos de Dirección</li>
-                                    <li onClick={() => onOptionSelect('Directores Técnicos')}>Directores Técnicos</li>
-                                    <li onClick={() => onOptionSelect('Temporadas')}>Temporadas</li>
-                                    <li onClick={() => onOptionSelect('Series')}>Series</li>
-                                    <li onClick={() => onOptionSelect('Juegos')}>Juegos</li>
-                                    <li onClick={() => onOptionSelect('Puntuaciones')}>Marcadores</li>
-                                    <li onClick={() => onOptionSelect('Equipos')}>Equipos</li>
-                                    <li onClick={() => onOptionSelect('Alineaciones')}>Alineaciones</li>
-                                    <li onClick={() => onOptionSelect('Jugadores en Alineación')}>Jugadores en Alineación</li>
-                                    <li onClick={() => onOptionSelect('Intercambios de Jugadores')}>Cambios de Jugador</li>
-                                    <li onClick={() => onOptionSelect('Equipos en el Campo')}>Equipos en el Campo</li>
-                                    <li onClick={() => onOptionSelect('BP Participations')}>Participación de Jugadores</li>
-                                    <li onClick={() => onOptionSelect('Posiciones')}>Posiciones</li>
-                                    <li onClick={() => onOptionSelect('Jugadores en Posición')}>Jugadores en Posición</li>
-                                    <li onClick={() => onOptionSelect('Jugadores Estrella')}>Jugadores Estrella</li>
-                                </ul>
-                            )}
-                        </>
-                    )}
-
-                    {role === 'Director Técnico' && (
-                        <>
-                            <li onClick={handleFormsClick}>
-                                Alineaciones {showForms ? '▼' : '▶'}
-                            </li>
-
-                            {showForms && (
-                                <ul>
-                                    <li onClick={() => onOptionSelect('Definir Cambios')}>Establecer Cambios</li>
-                                    <li onClick={() => onOptionSelect('Listar Cambios')}>Mostrar Cambios</li>
-                                </ul>
-                            )}
-
-                        </>
-                    )}
-                </ul>
-            </div>
-
-            <div className="sidebar-footer">
-                <button onClick={onModalOpen}>Cuenta</button>
-            </div>
-        </div >
+  const BranchIcon = ({ isOpen }) =>
+    isOpen ? (
+      <ChevronDown size={16} className="sidebar__chevron" />
+    ) : (
+      <ChevronRight size={16} className="sidebar__chevron" />
     );
+
+  return (
+    <div className={`sidebar${collapsed ? ' sidebar--collapsed' : ''}`}>
+      <div className="sidebar__top">
+        <div className="sidebar__brand">
+          <img src={Logo} alt="Logo" className="sidebar__logo" />
+          {!collapsed && (
+            <span className="sidebar__brand-name">Baseball Manager</span>
+          )}
+        </div>
+
+        <button
+          className="sidebar__collapse-btn"
+          onClick={toggleCollapse}
+          aria-label={collapsed ? 'Expandir menú' : 'Contraer menú'}
+          title={collapsed ? 'Expandir menú' : 'Contraer menú'}
+        >
+          {collapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+        </button>
+        <button
+          className="sidebar__collapse-btn"
+          onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+          title={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
+
+      <nav className="sidebar__nav">
+        <ul className="sidebar__list">
+          <li
+            className="sidebar__item"
+            onClick={() => onOptionSelect('Main')}
+            title="Inicio"
+          >
+            <Home size={20} className="sidebar__icon" />
+            {!collapsed && <span className="sidebar__label">Inicio</span>}
+          </li>
+
+          {/* Consultas */}
+          <li
+            className="sidebar__item sidebar__item--group"
+            onClick={handleQueriesClick}
+            title="Consultas"
+          >
+            <Database size={20} className="sidebar__icon" />
+            {!collapsed && <span className="sidebar__label">Consultas</span>}
+            {!collapsed && <BranchIcon isOpen={showQueries} />}
+          </li>
+
+          {showQueries && !collapsed && (
+            <ul className="sidebar__sublist">
+              {CONSULTAS.map((c) => (
+                <li
+                  key={c.value}
+                  className="sidebar__subitem"
+                  title={c.label}
+                  onClick={() => handleQuerySelect(c.value)}
+                >
+                  <span className="sidebar__sub-dot" />
+                  {c.label}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Estadísticas */}
+          <li
+            className="sidebar__item sidebar__item--group"
+            onClick={handleReportsClick}
+            title="Estadísticas"
+          >
+            <BarChart3 size={20} className="sidebar__icon" />
+            {!collapsed && <span className="sidebar__label">Estadísticas</span>}
+            {!collapsed && <BranchIcon isOpen={showReports} />}
+          </li>
+
+          {showReports && !collapsed && (
+            <ul className="sidebar__sublist">
+              {REPORTS.map((r) => (
+                <li
+                  key={r}
+                  className="sidebar__subitem"
+                  title={r}
+                  onClick={() => onOptionSelect(r)}
+                >
+                  <span className="sidebar__sub-dot" />
+                  {r}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Formularios */}
+          {role === 'Admin' && (
+            <>
+              <li
+                className="sidebar__item sidebar__item--group"
+                onClick={handleFormsClick}
+                title="Formularios"
+              >
+                <FolderOpen size={20} className="sidebar__icon" />
+                {!collapsed && <span className="sidebar__label">Formularios</span>}
+                {!collapsed && <BranchIcon isOpen={showForms} />}
+              </li>
+
+              {showForms && !collapsed && (
+                <ul className="sidebar__sublist">
+                  {ADMIN_FORMS.map((f) => (
+                    <li
+                      key={f.option}
+                      className="sidebar__subitem"
+                      title={f.label}
+                      onClick={() => onOptionSelect(f.option)}
+                    >
+                      <span className="sidebar__sub-dot" />
+                      {f.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
+
+          {role === 'Director Técnico' && (
+            <>
+              <li
+                className="sidebar__item sidebar__item--group"
+                onClick={handleFormsClick}
+                title="Alineaciones"
+              >
+                <LayoutGrid size={20} className="sidebar__icon" />
+                {!collapsed && (
+                  <span className="sidebar__label">Alineaciones</span>
+                )}
+                {!collapsed && <BranchIcon isOpen={showForms} />}
+              </li>
+
+              {showForms && !collapsed && (
+                <ul className="sidebar__sublist">
+                  <li
+                    className="sidebar__subitem"
+                    onClick={() => onOptionSelect('Definir Cambios')}
+                  >
+                    <span className="sidebar__sub-dot" />
+                    Establecer Cambios
+                  </li>
+                  <li
+                    className="sidebar__subitem"
+                    onClick={() => onOptionSelect('Listar Cambios')}
+                  >
+                    <span className="sidebar__sub-dot" />
+                    Mostrar Cambios
+                  </li>
+                </ul>
+              )}
+            </>
+          )}
+        </ul>
+      </nav>
+
+      <div className="sidebar__footer">
+        <button
+          className="sidebar__account"
+          onClick={onModalOpen}
+          title="Cuenta"
+        >
+          <span className="sidebar__avatar">
+            <User size={18} />
+          </span>
+          {!collapsed && (
+            <span className="sidebar__account-text">
+              <span className="sidebar__account-name">Cuenta</span>
+              <span className="sidebar__account-role">{role || 'Invitado'}</span>
+            </span>
+          )}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default Sidebar;

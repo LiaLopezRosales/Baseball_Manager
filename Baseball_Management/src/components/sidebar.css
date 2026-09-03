@@ -1,126 +1,399 @@
-/* Estilos base del Sidebar */
+/* ============================================================
+   Sidebar — Diamond Plate
+   Collapsible: 240px expanded / 60px collapsed
+   ============================================================ */
+
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 280px;
-  /* background-color: #ffffff; */
-  border-right: 1px solid #77a9f3;
-  box-shadow: 2px 0 5px rgba(27, 42, 112, 0.554);
+  width: var(--sidebar-width);
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  z-index: 40;
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sidebar--collapsed {
+  width: var(--sidebar-collapsed);
+}
+
+/* ---------- Top / Brand ---------- */
+.sidebar__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  white-space: nowrap;
   overflow: hidden;
 }
 
-/* Encabezado con Logo */
-
-.logo {
-  position: relative;
-  left: 20%;
-  height: 130px;
-  width: 150px;
+.sidebar__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
   clip-path: circle(47%);
-  margin-bottom: 15px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
-/* Contenedor del Sidebar */
-.sidebar-content {
+.sidebar__brand-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__collapse-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.sidebar__collapse-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--accent);
+  box-shadow: none;
+  transform: none;
+}
+
+/* ---------- Nav ---------- */
+.sidebar__nav {
   flex: 1;
   overflow-y: auto;
-  padding: 10px;
+  overflow-x: hidden;
+  padding: 12px 10px;
 }
 
-/* Lista Principal */
-.sidebar ul {
+.sidebar__list {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-/* Elementos principales alineados a la izquierda */
-.sidebar li {
+.sidebar__item {
   display: flex;
   align-items: center;
-  padding: 14px 15px;
-  font-size: 24px;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.92rem;
   font-weight: 600;
-  color: #081726;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out, color 0.3s;
-  border-radius: 5px;
-  text-align: left;  /* Mantiene alineación a la izquierda */
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s;
 }
 
-/* Íconos en los elementos */
-.sidebar li i {
-  margin-right: 10px;
-  font-size: 20px;
-  color: #081726;
+.sidebar__item--group {
+  margin-top: 6px;
 }
 
-/* Hover sobre los elementos */
-.sidebar li:hover {
-  background-color: rgba(0, 123, 255, 0.15);
-  color: #0044ff;
+.sidebar__item:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
-/* Submenús alineados al centro */
-.sidebar ul ul {
-  margin-left: 0;
-  padding-left: 0;
-  border-left: none;
-  text-align: center;
+.sidebar__icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: color 0.2s;
 }
 
-/* Elementos del Submenú centrados */
-.sidebar ul ul li {
+.sidebar__item:hover .sidebar__icon {
+  color: var(--accent);
+}
+
+.sidebar__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+/* ---------- Sublists ---------- */
+.sidebar__sublist {
+  list-style: none;
+  margin: 2px 0 4px;
+  padding: 0 0 0 16px;
+  border-left: 1px solid var(--border-subtle);
   display: flex;
-  justify-content: center; /* Centra horizontalmente */
-  text-align: center; /* Asegura que el texto también esté centrado */
-  padding: 10px 15px;
-  font-size: 20px;
-  color: #07192b;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 22px;
 }
 
-.sidebar ul ul li:hover {
-  background-color: rgba(0, 123, 255, 0.1);
-  color: #007bff;
-}
-
-/* Flechas de los menús desplegables */
-.sidebar li span {
-  margin-left: auto;
-  transition: transform 0.3s ease-in-out;
-}
-
-.sidebar li span.open {
-  transform: rotate(180deg);
-}
-
-/* Footer del Sidebar */
-.sidebar-footer {
-  padding: 10px;
-  border-top: 1px solid #1956c8;
-  background-color: rgba(155, 19, 19, 0);
-  width: 100%;
+.sidebar__subitem {
   display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar__subitem:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.sidebar__sub-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--border-strong);
+  transition: background-color 0.2s;
+}
+
+.sidebar__subitem:hover .sidebar__sub-dot {
+  background-color: var(--accent);
+}
+
+/* ---------- Collapsed state ---------- */
+.sidebar--collapsed .sidebar__item {
   justify-content: center;
-  position: relative;
-  margin-top: 25px; /* Ajusta esta propiedad para moverlo más arriba o abajo */
-  margin-bottom: 20px;
+  padding: 11px 0;
 }
 
-/* Botón en el Footer */
-.sidebar-footer button {
-  width: 85%;
-  padding: 20px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 55px;
-  font-size: 22px;
+.sidebar--collapsed .sidebar__nav {
+  padding: 12px 8px;
+}
+
+.sidebar--collapsed .sidebar__top {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 14px 8px;
+}
+
+.sidebar--collapsed .sidebar__brand {
+  display: none;
+}
+
+.sidebar--collapsed .sidebar__collapse-btn {
+  position: static;
+  width: 38px;
+  height: 38px;
+}
+
+.sidebar--collapsed .sidebar__item--group {
+  margin-top: 6px;
+}
+
+/* ---------- Footer / Account ---------- */
+.sidebar__footer {
+  padding: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sidebar__account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
   cursor: pointer;
-  transition: background-color 0.3s;
+  border: none;
+  transition: background-color 0.2s;
 }
 
-.sidebar-footer button:hover {
-  background-color: #0056b3;
+.sidebar__account:hover {
+  background-color: var(--bg-tertiary);
+  box-shadow: none;
+  transform: none;
+}
+
+.sidebar__avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.sidebar__account-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+.sidebar__account-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sidebar__account-role {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.sidebar--collapsed .sidebar__account {
+  justify-content: center;
+  padding: 10px;
+}
+
+/* ---------- Scrollbar ---------- */
+.sidebar__nav::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar__nav::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
+}
+
+/* ============================================================
+   Responsive — Diamond Plate
+   >1024px expanded | 768-1024px collapsed | <768px overlay
+   ============================================================ */
+
+/* 768–1024px: forzar colapso (solo iconos) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .sidebar {
+    width: var(--sidebar-collapsed);
+  }
+
+  .sidebar__label,
+  .sidebar__brand-name,
+  .sidebar__chevron,
+  .sidebar__account-text {
+    display: none;
+  }
+
+  .sidebar__item {
+    justify-content: center;
+    padding: 11px 0;
+  }
+
+  .sidebar__top {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 14px 8px;
+  }
+
+  .sidebar__brand {
+    display: none;
+  }
+
+  .sidebar__collapse-btn {
+    position: static;
+    width: 38px;
+    height: 38px;
+  }
+
+  .sidebar__sublist {
+    display: none;
+  }
+
+  .sidebar__account {
+    justify-content: center;
+    padding: 10px;
+  }
+
+  /* Seleccionable al pasar el ratón */
+  .sidebar__item:hover .sidebar__sublist,
+  .sidebar__item--group:hover + .sidebar__sublist {
+    display: block;
+  }
+}
+
+/* <768px: overlay */
+@media (max-width: 768px) {
+  .sidebar {
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: var(--shadow-lg);
+  }
+
+  body.sidebar-mobile-open .sidebar {
+    transform: translateX(0);
+  }
+
+  /* Overlay de fondo */
+  body.sidebar-mobile-open::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 35;
+  }
+}
+
+/* Botón menú móvil (visible solo <768px) */
+.mobile-menu-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    z-index: 50;
+    cursor: pointer;
+  }
+
+  .mobile-menu-btn:hover {
+    background: var(--bg-tertiary);
+    box-shadow: none;
+    transform: none;
+  }
 }

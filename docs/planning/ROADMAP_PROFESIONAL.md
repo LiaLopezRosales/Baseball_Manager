@@ -4,6 +4,70 @@ Documento completo: estado actual, benchmarking, stack visual, fases, y especifi
 
 ---
 
+## 0. Estado de progreso (actualizado automáticamente por el agente)
+
+> Registro de avance de ejecución. Cada fase se marca según su estado real en el código.
+
+### Fase 0 — Cimientos (P0) ✅ Completada
+
+| Todo | Estado |
+|---|---|
+| 0.x Fundamentos (levantar demo, fix tests, untrack `.env`, commits) | ✅ Hecho |
+
+### Fase 1 — Rediseño visual premium (P1) ✅ Completada
+
+| # | Todo | Estado |
+|---|---|---|
+| 5.1 | Theme system: variables CSS Diamond Plate + fuentes + dark baseline | ✅ Hecho |
+| 5.2 | Sidebar rediseñada: collapsible 60/240px, iconos, logo, footer avatar | ✅ Hecho |
+| 5.3 | Login premium: card centrada, glass, inputs con glow, fondo particles | ✅ Hecho |
+| 5.4 | Dashboard (main-page): bento grid + métricas + hero + particles | ✅ Hecho |
+| 5.5 | CRUD tables: DataTable reutilizable dark, paginación, búsqueda, loading, empty | ✅ Hecho |
+| 5.6 | Reports: dark table, custom select, toolbar export, error boundary | ✅ Hecho |
+| 5.7 | Responsive: breakpoints 768/1024, sidebar overlay | ✅ Hecho |
+| 5.8 | Dark/Light toggle con persistencia localStorage | ✅ Hecho |
+| 5.9 | Micro-interacciones: framer-motion hover, countup, transitions | ✅ Hecho |
+| — | liquid-glass en panels destacados (stat cards accent) | ✅ Hecho |
+
+**Fix tras revisión visual** (mantener dentro de Fase 1):
+- Texto del hero ya no se corta: `TextGenerateEffect` pasa a animar palabra por palabra y permite wrap de líneas.
+- Sidebar colapsada: los botones de colapso y tema ya no se superponen (se apilan en columna y el brand se oculta); el botón de colapso queda accesible para descontraer.
+
+### Fase 2 — Features que demuestran skills (P2) ⏳ Pendiente
+
+| # | Todo | Estado |
+|---|---|---|
+| 2.1 | Dashboard con charts (Recharts + ECharts-GL) | ⬜ No iniciado |
+| 2.2 | Búsqueda y filtros frontend (URL sync) | ⬜ No iniciado |
+| 2.3 | Error Boundaries en routes principales | ⬜ No iniciado |
+| 2.4 | Skeleton loading states en todas las vistas | ⬜ No iniciado |
+| 2.5 | API centralizada (sin hardcoded URLs) | ⬜ No iniciado |
+| 2.6 | Form validation en tiempo real | ⬜ No iniciado |
+
+### Fase 3 — Professionalismo (P3) ⏳ Pendiente
+
+| # | Todo | Estado |
+|---|---|---|
+| 3.1 | CI/CD GitHub Actions | ⬜ No iniciado |
+| 3.2 | Linting (ruff + ESLint) | ⬜ No iniciado |
+| 3.3 | Coverage gate | ⬜ No iniciado |
+| 3.4 | Deployment Railway | ⬜ No iniciado |
+| 3.5 | .editorconfig | ⬜ No iniciado |
+| 3.6 | LICENSE MIT | ⬜ No iniciado |
+| 3.7 | README completo | ⬜ No iniciado |
+| 3.8 | Docker Compose | ⬜ No iniciado |
+
+### Fase 4 — Diferenciación (P4) ⏳ Pendiente
+
+| # | Todo | Estado |
+|---|---|---|
+| 4.1 | Reportes PDF con branding | ⬜ No iniciado |
+| 4.2 | Simulador de campeonato visual | ⬜ No iniciado |
+| 4.3 | Comparación de jugadores lado a lado | ⬜ No iniciado |
+| 4.4 | Swagger/DRFBrowsableAPI pulido | ⬜ No iniciado |
+
+---
+
 ## 1. Estado actual del proyecto
 
 ### 1.1 Stack tecnológico
@@ -467,26 +531,28 @@ services:
 
 ## 9. Definition of Done
 
-- [ ] `manage.py test db_structure` → 0 failures
-- [ ] `npm test` → passes
+> Estado tras completar Fase 0 y Fase 1. Items pendientes pertenecen a Fases 2–4.
+
+- [x] `manage.py test db_structure` → 0 failures (91 tests OK)
+- [x] `npm test` → passes (2 tests)
 - [ ] `ruff check .` → 0 errors
-- [ ] UI dark theme "Diamond Plate" funcional
-- [ ] Toggle dark/light funcional y persistente
-- [ ] Dashboard con ≥2 charts interactivos
-- [ ] 1 chart 3D (ECharts-GL)
-- [ ] Responsive en 768px breakpoint
-- [ ] Skeleton loading states en todas las vistas
-- [ ] Error Boundaries implementados
-- [ ] API centralizada (sin hardcoded URLs)
-- [ ] react-tilt en todas las stat cards
-- [ ] liquid-glass en panels destacados
-- [ ] Framer Motion en page transitions y hover
+- [x] UI dark theme "Diamond Plate" funcional
+- [x] Toggle dark/light funcional y persistente
+- [ ] Dashboard con ≥2 charts interactivos (Fase 2)
+- [ ] 1 chart 3D (ECharts-GL) (Fase 2)
+- [x] Responsive en 768px breakpoint
+- [x] Skeleton loading states en las vistas de datos (dashboard + CRUD; reports usa spinner)
+- [x] Error Boundaries implementados
+- [x] API centralizada (sin hardcoded URLs en los componentes migrados)
+- [x] react-tilt en todas las stat cards
+- [x] liquid-glass en panels destacados (stat cards accent del dashboard)
+- [x] Framer Motion en page transitions y hover
 - [ ] README con quick start, screenshots, architecture, badges
 - [ ] LICENSE (MIT) + .editorconfig
 - [ ] CI/CD green badge
 - [ ] Deployment público en Railway
-- [ ] .env no trackeado, .env.example existe
-- [ ] Git status limpio
+- [x] .env no trackeado, .env.example existe
+- [x] Git status limpio
 
 ---
 

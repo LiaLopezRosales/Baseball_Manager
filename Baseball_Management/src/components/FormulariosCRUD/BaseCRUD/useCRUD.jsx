@@ -8,6 +8,7 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   // Variables para manejar formulario y estados de edición/creación
   const [formValues, setFormValues] = useState(initialFormValues);
@@ -17,6 +18,7 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
   const [currentItem, setCurrentItem] = useState(null);
 
   const fetchItems = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await fetch(apiUrl);
       if (response.ok) {
@@ -82,8 +84,10 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
       } else {
         console.error("Error fetching data");
       }
+      setLoading(false);
     } catch (error) {
       console.error("Error:", error);
+      setLoading(false);
     }
   }, [apiUrl, sortConfig, filters, fields]);
 
@@ -225,6 +229,7 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
     paginatedData,
     totalPages,
     currentPage,
+    loading,
   };
 };
 
