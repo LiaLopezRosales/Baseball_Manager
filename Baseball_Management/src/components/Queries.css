@@ -1,157 +1,170 @@
-/* ================== RESET GLOBAL ================== */
-html, body, header {
-    height: 100%;
-    margin: 0;
-}
+/* ============================================================
+   Queries — Consultas dinámicas (tema Diamond Plate)
+   Sin selectores globales sobre body/header (no rompe el tema).
+   ============================================================ */
 
-body, header {
-    background: linear-gradient(45deg, #49a09d, #5f2c82); 
-    font-family: sans-serif;
-    font-weight: 100;
-    background-size: cover;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-}
-
-/* ================== CONTENEDOR PRINCIPAL ================== */
 .queries-container {
-    font-family: 'Times New Roman', Times, serif;
-    padding: 20px;
-    max-width: 1400px;
-    min-width: 800px;
-    margin: 0 auto;
-    text-align: center;
+  font-family: var(--font-sans);
+  padding: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: left;
 }
 
-/* ================== TÍTULO ================== */
 .queries-container h2 {
-    font-size: 62px;
-    font-weight: bold;
-    margin-bottom: 30px;
-    color: rgb(235, 237, 243);
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-/* ================== TABLA ================== */
-.queries-table-container {
-    margin: 20px auto;
-    overflow-x: auto;
-    background: linear-gradient(45deg, #0e599b, #6f3fa8);
-    padding: 20px;
-    border-radius: 30px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 100%;
-}
-
-.queries-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.queries-table th, 
-.queries-table td {
-    text-align: center;
-    border: 1px solid #ccc;
-    padding: 15px;
-    color: white;
-    font-size: 24px;
-}
-
-.queries-table th {
-    background-color: rgba(95, 44, 130, 0.9);
-    font-weight: bold;
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  text-shadow: none;
 }
 
 /* ================== FILTROS DE BÚSQUEDA ================== */
 .queries-filters {
-    margin-top: 20px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.15); /* Transparencia para que se integre */
-    border-radius: 55px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-    color: rgb(255, 255, 255);
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* Espaciado uniforme entre los filtros */
+  margin-top: 20px;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .queries-filters .form-group {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Alinea los elementos a la izquierda */
-    gap: 10px; /* Espaciado entre el label y el input */
-    flex-wrap: nowrap; /* Permite que los elementos se acomoden correctamente */
-    width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: nowrap;
+  width: 100%;
 }
 
 .queries-filters label {
-    width: 130px; /* Ajusta el ancho del label */
-    font-weight: bold;
-    color: white;
-    text-align: left;
-    min-width: 120px;  
+  width: 130px;
+  min-width: 120px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: left;
 }
 
-.queries-filters input, 
+.queries-filters input,
 .queries-filters select {
-    flex: 1;
-    min-width: 400px; /* Evita que los inputs sean demasiado pequeños */
-    padding: 6px;
-    border: 1px solid #ccc;
-    border-radius: 35px;
-    font-size: 18px;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.queries-filters input:focus, 
+.queries-filters input:focus,
 .queries-filters select:focus {
-    border-color: #5f2c82;
-    outline: none;
-    box-shadow: 0 0 5px rgba(95, 44, 130, 0.5);
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 /* Ajuste específico para los filtros de mínimo/máximo */
 .queries-filters .form-group.range-filter {
-    display: grid;
-    grid-template-columns: auto 1fr auto 1fr; /* Distribuye correctamente Mínimo - Input - Máximo - Input */
-    gap: 10px; /* Espacio entre cada elemento */
-    align-items: center;
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ================== CONTENEDOR DE TABLA ================== */
+.queries-table-container {
+  margin: 20px auto;
+  overflow-x: auto;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-width: 100%;
+}
+
+.queries-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.queries-table th,
+.queries-table td {
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 14px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.queries-table th {
+  background-color: var(--bg-tertiary);
+  font-weight: 700;
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.queries-table tbody tr:hover {
+  background: var(--bg-tertiary);
 }
 
 /* ================== PAGINACIÓN ================== */
 .pagination-controls {
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 .pagination-controls button {
-    background-color: #5f2c82;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 45px;
-    margin: 0 10px;
-    font-weight: bold;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .pagination-controls button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .pagination-controls span {
-    font-size: 16px;
-    color: #fff;
-    font-weight: bold;
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 5px 10px;
-    border-radius: 20px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  background-color: var(--bg-tertiary);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
 }

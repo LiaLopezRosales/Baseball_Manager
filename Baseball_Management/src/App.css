@@ -135,19 +135,7 @@ body.sidebar-collapsed .App-header {
   box-shadow: var(--shadow-md);
 }
 
-/* Estilo login (posicionado de forma absoluta, se refina en 5.3) */
-.login {
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  width: 360px;
-  padding: 24px;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg) 0 0 0;
-  box-shadow: var(--shadow-lg);
-  z-index: 20;
-}
+
 
 /* ============================================================
    Responsive — Diamond Plate

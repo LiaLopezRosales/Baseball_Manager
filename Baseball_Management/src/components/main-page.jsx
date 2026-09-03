@@ -109,7 +109,7 @@ function MainPage() {
 
   if (error) {
     return (
-      <div className="base-page dashboard">
+      <div className="dashboard">
         <div className="dashboard__error">
           <p>No se pudieron cargar las estadísticas.</p>
           <p className="muted">{error.message}</p>

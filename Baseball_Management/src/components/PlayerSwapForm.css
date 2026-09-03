@@ -1,159 +1,190 @@
-/* Baseball_Management/src/components/PlayerSwapForm.css */
+/* ============================================================
+   PlayerSwapForm — Cambios de jugadores (tema Diamond Plate)
+   Sin selectores globales body/header ni table/th/td genéricos.
+   ============================================================ */
 
-/* ================== ESTILOS GENERALES ================== */
-body, header {
-    font-family: 'Times New Roman', Times, serif;
-    background: linear-gradient(45deg, #49a09d, #5f2c82);
-    color: #fff;
-}
-
-/* ================== CONTENEDOR PRINCIPAL ================== */
 .player-swap-form {
-    max-width: 1000px;
-    margin: 40px auto;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 30px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-family: var(--font-sans);
+  max-width: 1000px;
+  margin: 24px auto;
+  padding: 24px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
 }
 
 /* ================== ENCABEZADO ================== */
-.team-title {
-    font-size: 62px;
-    font-weight: bold;
-    font-family: 'Times New Roman', Times, serif;
-    margin-bottom: 10px;
-    text-align: center;
-    color: rgb(235, 237, 243);
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+.player-swap-form .team-title {
+  font-family: var(--font-sans);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-align: center;
+  color: var(--text-primary);
+  text-shadow: none;
 }
 
-.team-subtitle {
-    font-size: 40px;
-    font-family: 'Times New Roman', Times, serif;
-    text-align: center;
-    color: #ddd;
+.player-swap-form .team-subtitle {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  font-weight: 500;
 }
 
 /* ================== STEPPER ================== */
-.stepper {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 30px;
+.player-swap-form .stepper {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
 }
 
-.step {
-    padding: 10px 20px;
-    border-radius: 30px;
-    background: #ccc;
-    color: #333;
-    font-weight: bold;
-    font-family: 'Times New Roman', Times, serif;
+.player-swap-form .step {
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  border: 1px solid var(--border-subtle);
 }
 
-.step.active {
-    background: #5f2c82;
-    color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+.player-swap-form .step.active {
+  background: var(--accent);
+  color: var(--text-inverse);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 /* ================== TABLAS ================== */
-.scrollable-table {
-    max-height: 500px;
-    min-width: 600px;
-    overflow-y: auto;
-    margin-bottom: 20px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.player-swap-form .scrollable-table {
+  max-height: 500px;
+  overflow: auto;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-sm);
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: rgba(255, 255, 255, 0.1);
+.player-swap-form .games-table,
+.player-swap-form .lineup-table,
+.player-swap-form .participation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
 }
 
-th, td {
-    text-align: center;
-    border: 1px solid #ccc;
-    padding: 15px;
-    font-size: 20;
-    font-family: 'Times New Roman', Times, serif;
-    color: white;
+.player-swap-form th,
+.player-swap-form td {
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 14px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  white-space: nowrap;
 }
 
-th {
-    background-color: rgba(95, 44, 130, 0.9);
-    font-weight: bold;
-    font-family: 'Times New Roman', Times, serif;
+.player-swap-form th {
+  background-color: var(--bg-tertiary);
+  font-weight: 700;
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.player-swap-form tbody tr:hover {
+  background: var(--bg-tertiary);
 }
 
 /* ================== BOTONES ================== */
-.select-button,
-.back-button,
-.next-button,
-.save-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 50px;
-    font-weight: bold;
-    font-family: 'Times New Roman', Times, serif;
-    font-size: 26;
-    cursor: pointer;
-    transition: background 0.3s;
+.player-swap-form .select-button,
+.player-swap-form .back-button,
+.player-swap-form .next-button,
+.player-swap-form .save-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
 }
 
-.select-button,
-.next-button {
-    background-color: #007bff;
-    color: #fff;
+.player-swap-form .select-button,
+.player-swap-form .next-button {
+  background-color: var(--accent);
+  color: var(--text-inverse);
 }
 
-.back-button {
-    background-color: #6c757d;
-    color: #fff;
+.player-swap-form .back-button {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
 }
 
-.save-button {
-    background-color: #28a745;
-    color: #fff;
+.player-swap-form .save-button {
+  background-color: var(--success);
+  color: #fff;
 }
 
-.select-button:hover,
-.next-button:hover {
-    background-color: #0056b3;
+.player-swap-form .select-button:hover,
+.player-swap-form .next-button:hover {
+  background-color: var(--accent-hover);
 }
 
-.back-button:hover {
-    background-color: #5a6268;
+.player-swap-form .back-button:hover {
+  background-color: var(--bg-elevated);
 }
 
-.save-button:hover {
-    background-color: #218838;
+.player-swap-form .save-button:hover {
+  filter: brightness(1.05);
 }
 
 /* ================== BOTONES DE NAVEGACIÓN ================== */
-.step-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-    border-radius: 50px;
-    font-family: 'Times New Roman', Times, serif;
-    font-size: 36;
+.player-swap-form .step-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  font-family: var(--font-sans);
 }
 
 /* ================== CAMBIOS SECCIÓN ================== */
-.changes-section {
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.player-swap-form .changes-section {
+  padding: 20px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: none;
 }
 
-.changes-section p {
-    font-size: 26px;
-    font-family: 'Times New Roman', Times, serif;
-    margin: 10px 0;
+.player-swap-form .changes-section p {
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  margin: 10px 0;
+  color: var(--text-secondary);
+}
+
+.player-swap-form .changes-section strong {
+  color: var(--text-primary);
+}
+
+/* Secciones de cada paso */
+.player-swap-form .step-content section > h2 {
+  font-size: 1.15rem;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  margin-bottom: 14px;
 }

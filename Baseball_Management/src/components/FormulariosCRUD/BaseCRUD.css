@@ -7,8 +7,6 @@
 /* ---------- Contenedor ---------- */
 .base-crud-container {
   padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
   text-align: left;
 }
 
