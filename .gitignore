@@ -490,7 +490,11 @@ yarn-error.log*
 uv-installer.sh
 
 #configuración personal para la base de datos
-./.env
+.env
+!*.env.example
+
+# artefactos de build de React (CRA)
+Baseball_Management/build/
 
 # eliminar que se suban las migraciones para que cada uno las haga en su propia computadora
 migrations/

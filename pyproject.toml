@@ -5,8 +5,8 @@ dependencies = [
     "asgiref", #para poder instalar manualmente la ultima versión de django
     "chardet",
     "sqlparse", #lo mismo que el de arriba, si se instalada directo con pip no hace falta pensarlos porque se instalan automáticamente
-    "django",
-    "djangorestframework",
+    "django>=5.1,<6.0",   # <6.0: CheckConstraint(check=...) API cambió en Django 6
+    "djangorestframework>=3.15,<4",
     "django-cors-headers",
     "factory-boy",
     "faker",
