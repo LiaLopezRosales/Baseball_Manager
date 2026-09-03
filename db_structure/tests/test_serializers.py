@@ -155,10 +155,17 @@ class TestSerializersWithMock(unittest.TestCase):
 
     def test_player_in_lineup_serializer_valid(self):
         """✅ Serializar jugador en alineación correctamente"""
-        self.mock_player_in_lineup = MagicMock(spec=PlayerInLineUp)
-        self.mock_player_in_lineup.line_up_id = 1
-        self.mock_player_in_lineup.player_in_position_id = 1
-        data = {"line_up": 1, "player_in_position": 1}
+        from db_structure.models import LineUp, PlayerInPosition, PlayerInLineUp
+        line_up = LineUp.objects.first()
+        used = set(
+            PlayerInLineUp.objects.filter(line_up=line_up).values_list(
+                "player_in_position_id", flat=True
+            )
+        )
+        free_pip = PlayerInPosition.objects.exclude(id__in=used).first()
+        if line_up is None or free_pip is None:
+            self.skipTest("No hay datos de alineación disponibles en la base de datos")
+        data = {"line_up": line_up.id, "player_in_position": free_pip.id}
         serializer = PlayerInLineUpSerializer(data=data)
         self.assertTrue(serializer.is_valid())  # 🔹 Debe pasar correctamente
 
