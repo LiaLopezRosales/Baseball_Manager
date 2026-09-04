@@ -136,3 +136,31 @@ de datos; el seed (`populate_db.py`) ya genera volumen realista.
 - [x] A2 modal/login
 - [x] A3 estructura
 - [ ] A4 verificación visual pendiente (build/tests OK)
+
+---
+
+## Apéndice — Habilitador de revisión visual de la UI
+
+Para que un agente pueda "ver" cómo queda la UI mientras edita se necesitan
+**dos piezas** (ninguna modelo de LLM ve el navegador por sí solo):
+
+1. **Modelo con visión** (para interpretar el screenshot). Entre los models
+   gratis de OpenCode Zen, solo estos aceptan imagen:
+   - `opencode/muse-spark-1.3-contributor-free` (recomendado)
+   - `opencode/muse-spark-1.2-contributor-free`
+   - `opencode/mimo-v2.5-free`
+   Los demás (Ling 3.0 Flash Fin, Nemotron 3.5 Lightning, Nemotron 3 Ultra,
+   Big Pickle) son solo texto y NO pueden ver imágenes.
+2. **MCP de navegador** (para capturar la UI): configurado en
+   `opencode.json` del proyecto con `@playwright/mcp` (Chromium headless,
+   permite navegar a `localhost:3000`). Verificado: responde al handshake
+   JSON-RPC.
+
+### Pasos para usarlo
+1. Reiniciar opencode para que cargue el nuevo MCP (`opencode.json` no se
+   hot-recarrega).
+2. En la sesión, `/models` → seleccionar un modelo con visión
+   (p. ej. `Muse Spark 1.3 Free`).
+3. El agente lanza `cd Baseball_Management && npm start`, usa la herramienta
+   de navegador del MCP para navegar a `http://localhost:3000`, toma
+   screenshots y los interpreta él mismo.
