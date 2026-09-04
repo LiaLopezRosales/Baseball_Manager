@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Shield,
@@ -26,6 +27,8 @@ function Landing() {
   const [batters, setBatters] = useState([]);
   const [stars, setStars] = useState([]);
   const [champions, setChampions] = useState([]);
+  const [teamIdByName, setTeamIdByName] = useState({});
+  const [playerIdByName, setPlayerIdByName] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -34,6 +37,7 @@ function Landing() {
     Promise.all([
       apiGet('/teams/'),
       apiGet('/baseball-players/'),
+      apiGet('/persons/'),
       apiGet('/games/'),
       apiGet('/seasons/'),
       apiGet('/scores/'),
@@ -46,6 +50,7 @@ function Landing() {
         ([
           teams,
           players,
+          persons,
           games,
           seasons,
           scores,
@@ -73,6 +78,23 @@ function Landing() {
           setBatters((battersData || []).slice(0, 5));
           setStars((starsData || []).slice(0, 6));
           setChampions(championsData || []);
+
+          const teamMap = {};
+          (teams || []).forEach((t) => {
+            teamMap[t.name] = t.id;
+          });
+          setTeamIdByName(teamMap);
+
+          const personById = {};
+          (persons || []).forEach((p) => {
+            personById[p.id] = p;
+          });
+          const playerMap = {};
+          (players || []).forEach((pl) => {
+            const per = personById[pl.P_id];
+            if (per) playerMap[`${per.name} ${per.lastname}`.toLowerCase()] = pl.id;
+          });
+          setPlayerIdByName(playerMap);
         }
       )
       .catch((err) => {
@@ -166,6 +188,17 @@ function Landing() {
     </div>
   );
 
+  const renderChampTeam = (name) => {
+    const teamId = teamIdByName[name];
+    return teamId ? (
+      <Link to={`/equipo/${teamId}`} className="landing__champ-team landing__link">
+        {name}
+      </Link>
+    ) : (
+      <span className="landing__champ-team">{name}</span>
+    );
+  };
+
   return (
     <div className="landing">
       {/* HERO */}
@@ -230,18 +263,29 @@ function Landing() {
               </tr>
             </thead>
             <tbody>
-              {sortedStandings.map((row, i) => (
-                <tr key={row.Equipo}>
-                  <td>{i + 1}</td>
-                  <td className="landing__team">
-                    {i === 0 && <Crown size={14} className="landing__crown" />}
-                    {row.Equipo}
-                  </td>
-                  <td>{row['Total de juegos']}</td>
-                  <td>{row['Total de puntos en juegos ganados']}</td>
-                  <td>{row['Total de puntos en juegos perdidos']}</td>
-                </tr>
-              ))}
+              {sortedStandings.map((row, i) => {
+                const teamId = teamIdByName[row.Equipo];
+                return (
+                  <tr key={row.Equipo}>
+                    <td>{i + 1}</td>
+                    <td className="landing__team">
+                      {i === 0 && (
+                        <Crown size={14} className="landing__crown" />
+                      )}
+                      {teamId ? (
+                        <Link to={`/equipo/${teamId}`} className="landing__team-link">
+                          {row.Equipo}
+                        </Link>
+                      ) : (
+                        row.Equipo
+                      )}
+                    </td>
+                    <td>{row['Total de juegos']}</td>
+                    <td>{row['Total de puntos en juegos ganados']}</td>
+                    <td>{row['Total de puntos en juegos perdidos']}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -256,19 +300,34 @@ function Landing() {
             'Mejor promedio de bateo'
           )}
           <ol className="landing__leaders">
-            {batters.map((b, i) => (
-              <li key={`${b.Nombre}-${b.Apellido}`} className="landing__leader">
-                <span className="landing__leader-rank">
-                  {['🥇', '🥈', '🥉'][i] || `${i + 1}°`}
-                </span>
+            {batters.map((b, i) => {
+              const pid = playerIdByName[
+                `${b.Nombre} ${b.Apellido}`.toLowerCase()
+              ];
+              const nameNode = pid ? (
+                <Link to={`/jugador/${pid}`} className="landing__leader-name landing__link">
+                  {b.Nombre} {b.Apellido}
+                </Link>
+              ) : (
                 <span className="landing__leader-name">
                   {b.Nombre} {b.Apellido}
                 </span>
-                <span className="landing__leader-val">
-                  {Number(b['Promedio de Bateo'] || b.Average || 0).toFixed(3)}
-                </span>
-              </li>
-            ))}
+              );
+              return (
+                <li
+                  key={`${b.Nombre}-${b.Apellido}`}
+                  className="landing__leader"
+                >
+                  <span className="landing__leader-rank">
+                    {['🥇', '🥈', '🥉'][i] || `${i + 1}°`}
+                  </span>
+                  {nameNode}
+                  <span className="landing__leader-val">
+                    {Number(b['Promedio de Bateo'] || b.Average || 0).toFixed(3)}
+                  </span>
+                </li>
+              );
+            })}
           </ol>
         </section>
 
@@ -279,17 +338,31 @@ function Landing() {
             'Efectividad destacada por serie'
           )}
           <div className="landing__stars">
-            {stars.map((s, i) => (
-              <div key={i} className="landing__star">
-                <span className="landing__star-name">
-                  {s.Nombre} {s.Apellido}
-                </span>
-                <span className="landing__star-pos">{s.Posición}</span>
-                <span className="landing__star-val">
-                  {Number(s.Efectividad).toFixed(3)}
-                </span>
-              </div>
-            ))}
+            {stars.map((s, i) => {
+              const pid = playerIdByName[
+                `${s.Nombre} ${s.Apellido}`.toLowerCase()
+              ];
+              return (
+                <div key={i} className="landing__star">
+                  {pid ? (
+                    <Link
+                      to={`/jugador/${pid}`}
+                      className="landing__star-name landing__link"
+                    >
+                      {s.Nombre} {s.Apellido}
+                    </Link>
+                  ) : (
+                    <span className="landing__star-name">
+                      {s.Nombre} {s.Apellido}
+                    </span>
+                  )}
+                  <span className="landing__star-pos">{s.Posición}</span>
+                  <span className="landing__star-val">
+                    {Number(s.Efectividad).toFixed(3)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </section>
       </div>
@@ -312,7 +385,7 @@ function Landing() {
               transition={{ delay: i * 0.05 }}
             >
               <span className="landing__champ-season">{c.Temporada}</span>
-              <span className="landing__champ-team">{c.Equipo}</span>
+              {renderChampTeam(c.Equipo)}
               <span className="landing__champ-dt">
                 {c['Director Técnico']}
               </span>

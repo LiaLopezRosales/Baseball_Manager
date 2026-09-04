@@ -7,6 +7,7 @@ import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import Landing from './components/Landing';
+import { TeamProfile, PlayerProfile } from './components/profilePages';
 import PlayerSwapForm from './components/PlayerSwapForm';
 import PlayerSwapTable from './components/PlayerSwapTable';
 import { CRUDRoute, ReportRoute, QueryRoute } from './viewRoutes';
@@ -77,6 +78,8 @@ function AppRoutes({ role, team, onModalOpen }) {
               <Route path="/consultas/:tabla" element={<QueryRoute />} />
               <Route path="/dt/cambios" element={<PlayerSwapForm teamId={team} />} />
               <Route path="/dt/listar-cambios" element={<PlayerSwapTable teamId={team} />} />
+              <Route path="/equipo/:id" element={<TeamProfile />} />
+              <Route path="/jugador/:id" element={<PlayerProfile />} />
               <Route path="*" element={<Landing />} />
             </Routes>
           </motion.div>

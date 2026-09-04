@@ -160,6 +160,35 @@
   color: var(--accent);
 }
 
+/* ---------- Enlaces de navegación interna ---------- */
+.landing__link {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.landing__link:hover {
+  color: var(--accent);
+}
+
+.landing__team-link {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.landing__team-link:hover {
+  color: var(--accent);
+}
+
+.landing__champ-team {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
 /* ---------- Dos columnas ---------- */
 .landing__two-col {
   display: grid;
