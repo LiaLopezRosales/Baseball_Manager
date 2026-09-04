@@ -64,9 +64,8 @@ function LoginBoard({
       setLogin(true);
       onButtonClick();
 
-      if (role_name === 'Admin') navigate('/admin-dashboard');
-      if (role_name === 'Director Técnico') navigate('/DT');
-      if (role_name === 'Usuario General') navigate('/');
+      if (role_name === 'Director Técnico') navigate('/dt/cambios');
+      else navigate('/');
     } catch (error) {
       console.error('Error capturado:', error.message);
       setErrorMessage(error.message);
