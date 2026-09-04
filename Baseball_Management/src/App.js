@@ -8,6 +8,7 @@ import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import Landing from './components/Landing';
 import { TeamProfile, PlayerProfile } from './components/profilePages';
+import ProtectedRoute from './components/ProtectedRoute';
 import PlayerSwapForm from './components/PlayerSwapForm';
 import PlayerSwapTable from './components/PlayerSwapTable';
 import { CRUDRoute, ReportRoute, QueryRoute } from './viewRoutes';
@@ -73,11 +74,11 @@ function AppRoutes({ role, team, onModalOpen }) {
           >
             <Routes>
               <Route path="/" element={<Landing />} />
-              <Route path="/admin/:slug" element={<CRUDRoute />} />
-              <Route path="/reporte/:slug" element={<ReportRoute />} />
-              <Route path="/consultas/:tabla" element={<QueryRoute />} />
-              <Route path="/dt/cambios" element={<PlayerSwapForm teamId={team} />} />
-              <Route path="/dt/listar-cambios" element={<PlayerSwapTable teamId={team} />} />
+              <Route path="/admin/:slug" element={<ProtectedRoute roles={['Admin']}><CRUDRoute /></ProtectedRoute>} />
+              <Route path="/reporte/:slug" element={<ProtectedRoute roles={['Admin']}><ReportRoute /></ProtectedRoute>} />
+              <Route path="/consultas/:tabla" element={<ProtectedRoute roles={['Admin']}><QueryRoute /></ProtectedRoute>} />
+              <Route path="/dt/cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapForm teamId={team} /></ProtectedRoute>} />
+              <Route path="/dt/listar-cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapTable teamId={team} /></ProtectedRoute>} />
               <Route path="/equipo/:id" element={<TeamProfile />} />
               <Route path="/jugador/:id" element={<PlayerProfile />} />
               <Route path="*" element={<Landing />} />
