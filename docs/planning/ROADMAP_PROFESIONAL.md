@@ -532,17 +532,37 @@ services:
 
 ---
 
+## 8.5. Fase B — Landing pública, perfiles y charts (completada)
+
+| Subfase | Descripción | Estado |
+|---|---|---|
+| B1 | Migración de enrutado de `selectedOption` a React Router con rutas URL reales | ✅ |
+| B2 | Landing pública con stats, standings, líderes de bateo, estrellas, campeones | ✅ |
+| B3 | Perfiles navegables `/equipo/:id` y `/jugador/:id` con enlaces desde landing | ✅ |
+| B4 | Charts ECharts (barras para standings + radar para perfil de jugador) | ✅ |
+| B5 | Guard de protección por rol (`ProtectedRoute`) en rutas admin y DT | ✅ |
+| B6 | Verificación final (build, tests) y docs (AGENTS.md, este roadmap) | ✅ |
+
+**Archivos creados en Fase B:**
+- `src/routes.js`, `src/path.js`, `src/viewRoutes.jsx` — sistema de rutas URL
+- `src/components/Landing.jsx`, `src/components/landing.css` — landing pública
+- `src/components/profilePages.jsx`, `src/components/profilePages.css` — perfiles equipo/jugador
+- `src/components/ProtectedRoute.jsx` — guard por rol
+- `src/components/ui/BarChart.jsx`, `src/components/ui/RadarChart.jsx` — charts ECharts
+
+---
+
 ## 9. Definition of Done
 
-> Estado tras completar Fase 0 y Fase 1. Items pendientes pertenecen a Fases 2–4.
+> Estado tras completar Fase 0, Fase 1 y Fase B. Items pendientes pertenecen a Fases 2–4.
 
 - [x] `manage.py test db_structure` → 0 failures (91 tests OK)
 - [x] `npm test` → passes (2 tests)
 - [ ] `ruff check .` → 0 errors
 - [x] UI dark theme "Diamond Plate" funcional
 - [x] Toggle dark/light funcional y persistente
-- [ ] Dashboard con ≥2 charts interactivos (Fase 2)
-- [ ] 1 chart 3D (ECharts-GL) (Fase 2)
+- [x] Dashboard con ≥2 charts interactivos (barras standings + radar perfil jugador, ECharts)
+- [ ] 1 chart 3D (ECharts-GL) (pendiente)
 - [x] Responsive en 768px breakpoint
 - [x] Skeleton loading states en las vistas de datos (dashboard + CRUD; reports usa spinner)
 - [x] Error Boundaries implementados

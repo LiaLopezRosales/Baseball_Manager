@@ -100,7 +100,7 @@ Tests use `unittest` with `MagicMock` (no DB required). Located in `db_structure
 - `Pitcher.save()` calls `get_pitcher_wins`/`get_pitcher_losses` and **accumulates** values — saving twice doubles the count.
 - `get_team_players_at_a_specified_serie` in `queries.py` has dead code after a `return` statement (ORM version unreachable).
 - Report queries expect specific parameter shapes (e.g., `report_id` as int, season/series names as strings).
-- Frontend routing is primarily driven by `selectedOption` state, not URL paths.
+- Frontend routing uses React Router with real URL paths (`/admin/:slug`, `/reporte/:slug`, `/consultas/:tabla`, `/equipo/:id`, `/jugador/:id`). Route definitions are in `src/routes.js` (slug→option maps), path helpers in `src/path.js`, route wrappers in `src/viewRoutes.jsx`.
 
 ## Frontend: cómo centrar iconos dentro de inputs (login, etc.)
 
@@ -126,3 +126,36 @@ analizar los píxeles con un script (Python + Pillow) o mapas ASCII de las filas
 glifo vs. el texto para calibrar el offset exacto (ruta de ejemplo:
 `/tmp/opencode/login/ascii.py`). NOTA para el ciclo de UI-review: la alineación óptica
 se resuelve por píxeles, no por coordenadas del elemento.
+
+## Frontend: Fase B — Landing pública y perfiles
+
+### Arquitectura de rutas (URL-based)
+- `/` — Landing pública (hero, stat cards, standings, líderes de bateo, estrellas, campeones)
+- `/admin/:slug` — CRUD Admin (protegido, rol "Admin")
+- `/reporte/:slug` — Reportes (protegido, rol "Admin")
+- `/consultas/:tabla` — Consultas dinámicas (protegido, rol "Admin")
+- `/dt/cambios` — Definir cambios DT (protegido, rol "Director Técnico")
+- `/dt/listar-cambios` — Listar cambios DT (protegido, rol "Director Técnico")
+- `/equipo/:id` — Perfil de equipo (público, con lista de jugadores enlazados)
+- `/jugador/:id` — Perfil de jugador (público, con stats + radar chart ECharts)
+
+### Componentes clave
+- `Landing.jsx` — Landing principal, carga 9 endpoints (teams, players, persons, games, seasons, scores + reportes 0,1,5,6)
+- `profilePages.jsx` — TeamProfile y PlayerProfile (useParams, profiles)
+- `ProtectedRoute.jsx` — Guard que verifica rol en localStorage y redirige a "/"
+- `routes.js` — Mapa slug→option para CRUD_ROUTES, REPORT_ROUTES, QUERY_TABLES
+- `path.js` — Helpers option→path (toCRUDPath, toReportPath, etc.)
+- `viewRoutes.jsx` — CRUDRoute, ReportRoute, QueryRoute (wrappers con useParams)
+- `ui/BarChart.jsx` — Chart de barras ECharts (standings en landing)
+- `ui/RadarChart.jsx` — Radar chart ECharts (perfil de jugador)
+
+### Datos de la landing
+- Reporte 0 (sin params): campeones por temporada (Equipo, Director Técnico, Temporada, Serie)
+- Reporte 1 (sin params): jugadores estrella por serie (Nombre, Apellido, Posición, Efectividad)
+- Reporte 5 (sin params): top promedio de bateo (Nombre, Apellido, Average)
+- Reporte 6 (sin params): estadísticas por equipo (Total de juegos, puntos ganados/perdidos)
+- Reporte 8 (team_name param): jugadores de un equipo con series
+- `/teams/`, `/persons/`, `/baseball-players/`, `/players-in-position/`, `/positions/` — datos base
+
+### Dependencias de charts
+- `echarts` + `echarts-for-react` — ECharts para React (SVG renderer)
