@@ -104,6 +104,16 @@
   transition: color 0.2s;
 }
 
+/* Compensa la altura óptica del glifo de cada icono para alinearlo con el texto:
+   el mail se dibuja 1.5px y el candado 4.1px por encima del centro de su caja. */
+.login-field:not(.login-field--password) .login-input-icon {
+  top: calc(50% + 1.5px);
+}
+
+.login-field--password .login-input-icon {
+  top: calc(50% + 4px);
+}
+
 .login-input {
   width: 100%;
   height: 46px;
