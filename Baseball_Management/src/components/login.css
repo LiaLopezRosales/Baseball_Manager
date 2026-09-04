@@ -104,13 +104,9 @@
   transition: color 0.2s;
 }
 
-/* Compensa la altura óptica del glifo de cada icono para alinearlo con el texto:
-   el mail se dibuja 1.5px y el candado 4.1px por encima del centro de su caja. */
-.login-field:not(.login-field--password) .login-input-icon {
-  top: calc(50% + 1.5px);
-}
-
-.login-field--password .login-input-icon {
+/* Desplaza los iconos 4px bajo el centro del input para alinearlos con el
+   texto real (los inputs dibujan el texto ~4px por debajo del centro). */
+.login-field .login-input-icon {
   top: calc(50% + 4px);
 }
 
@@ -173,6 +169,10 @@
   color: var(--accent);
   box-shadow: none;
   transform: translateY(-50%);
+}
+
+.toggle-password {
+  top: calc(50% + 4px);
 }
 
 .login-input--password .login-input {
