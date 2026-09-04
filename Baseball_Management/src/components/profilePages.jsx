@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Shield, Users, Star, ArrowLeft, Target } from 'lucide-react';
 import { apiGet } from '../api';
+import RadarChart from './ui/RadarChart';
 import './profilePages.css';
 
 export function TeamProfile() {
@@ -225,6 +226,17 @@ export function PlayerProfile() {
             <span className="profile__stat-value">{person.age}</span>
           </div>
         </div>
+      </section>
+
+      <section className="profile__section">
+        <RadarChart
+          title="Rendimiento"
+          stats={[
+            { label: 'Bateo', value: player.batting_average, max: 1 },
+            { label: 'Experiencia', value: Math.min(player.years_of_experience / 20, 1), max: 1 },
+            { label: 'Edad', value: Math.min(person.age / 70, 1), max: 1 },
+          ]}
+        />
       </section>
     </div>
   );

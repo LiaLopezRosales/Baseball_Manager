@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { apiGet } from '../api';
 import StatCard from './ui/StatCard';
+import BarChart from './ui/BarChart';
 import ParticleField from './ui/Particles';
 import TextGenerateEffect from './ui/TextGenerateEffect';
 import './landing.css';
@@ -252,6 +253,13 @@ function Landing() {
           'Ganadores y puntos por equipo'
         )}
         <div className="landing__standings">
+          {sortedStandings.length > 0 && (
+            <BarChart
+              teams={sortedStandings.map((r) => r.Equipo)}
+              values={sortedStandings.map((r) => r['Total de puntos en juegos ganados'])}
+              title="Puntos ganados por equipo"
+            />
+          )}
           <table className="landing__table">
             <thead>
               <tr>
