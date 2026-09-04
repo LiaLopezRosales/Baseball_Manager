@@ -1,0 +1,303 @@
+/* ============================================================
+   Landing pública — Diamond Plate
+   ============================================================ */
+
+.landing {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  width: 100%;
+}
+
+/* ---------- Hero ---------- */
+.landing__hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  padding: 56px 32px;
+  text-align: left;
+}
+
+.landing__particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.landing__hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.landing__eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+.landing__title {
+  font-size: 2.2rem;
+  line-height: 1.15;
+  font-weight: 800;
+  color: var(--text-primary);
+  max-width: 820px;
+  margin: 0 0 16px;
+  letter-spacing: -0.02em;
+}
+
+.landing__subtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 620px;
+  margin: 0;
+}
+
+/* ---------- Grid de stats (reutiliza StatCard) ---------- */
+.landing__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+/* ---------- Secciones ---------- */
+.landing__section {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  padding: 28px;
+}
+
+.landing__section-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.landing__section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.landing__section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.landing__section-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+/* ---------- Tabla standings ---------- */
+.landing__standings {
+  overflow-x: auto;
+}
+
+.landing__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.landing__table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.landing__table td {
+  padding: 11px 12px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.landing__table tr:last-child td {
+  border-bottom: none;
+}
+
+.landing__table tbody tr:hover {
+  background: var(--bg-elevated);
+}
+
+.landing__team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary) !important;
+  font-weight: 600;
+}
+
+.landing__crown {
+  color: var(--accent);
+}
+
+/* ---------- Dos columnas ---------- */
+.landing__two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+/* ---------- Líderes ---------- */
+.landing__leaders {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.landing__leader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.landing__leader:last-child {
+  border-bottom: none;
+}
+
+.landing__leader-rank {
+  width: 28px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.landing__leader-name {
+  flex: 1;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.landing__leader-val {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---------- Estrellas ---------- */
+.landing__stars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.landing__star {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+}
+
+.landing__star-name {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.landing__star-pos {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.landing__star-val {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* ---------- Timeline campeones ---------- */
+.landing__timeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.landing__champ {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+}
+
+.landing__champ-season {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.landing__champ-team {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.landing__champ-dt {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.landing__champ-serie {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .landing__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .landing__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .landing__two-col {
+    grid-template-columns: 1fr;
+  }
+  .landing__title {
+    font-size: 1.7rem;
+  }
+  .landing__stars {
+    grid-template-columns: 1fr;
+  }
+}

@@ -499,3 +499,6 @@ Baseball_Management/build/
 # eliminar que se suban las migraciones para que cada uno las haga en su propia computadora
 migrations/
 /migrations
+
+# artefactos de autoevaluación de UI (Playwright MCP)
+.playwright-mcp/

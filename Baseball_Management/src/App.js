@@ -6,7 +6,7 @@ import './App.css';
 import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
-import MainPage from './components/main-page';
+import Landing from './components/Landing';
 import PlayerSwapForm from './components/PlayerSwapForm';
 import PlayerSwapTable from './components/PlayerSwapTable';
 import { CRUDRoute, ReportRoute, QueryRoute } from './viewRoutes';
@@ -71,13 +71,13 @@ function AppRoutes({ role, team, onModalOpen }) {
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
           >
             <Routes>
-              <Route path="/" element={<MainPage />} />
+              <Route path="/" element={<Landing />} />
               <Route path="/admin/:slug" element={<CRUDRoute />} />
               <Route path="/reporte/:slug" element={<ReportRoute />} />
               <Route path="/consultas/:tabla" element={<QueryRoute />} />
               <Route path="/dt/cambios" element={<PlayerSwapForm teamId={team} />} />
               <Route path="/dt/listar-cambios" element={<PlayerSwapTable teamId={team} />} />
-              <Route path="*" element={<MainPage />} />
+              <Route path="*" element={<Landing />} />
             </Routes>
           </motion.div>
         </AnimatePresence>
