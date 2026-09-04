@@ -24,7 +24,7 @@
 .form-container {
   position: relative;
   z-index: 1;
-  width: min(400px, 100%);
+  width: 100%;
   padding: 36px 32px;
   border-radius: var(--radius-lg);
   background: var(--bg-secondary);
@@ -96,7 +96,7 @@
 
 .login-input-icon {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
@@ -106,12 +106,15 @@
 
 .login-input {
   width: 100%;
-  padding: 12px 12px 12px 40px;
+  height: 46px;
+  box-sizing: border-box;
+  padding: 0 12px 0 42px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
   background: var(--bg-tertiary);
   color: var(--text-primary);
   font-size: 0.95rem;
+  line-height: 1;
   font-family: var(--font-sans);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
@@ -141,7 +144,12 @@
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;

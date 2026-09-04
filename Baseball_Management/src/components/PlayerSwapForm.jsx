@@ -14,7 +14,6 @@ function PlayerSwapForm({ teamId }) {
     const [lineupId, setLineupId] = useState(null); // Nuevo estado
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [positionName, setPositionName] = useState(null);
     const [step, setStep] = useState(1); // Controla el paso actual
 
     const nextStep = () => setStep((prev) => Math.min(prev + 1, 4));
@@ -24,7 +23,6 @@ function PlayerSwapForm({ teamId }) {
         setSelectedGame(null);
         setSelectedLineupPlayer(null);
         setSelectedParticipation(null);
-        setPositionName(null);
         setParticipations([]);
     }, []);
 
@@ -60,7 +58,6 @@ function PlayerSwapForm({ teamId }) {
     const handleGameSelect = async (game) => {
         setSelectedGame(game);
         setSelectedLineupPlayer(null); // Reinicia selección de jugador
-        setPositionName(null); // Reinicia encabezado dinámico
         setParticipations([]); // Limpia jugadores disponibles
         nextStep();
 
@@ -81,7 +78,6 @@ function PlayerSwapForm({ teamId }) {
     const handleLineupPlayerSelect = async (player) => {
         if (!selectedGame || !lineupId) return;
         setSelectedLineupPlayer(player);
-        setPositionName(player.position_name);
         nextStep();
 
         try {
@@ -100,12 +96,6 @@ function PlayerSwapForm({ teamId }) {
     const handleParticipationSelect = (player) => {
         setSelectedParticipation(player);
         nextStep();
-    };
-
-    const handleGoBack = () => {
-        if (selectedGame != null && selectedLineupPlayer == null){ setSelectedGame(null) }    
-        if (selectedGame != null && selectedLineupPlayer != null && selectedParticipation == null){ setSelectedLineupPlayer(null) }
-        if (selectedGame != null && selectedLineupPlayer != null && selectedParticipation != null){ setSelectedParticipation(null) }
     };
 
     // Actualización automática de los campos de cambio
@@ -147,7 +137,6 @@ function PlayerSwapForm({ teamId }) {
             setSelectedGame(null);
             setSelectedLineupPlayer(null);
             setSelectedParticipation(null);
-            setPositionName(null);
             setParticipations([]);
         } catch (err) {
             console.error(err);

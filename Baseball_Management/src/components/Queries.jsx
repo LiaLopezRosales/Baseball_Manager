@@ -70,7 +70,6 @@ const Queries = ({ selectedTable }) => {
     const [data, setData] = useState([]);
     const [fields, setFields] = useState([]);
     const [filters, setFilters] = useState({});
-    const [query, setQuery] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -82,7 +81,6 @@ const Queries = ({ selectedTable }) => {
                     fields: getQueryFields(fields),
                     filters: filters,
                 };
-                setQuery(query);
 
                 const result = await fetchData('http://127.0.0.1:8000/api/queries/dinamic-filter/', query);
                 setData(result);
