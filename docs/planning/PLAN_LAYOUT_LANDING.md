@@ -53,6 +53,14 @@ Diamond Plate).
 - [x] `App.css` (líneas ~139-150): eliminar el bloque `.login` huérfano
   (carta stale posicionada fixed bottom-right; el login real es
   `.login-board` en el modal).
+- [x] `Modal.css`: botón ✕ rediseñado como botón circular de 34px con fondo
+  `--bg-elevated`, borde sutil y hover accent; posicionado a 14px del borde
+  (antes quedaba pegado al extremo y no encajaba con la estética).
+- [x] `login.css`: alinear los glifos de los iconos (mail, candado, ojo) con
+  el texto real del input (ver "Indicaciones para centrar" al final).
+- [x] Escalar en `BaseCRUD.css`: `.form-group`, `.password-container`,
+  `.toggle-password`, `.form-actions` se scopearon bajo `.item-form` para no
+  colisionar con el login (que usa `.form-group`/`.toggle-password`).
 
 ### A3. Estructura de layout
 - [x] Resolver el doble padding: `MainPage` renderiza `class="base-page
@@ -70,8 +78,11 @@ Diamond Plate).
 - [x] `npm run build` (exit 0).
 - [x] Tests frontend (`CI=true npm test`) y backend (`manage.py test
   db_structure`).
-- [ ] Revisión visual en `npm start` (login, sidebar colapsada, dashboard,
-  tablas, reports).
+- [x] Corregidos los 4 errores de ESLint que bloqueaban el build
+  (`PlayerSwapForm.jsx`, `Queries.jsx`, `admin.jsx`).
+- [x] Revisión visual del login: iconos de email/candado/ojo alineados con el
+  texto, botón ✕ circular y bien posicionado en el modal.
+- [ ] Revisión visual restante: sidebar colapsada, dashboard, tablas, reports.
 
 ---
 
@@ -133,9 +144,30 @@ de datos; el seed (`populate_db.py`) ya genera volumen realista.
 
 - [x] Documentar planes.
 - [x] A1 tema global
-- [x] A2 modal/login
+- [x] A2 modal/login (incluye iconos del login alineados + ✕ circular del modal)
 - [x] A3 estructura
-- [ ] A4 verificación visual pendiente (build/tests OK)
+- [x] A4 login revisado visualmente; build y tests OK
+- [ ] A4 resto de vistas (sidebar colapsada, dashboard, tablas, reports) pendiente
+
+---
+
+## Indicaciones para centrar iconos dentro de inputs
+
+Regla aprendida de forma empírica (validada visualmente en el login). Detalle
+completo en `AGENTS.md` → "Frontend: cómo centrar iconos dentro de inputs".
+
+**Resumen:**
+1. **No confiar en `top:50%` por sí solo.** El texto real de un `<input>` se
+   dibuja ~4px por debajo del centro geométrico de la caja. Los iconos centrados
+   en la caja quedan "altos" respecto al texto.
+2. **Centrar el texto**: input con `height` fija, `line-height:1`, `padding`
+   vertical `0` → el texto ocupa el centro de la caja.
+3. **Desplazar los glifos de lucide**: aunque la caja del SVG esté centrada, el
+   glifo interno (mail 1.5px, candado 4.1px) está desplazado. Se compensa
+   `top: calc(50% + 4px)`.
+4. **Verificar por píxeles** (no por `getBBox()` ni coordenadas): screenshot +
+   análisis con Python/Pillow o mapas ASCII de filas. La óptica se decide por
+   píxeles, no por la geometría declarada del elemento.
 
 ---
 

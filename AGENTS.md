@@ -101,3 +101,28 @@ Tests use `unittest` with `MagicMock` (no DB required). Located in `db_structure
 - `get_team_players_at_a_specified_serie` in `queries.py` has dead code after a `return` statement (ORM version unreachable).
 - Report queries expect specific parameter shapes (e.g., `report_id` as int, season/series names as strings).
 - Frontend routing is primarily driven by `selectedOption` state, not URL paths.
+
+## Frontend: cómo centrar iconos dentro de inputs (login, etc.)
+
+**Síntoma:** los iconos (email, candado, ojo) se ven "más altos que el texto" aunque
+matemáticamente la caja del SVG esté centrada en el input (`top:50%; translateY(-50%)`).
+
+**Causas reales (medidas en el login):**
+1. El texto dentro de un `<input>` se dibuja ~4px **por debajo** del centro geométrico
+   de la caja (no está centrado en la práctica). Con `height` fija + `line-height:1` +
+   `padding` vertical `0`, el texto queda centrado.
+2. Los glifos de los iconos de lucide-react **no ocupan la caja completa**: cada icono
+   dibuja su forma desplazada verticalmente dentro de su viewBox 24x24 (p. ej. el `Mail`
+   queda 1.5px alto y el `Lock` 4.1px alto). `getBBox()` NO predice bien la percepción.
+
+**Fix aplicado en `login.css` (validado visualmente):** dar al input `height:46px`,
+`line-height:1`, `padding: 0 12px 0 42px` y desplazar cada icono verticalmente con
+`top: calc(50% + 4px)` (un desplazamiento uniforme por debajo del centro para alinear
+con el texto real). No se alinea respecto al centro de la caja, sino respecto a dónde
+cae el texto.
+
+**Verificación objetiva sin necesidad de visión:** capturar screenshot del modal y
+analizar los píxeles con un script (Python + Pillow) o mapas ASCII de las filas del
+glifo vs. el texto para calibrar el offset exacto (ruta de ejemplo:
+`/tmp/opencode/login/ascii.py`). NOTA para el ciclo de UI-review: la alineación óptica
+se resuelve por píxeles, no por coordenadas del elemento.

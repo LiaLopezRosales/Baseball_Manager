@@ -32,6 +32,9 @@ Documento completo: estado actual, benchmarking, stack visual, fases, y especifi
 **Fix tras revisión visual** (mantener dentro de Fase 1):
 - Texto del hero ya no se corta: `TextGenerateEffect` pasa a animar palabra por palabra y permite wrap de líneas.
 - Sidebar colapsada: los botones de colapso y tema ya no se superponen (se apilan en columna y el brand se oculta); el botón de colapso queda accesible para descontraer.
+- Corregidas colisiones de CSS global: `Queries.css` y `PlayerSwapForm.css` ya no inyectan un fondo gradiente + Times New Roman que pisaba el tema; `BaseCRUD.css` escopa sus selectores (`.form-group`, `.toggle-password`, etc.) bajo `.item-form` para no romper el login.
+- Login premium refinado: botón ✕ del modal ahora es un botón circular (34px, `--bg-elevated`, hover accent) bien posicionado; los iconos (mail, candado, ojo) se alinean con el texto real del input (ver técnica de centrado en `AGENTS.md` y `PLAN_LAYOUT_LANDING.md`).
+- Corregidos 4 errores de ESLint que bloqueaban el build (vars sin usar en `PlayerSwapForm.jsx`, `Queries.jsx`, `admin.jsx`).
 
 ### Fase 2 — Features que demuestran skills (P2) ⏳ Pendiente
 
@@ -75,7 +78,7 @@ Documento completo: estado actual, benchmarking, stack visual, fases, y especifi
 - **Frontend**: React 18 (Create React App), JavaScript puro (sin TypeScript)
 - **Auth**: Token-based (DRF), contraseñas en texto plano (intencional)
 - **Reportes**: 9 reportes con SQL raw, exportación PDF/CSV vía plugin system
-- **Tests**: 91 tests backend (unittest + MagicMock), 1 test frontend obsoleto
+- **Tests**: 91 tests backend (unittest + MagicMock), 2 tests frontend (passing; `App.test.js` actualizado)
 
 ### 1.2 Lo que existe de verdad (verificado en código)
 - CRUD completo para 18 entidades (Repository + BaseViewSet + Serializer)
