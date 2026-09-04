@@ -274,6 +274,21 @@ def populate_users_and_workers(team_numbers=6):
 
     print(f"{len(users)} usuarios creados.")
     print(f"{len(workers)} trabajadores creados y asignados a equipos de dirección.")
+
+    # Admin conocido para desarrollo
+    admin_user, created = User.objects.get_or_create(
+        email='lialopez@gmail.com',
+        defaults={
+            'password': 'lia',
+            'rol_id': roles['Admin'],
+            'TD_id': None,
+        }
+    )
+    if created:
+        print("Admin conocido creado: lialopez@gmail.com / lia")
+    else:
+        print("Admin conocido ya existía: lialopez@gmail.com")
+
     return {
         "roles": roles,
         "users": users,
