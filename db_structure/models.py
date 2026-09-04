@@ -491,3 +491,43 @@ class PlayerInLineUp(models.Model):
     def __str__(self):
         return f"{self.player_in_position} en {self.line_up}"
 
+
+class FavoriteTeam(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='favorite_teams')
+    team = models.ForeignKey('Team', on_delete=models.CASCADE, related_name='favorited_by')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'team'], name='unique_favorite_team')
+        ]
+
+    def __str__(self):
+        return f"{self.user.email} → {self.team.name}"
+
+
+class FavoritePlayer(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='favorite_players')
+    player = models.ForeignKey('BaseballPlayer', on_delete=models.CASCADE, related_name='favorited_by')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'player'], name='unique_favorite_player')
+        ]
+
+    def __str__(self):
+        return f"{self.user.email} → BP#{self.player.id}"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    link = models.CharField(max_length=255, blank=True, default='')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{'✓' if self.is_read else '•'}] {self.message[:50]}"
+

@@ -159,3 +159,52 @@ se resuelve por píxeles, no por coordenadas del elemento.
 
 ### Dependencias de charts
 - `echarts` + `echarts-for-react` — ECharts para React (SVG renderer)
+
+## Frontend/Backend: Fase C — Usuario General funcional
+
+### Auth y token
+- El backend usa `DEFAULT_AUTHENTICATION_CLASSES = api.authentication.FlexibleTokenAuthentication` (en `settings.py`).
+  `CustomUser.is_active = None` hace que el `TokenAuthentication` estándar rechace a todos; `FlexibleTokenAuthentication`
+  (en `api/authentication.py`) omite el chequeo de `is_active`.
+- Login: `POST /api/login/` (devuelve `token`, `team_id`, `role_name`, `user.permissions`).
+- Registro público: `POST /api/register/` con `{name, lastname, email, password}` → crea `Person` + `User`
+  (rol "Usuario General") automáticamente y devuelve un token (auto-login). Requiere `Rol.objects.get(type='Usuario General')`.
+- **Gotcha**: `RegisterView` debe crear con `api.models.CustomUser` (el `Token` FK exige el modelo AUTH, no `db_structure.User`).
+
+### Endpoints de usuario general (todos con token `Authorization: Token <token>`)
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/api/user/dashboard/` | Resumen personalizado: favorito, últimos juegos, posición, jugador estrella |
+| POST | `/api/user/favorites/team/` `{team_id}` | Toggle favorito de equipo (devuelve `favorited`) |
+| POST | `/api/user/favorites/player/` `{player_id}` | Toggle favorito de jugador |
+| GET | `/api/user/favorites/` | Lista de favoritos (`teams` + `players`) |
+| GET | `/api/notifications/` | Notificaciones + `unread_count` |
+| POST | `/api/notifications/read-all/` | Marcar todas leídas |
+| POST | `/api/notifications/<id>/read/` | Marcar una leída |
+
+Los FKs de `FavoriteTeam`/`FavoritePlayer`/`Notification` apuntan a `db_structure.User`; `request.user` es `CustomUser`,
+así que **todos los filtros usan `user_id`** (nunca `request.user` directo en lookups que lo usen como FK).
+
+### Export restringido
+- `ExportView` (`api/reports/views.py`) tiene `permission_classes = [IsAuthenticated]` → los invitados reciben 401.
+  El frontend (`report.jsx`) oculta el botón "Exportar" si no hay token y muestra un tooltip con candado.
+
+### Componentes de Fase C (frontend)
+- `Register.jsx` + `register.css` — registro público, ruta `/registro`
+- `FavoritesPanel.jsx` + `favorites.css` — `useFavorites`, `FavoriteButton`, `FavoritesPanel`
+- `UserDashboard.jsx` + `userDashboard.css` — panel "Tu panel" (posición, últimos juegos, radar compacto)
+- `NotificationBell.jsx` + `notifications.css` — campana con badge + dropdown + polling 20s
+- Logout: `handleLogout` en `App.js` (limpia localStorage y recarga) conectado al botón del sidebar y del modal de cuenta
+
+### Usuarios de prueba (seed en `populate_db.py`)
+| Email | Password | Rol |
+|---|---|---|
+| `lialopez@gmail.com` | `lia` | Admin |
+| `director@test.com` | `director` | Director Técnico |
+| `general@test.com` | `general` | Usuario General |
+
+### Gotchas de Fase C
+- `DashboardView` usa `Game`/`TeamOnTheField` para últimos juegos (el modelo `Score` **no** tiene campo `game`).
+- `db_structure.User` limita a `db_structure.models.User`; el `Token` requiere `CustomUser`. No mezclar.
+- La auto-generación de notificaciones al registrar resultados (signal/endpoint) **aún no está implementada** — las
+  notificaciones se crean manualmente (shell o futura API).

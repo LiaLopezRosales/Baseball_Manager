@@ -132,6 +132,8 @@ class DynamicFilterView(APIView):
             return Response({"error": str(e)},  status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ExportView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         
         # Serializar y validar el cuerpo de la consulta

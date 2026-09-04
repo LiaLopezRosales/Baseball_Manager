@@ -136,3 +136,33 @@ class PlayerInLineUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayerInLineUp
         fields = '__all__'
+
+
+class FavoriteTeamSerializer(serializers.ModelSerializer):
+    team_name = serializers.CharField(source='team.name', read_only=True)
+
+    class Meta:
+        model = FavoriteTeam
+        fields = ['id', 'user', 'team', 'team_name']
+        read_only_fields = ['user']
+
+
+class FavoritePlayerSerializer(serializers.ModelSerializer):
+    player_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FavoritePlayer
+        fields = ['id', 'user', 'player', 'player_name']
+        read_only_fields = ['user']
+
+    def get_player_name(self, obj):
+        if obj.player and obj.player.person:
+            return f"{obj.player.person.name} {obj.player.person.lastname}"
+        return f"BP#{obj.player.id}"
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'user', 'message', 'link', 'is_read', 'created_at']
+        read_only_fields = ['user', 'message', 'link', 'created_at']

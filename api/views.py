@@ -4,11 +4,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
-from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition, PlayerSwap
+from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition, PlayerSwap, Person, Rol, FavoriteTeam as FavoriteTeamModel, FavoritePlayer as FavoritePlayerModel, Notification as NotificationModel
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 # from datetime import datetime
 from db_structure.serializers import PlayerSwapSerializer
+from db_structure.views import FavoriteTeamViewSet, FavoritePlayerViewSet, NotificationViewSet
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.db.models import Q
 
 
 class LoginView(APIView):
@@ -290,3 +294,225 @@ class PlayerSwapsForTeamView(APIView):
             return Response({"error": "Cambio de jugador no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": f"Error interno: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        try:
+            name = request.data.get('name', '').strip()
+            lastname = request.data.get('lastname', '').strip()
+            email = request.data.get('email', '').strip()
+            password = request.data.get('password', '').strip()
+
+            if not all([name, lastname, email, password]):
+                return Response({'error': 'Todos los campos son obligatorios.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if CustomUser.objects.filter(email=email).exists():
+                return Response({'error': 'El correo ya está registrado.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            rol_general = Rol.objects.get(type='Usuario General')
+
+            import random
+            ci = random.randint(10000000, 99999999)
+            while Person.objects.filter(CI=ci).exists():
+                ci = random.randint(10000000, 99999999)
+
+            Person.objects.create(
+                CI=ci,
+                age=0,
+                name=name,
+                lastname=lastname,
+            )
+
+            user = CustomUser.objects.create(
+                email=email,
+                password=password,
+                rol=rol_general,
+                TD_id=None,
+            )
+
+            token, _ = Token.objects.get_or_create(user=user)
+            user_data = CustomUserSerializer(user).data
+            return Response({
+                'token': token.key,
+                'user': user_data,
+                'team_id': None,
+                'role_name': 'Usuario General',
+            }, status=status.HTTP_201_CREATED)
+
+        except Rol.DoesNotExist:
+            return Response({'error': 'Error de configuración: rol no encontrado.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({'error': f'Error interno del servidor: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = request.user
+            data = {}
+
+            fav_team = FavoriteTeamModel.objects.filter(user_id=user.id).first()
+            if fav_team:
+                team = fav_team.team
+                data['favorite_team'] = {
+                    'id': team.id,
+                    'name': team.name,
+                    'initials': team.initials,
+                }
+
+                from db_structure.models import Game, TeamOnTheField
+                team_on_field_ids = TeamOnTheField.objects.filter(
+                    lineup_id__team_id=team
+                ).values_list('id', flat=True)
+                games = Game.objects.filter(
+                    Q(local_id__in=team_on_field_ids) |
+                    Q(rival_id__in=team_on_field_ids)
+                ).order_by('-date')[:10]
+
+                data['recent_games'] = []
+                for game in games:
+                    is_local = game.local.lineup_id.team_id == team
+                    rival = game.rival.lineup_id.team_id if is_local else game.local.lineup_id.team_id
+                    score = game.score
+                    local_score = None
+                    rival_score = None
+                    if score:
+                        if score.winner_id == team.id:
+                            local_score = score.w_points if is_local else score.l_points
+                            rival_score = score.l_points if is_local else score.w_points
+                        else:
+                            local_score = score.l_points if is_local else score.w_points
+                            rival_score = score.w_points if is_local else score.l_points
+                    data['recent_games'].append({
+                        'game_id': game.id,
+                        'date': game.date.strftime('%d/%m/%Y'),
+                        'rival_name': rival.name,
+                        'rival_initials': rival.initials,
+                        'local_score': local_score,
+                        'rival_score': rival_score,
+                        'is_local': is_local,
+                    })
+
+            fav_players = FavoritePlayerModel.objects.filter(user_id=user.id).select_related('player__P_id')
+            data['favorite_players'] = []
+            for fp in fav_players:
+                bp = fp.player
+                data['favorite_players'].append({
+                    'id': bp.id,
+                    'name': f"{bp.P_id.name} {bp.P_id.lastname}",
+                    'batting_average': bp.batting_average,
+                    'experience': bp.years_of_experience,
+                })
+
+            data['unread_notifications'] = NotificationModel.objects.filter(
+                user_id=user.id, is_read=False
+            ).count()
+
+            return Response(data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'error': f'Error al obtener dashboard: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_favorite_team(request):
+    try:
+        team_id = request.data.get('team_id')
+        if not team_id:
+            return Response({'error': 'team_id es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        existing = FavoriteTeamModel.objects.filter(user_id=request.user.id, team_id=team_id).first()
+        if existing:
+            existing.delete()
+            return Response({'favorited': False}, status=status.HTTP_200_OK)
+        else:
+            FavoriteTeamModel.objects.create(user_id=request.user.id, team_id=team_id)
+            return Response({'favorited': True}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_favorite_player(request):
+    try:
+        player_id = request.data.get('player_id')
+        if not player_id:
+            return Response({'error': 'player_id es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        existing = FavoritePlayerModel.objects.filter(user_id=request.user.id, player_id=player_id).first()
+        if existing:
+            existing.delete()
+            return Response({'favorited': False}, status=status.HTTP_200_OK)
+        else:
+            FavoritePlayerModel.objects.create(user_id=request.user.id, player_id=player_id)
+            return Response({'favorited': True}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_favorites(request):
+    try:
+        fav_teams = FavoriteTeamModel.objects.filter(user_id=request.user.id).select_related('team')
+        fav_players = FavoritePlayerModel.objects.filter(user_id=request.user.id).select_related('player__P_id')
+
+        return Response({
+            'teams': [{'id': ft.team.id, 'name': ft.team.name, 'initials': ft.team.initials} for ft in fav_teams],
+            'players': [{'id': fp.player.id, 'name': f"{fp.player.P_id.name} {fp.player.P_id.lastname}"} for fp in fav_players],
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notifications(request):
+    try:
+        notifs = NotificationModel.objects.filter(user_id=request.user.id)[:20]
+        return Response({
+            'notifications': [
+                {
+                    'id': n.id,
+                    'message': n.message,
+                    'link': n.link,
+                    'is_read': n.is_read,
+                    'created_at': n.created_at.isoformat(),
+                }
+                for n in notifs
+            ],
+            'unread_count': NotificationModel.objects.filter(user_id=request.user.id, is_read=False).count(),
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_notification_read(request, notification_id):
+    try:
+        notif = NotificationModel.objects.filter(user_id=request.user.id, id=notification_id).first()
+        if not notif:
+            return Response({'error': 'Notificación no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        notif.is_read = True
+        notif.save()
+        return Response({'ok': True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_all_notifications_read(request):
+    try:
+        NotificationModel.objects.filter(user_id=request.user.id, is_read=False).update(is_read=True)
+        return Response({'ok': True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

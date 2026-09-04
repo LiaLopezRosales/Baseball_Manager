@@ -114,6 +114,8 @@ const ReportComponent = ({ report_id, report_name }) => {
   const [season_name, setSelectedSeason] = useState('');
   const [serie_name, setSelectedSeries] = useState('');
   const [exportFormat, setExportFormat] = useState('pdf');
+  const [exportError, setExportError] = useState('');
+  const isLogged = !!localStorage.getItem('token');
 
   const fetchReport = () => {
     setLoading(true);
@@ -167,6 +169,11 @@ const ReportComponent = ({ report_id, report_name }) => {
   }, [report_id, season_name, serie_name, pitcher_name, pitcher_lastname, team_name]);
 
   const handleExport = async () => {
+    if (!isLogged) {
+      setExportError('Debes iniciar sesión para exportar.');
+      return;
+    }
+    setExportError('');
     const exportData = {
       filename: report_name,
       format: exportFormat,
@@ -180,6 +187,7 @@ const ReportComponent = ({ report_id, report_name }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(localStorage.getItem('token') ? { Authorization: `Token ${localStorage.getItem('token')}` } : {}),
         },
         body: JSON.stringify(exportData),
       });
@@ -242,21 +250,28 @@ const ReportComponent = ({ report_id, report_name }) => {
           />
         </div>
 
-        <div className="export-controls">
-          <select
-            className="export-select"
-            value={exportFormat}
-            onChange={(e) => setExportFormat(e.target.value)}
-          >
-            <option value="pdf">PDF</option>
-            <option value="csv">CSV</option>
-          </select>
-          <button className="export-button" onClick={handleExport}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              <Download size={16} /> Exportar
-            </span>
-          </button>
-        </div>
+        {isLogged ? (
+          <div className="export-controls">
+            <select
+              className="export-select"
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value)}
+            >
+              <option value="pdf">PDF</option>
+              <option value="csv">CSV</option>
+            </select>
+            <button className="export-button" onClick={handleExport}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <Download size={16} /> Exportar
+              </span>
+            </button>
+          </div>
+        ) : (
+          <p className="export-lock-note">
+            🔒 Inicia sesión para exportar reportes
+          </p>
+        )}
+        {exportError && <p className="export-lock-note">{exportError}</p>}
       </div>
 
       <div className="reports-table-container">

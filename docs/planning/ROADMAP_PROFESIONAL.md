@@ -552,6 +552,51 @@ services:
 
 ---
 
+## 8.6. Fase C — Usuario General funcional, registro, favoritos, notificaciones (completada)
+
+| Subfase | Descripción | Estado |
+|---|---|---|
+| C1 | Backend: modelos `FavoriteTeam`, `FavoritePlayer`, `Notification` + repos/serializers/viewsets + migración | ✅ |
+| C2 | Registro público `/registro` (crea Person + User con rol "Usuario General", auto-login) | ✅ |
+| C3 | Favoritos: toggle equipo/jugador, panel "Tus favoritos" en landing y botones corazón en perfiles | ✅ |
+| C4 | Dashboard personalizado "Tu panel" (posición, últimos juegos, estrella con radar) solo si hay login | ✅ |
+| C5 | Registration/login con `onCloseModal` para salir del modal al navegar a `/registro` | ✅ |
+| C6 | Notificaciones backend: campana con badge, dropdown, marcar leídas | ✅ |
+| C7 | Export de reportes restringido a usuarios autenticados (backend `IsAuthenticated`) | ✅ |
+| C8 | Logout accesible (botón en sidebar y en modal de cuenta) | ✅ |
+| C9 | Usuarios de prueba en `populate_db.py` (Admin, DT, Usuario General) | ✅ |
+| C10 | Verificación final (91 tests OK, check OK, curl, UI E2E, build) | ✅ |
+
+**Archivos creados en Fase C (backend):**
+- `db_structure/models.py` — `FavoriteTeam`, `FavoritePlayer`, `Notification` (FK a `db_structure.User`)
+- `db_structure/repositories.py`, `serializers.py`, `views.py` — capas CRUD de las 3 entidades
+- `api/views.py` — `RegisterView`, `DashboardView`, `toggle_favorite_team/player`, `get_favorites`, `get_notifications`, `mark_notification_read`, `mark_all_notifications_read`
+- `api/authentication.py` — `FlexibleTokenAuthentication` (el `CustomUser.is_active=None` rompía `TokenAuthentication`)
+- `api/urls.py`, `Baseball_Manager/urls.py` — rutas nuevas
+
+**Archivos creados en Fase C (frontend):**
+- `src/components/Register.jsx` + `register.css` — registro público con ruta `/registro`
+- `src/components/FavoritesPanel.jsx` + `favorites.css` — `useFavorites`, `FavoriteButton`, `FavoritesPanel`
+- `src/components/UserDashboard.jsx` + `userDashboard.css` — panel personalizado
+- `src/components/NotificationBell.jsx` + `notifications.css` — campana con polling (20s)
+- `src/App.js` — `handleLogout` (limpia localStorage + reload), props a Landing/Sidebar
+
+**Usuarios de prueba (creados por `populate_db.py`):**
+
+| Email | Password | Rol |
+|---|---|---|
+| `lialopez@gmail.com` | `lia` | Admin |
+| `director@test.com` | `director` | Director Técnico |
+| `general@test.com` | `general` | Usuario General |
+
+**Gotchas de Fase C:**
+- `RegisterView` debe crear con `CustomUser` (el `Token` FK exige el modelo de auth, no `db_structure.User`).
+- Favoritos/notificaciones filtran por `user_id` (`request.user` es `CustomUser`, el FK apunta a `db_structure.User`).
+- `DashboardView` usa `Game`/`TeamOnTheField` (el modelo `Score` no tiene campo `game`).
+- La auto-generación de notificaciones al registrar un resultado (signal) queda como TODO pendiente — las notificaciones se crean manualmente vía API/shell de momento.
+
+---
+
 ## 9. Definition of Done
 
 > Estado tras completar Fase 0, Fase 1 y Fase B. Items pendientes pertenecen a Fases 2–4.

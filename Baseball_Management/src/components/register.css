@@ -1,0 +1,191 @@
+/* ============================================================
+   Register — Diamond Plate premium (basado en login.css)
+   ============================================================ */
+
+.register-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  position: relative;
+}
+
+.register-page__particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.register-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  padding: 36px 32px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, var(--bg-elevated), var(--bg-secondary) 60%);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+.register-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent), transparent 40%, transparent 60%, var(--accent));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.register-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 18px;
+  transition: color 0.2s;
+}
+
+.register-back:hover {
+  color: var(--accent);
+}
+
+.register-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.register-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 24px;
+}
+
+/* ---------- Inputs ---------- */
+.register-field {
+  position: relative;
+}
+
+.register-input-icon {
+  position: absolute;
+  left: 14px;
+  top: calc(50% + 4px);
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.register-input {
+  width: 100%;
+  height: 46px;
+  box-sizing: border-box;
+  padding: 0 12px 0 42px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.register-input::placeholder {
+  color: var(--text-muted);
+}
+
+.register-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft), 0 0 0 1px var(--accent);
+  background-color: var(--bg-elevated);
+}
+
+.register-field:focus-within .register-input-icon {
+  color: var(--accent);
+}
+
+.register-field--password .register-input {
+  padding-right: 42px;
+}
+
+/* ---------- Botón ---------- */
+.register-button {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--text-inverse);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  font-family: var(--font-sans);
+  transition: background-color 0.25s, box-shadow 0.25s, transform 0.2s;
+}
+
+.register-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  box-shadow: 0 0 0 4px var(--accent-soft), 0 10px 30px -8px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+.register-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.register-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: var(--danger);
+  margin-top: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.register-footer {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 18px;
+}
+
+.register-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.register-link:hover {
+  color: var(--accent-hover);
+}

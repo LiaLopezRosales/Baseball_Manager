@@ -44,6 +44,9 @@ router.register(r'pitchers', PitcherViewSet, basename='pitcher')
 router.register(r'star-players', StarPlayerViewSet, basename='star-player')
 router.register(r'players-in-position', PlayerInPositionViewSet, basename='player-in-position')
 router.register(r'player-swaps', PlayerSwapViewSet, basename='player-swap')
+router.register(r'favorite-teams', FavoriteTeamViewSet, basename='favorite-team')
+router.register(r'favorite-players', FavoritePlayerViewSet, basename='favorite-player')
+router.register(r'notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

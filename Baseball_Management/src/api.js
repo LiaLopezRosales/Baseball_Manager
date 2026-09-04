@@ -10,9 +10,37 @@ export const API_URL =
  * Lanza un error con un mensaje legible si la respuesta no es OK.
  */
 export async function apiGet(path) {
-  const res = await fetch(`${API_URL}${path}`);
+  const headers = {};
+  const token = localStorage.getItem('token');
+  if (token) headers['Authorization'] = `Token ${token}`;
+  const res = await fetch(`${API_URL}${path}`, { headers });
   if (!res.ok) {
     throw new Error(`Error ${res.status} al consultar ${path}`);
+  }
+  return res.json();
+}
+
+/**
+ * POST a un endpoint de la API con token de autenticación si existe.
+ */
+export async function apiPost(path, body = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  const token = localStorage.getItem('token');
+  if (token) headers['Authorization'] = `Token ${token}`;
+  const res = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let message = `Error ${res.status} al enviar a ${path}`;
+    try {
+      const data = await res.json();
+      if (data.error) message = data.error;
+    } catch {
+      /* sin cuerpo JSON */
+    }
+    throw new Error(message);
   }
   return res.json();
 }

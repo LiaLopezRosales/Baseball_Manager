@@ -1,35 +1,21 @@
-#api/authentication.py
+# api/authentication.py
+# Autenticación por token que NO exige is_active.
+# El modelo CustomUser define is_active = None (el campo no existe en la tabla
+# db_structure_user), por lo que TokenAuthentication rechaza a todos los
+# usuarios con "Usuario inactivo o borrado". Esta clase salta esa comprobación.
 
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-from .roles import AdminRole, DirectorTecnicoRole, UsuarioGeneralRole
 
-class RoleBasedAuthentication(TokenAuthentication):
-    """
-    Autenticación basada en roles y permisos específicos para Admin, Director Técnico y Usuario General.
-    """
+
+class FlexibleTokenAuthentication(TokenAuthentication):
     def authenticate_credentials(self, key):
-        user, token = super().authenticate_credentials(key)
-        role_instance = user.get_role_instance()
+        try:
+            token = self.get_model().objects.select_related('user').get(key=key)
+        except self.get_model().DoesNotExist:
+            raise AuthenticationFailed('Token inválido.')
 
-        # Admin tiene acceso total
-        if isinstance(role_instance, AdminRole):
-            return user, token
-        
-        # Director Técnico solo puede acceder a su propio equipo
-        elif isinstance(role_instance, DirectorTecnicoRole):
-            team_id = user.get_team_id()
-            if not role_instance.has_permission('view_team', user, team_id):
-                raise AuthenticationFailed("Acceso denegado: No puedes gestionar este equipo.")
-            return user, token
+        if not token.user:
+            raise AuthenticationFailed('Usuario no encontrado.')
 
-        # Usuario General solo tiene permisos básicos
-        elif isinstance(role_instance, UsuarioGeneralRole):
-            if not role_instance.has_permission('view_team'):
-                raise AuthenticationFailed("Acceso denegado: Permisos insuficientes.")
-            return user, token
-
-        # Rol no identificado o inválido
-        else:
-            raise AuthenticationFailed("Rol no reconocido o sin permisos.")
-
+        return (token.user, token)

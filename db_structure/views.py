@@ -123,6 +123,40 @@ class PlayerSwapViewSet(BaseViewSet):
     serializer_class = PlayerSwapSerializer
 
 
+class FavoriteTeamViewSet(BaseViewSet):
+    repository = FavoriteTeamRepository
+    serializer_class = FavoriteTeamSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return FavoriteTeamRepository.get_by_user(self.request.user)
+        return FavoriteTeamRepository.model.objects.none()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class FavoritePlayerViewSet(BaseViewSet):
+    repository = FavoritePlayerRepository
+    serializer_class = FavoritePlayerSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return FavoritePlayerRepository.get_by_user(self.request.user)
+        return FavoritePlayerRepository.model.objects.none()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class NotificationViewSet(BaseViewSet):
+    repository = NotificationRepository
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return NotificationRepository.get_by_user(self.request.user)
+        return NotificationRepository.model.objects.none()
 
 
 

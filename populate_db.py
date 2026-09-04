@@ -289,6 +289,63 @@ def populate_users_and_workers(team_numbers=6):
     else:
         print("Admin conocido ya existía: lialopez@gmail.com")
 
+    # Director Técnico conocido para desarrollo
+    dt_person, _ = Person.objects.get_or_create(
+        CI=20000001,
+        defaults={
+            'age': 45,
+            'name': 'Carlos',
+            'lastname': 'Garcia',
+        }
+    )
+    dt_user, created = User.objects.get_or_create(
+        email='director@test.com',
+        defaults={
+            'password': 'director',
+            'rol_id': roles['Director Técnico'],
+            'TD_id': None,
+        }
+    )
+    if created:
+        first_team = teams[0] if teams else None
+        if first_team:
+            dt_worker = Worker.objects.filter(P_id=dt_person).first()
+            if not dt_worker:
+                dt_worker = Worker.objects.create(P_id=dt_person, DT_id=None)
+            dt_dir_team = DirectionTeam.objects.filter(Team_id=first_team).first()
+            if not dt_dir_team:
+                dt_dir_team = DirectionTeam.objects.create(Team_id=first_team)
+            dt_td = TechnicalDirector.objects.filter(direction_team=dt_dir_team).first()
+            if not dt_td:
+                dt_td = TechnicalDirector.objects.create(direction_team=dt_dir_team, W_id=dt_worker)
+            dt_user.TD_id = dt_td
+            dt_user.save()
+        print("Director Técnico conocido creado: director@test.com / director")
+    else:
+        print("Director Técnico conocido ya existía: director@test.com")
+
+    # Usuario General conocido para desarrollo
+    ug_person, _ = Person.objects.get_or_create(
+        CI=30000001,
+        defaults={
+            'age': 25,
+            'name': 'María',
+            'lastname': 'López',
+        }
+    )
+    ug_user, created = User.objects.get_or_create(
+        email='general@test.com',
+        defaults={
+            'password': 'general',
+            'rol_id': roles['Usuario General'],
+            'TD_id': None,
+        }
+    )
+    if created:
+        print("Usuario General conocido creado: general@test.com / general")
+    else:
+        print("Usuario General conocido ya existía: general@test.com")
+
     return {
         "roles": roles,
         "users": users,

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Shield, Users, Star, ArrowLeft, Target } from 'lucide-react';
 import { apiGet } from '../api';
 import RadarChart from './ui/RadarChart';
+import { FavoriteButton } from './FavoritesPanel';
 import './profilePages.css';
 
 export function TeamProfile() {
@@ -103,6 +104,7 @@ export function TeamProfile() {
             {team.initials} · {team.representative_entity}
           </p>
         </div>
+        <FavoriteButton type="team" id={Number(teamId)} size={22} />
       </header>
 
       <section className="profile__section">
@@ -202,6 +204,7 @@ export function PlayerProfile() {
           <h1 className="profile__name">{fullName}</h1>
           <p className="profile__meta">{position}</p>
         </div>
+        <FavoriteButton type="player" id={Number(bpId)} size={22} />
       </header>
 
       <section className="profile__section">

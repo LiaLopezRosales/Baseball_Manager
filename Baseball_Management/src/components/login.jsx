@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, LogOut, LogIn } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogOut, LogIn, UserPlus } from 'lucide-react';
 import { API_URL } from '../api';
 import ParticleField from './ui/Particles';
 import './login.css';
@@ -13,6 +13,7 @@ function LoginBoard({
   NameOnChange,
   updateRole,
   updateTeam,
+  onCloseModal,
 }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -140,6 +141,13 @@ function LoginBoard({
           </button>
 
           {errorMessage && <p className="error-message">{errorMessage}</p>}
+
+          <p className="login-register-link">
+            ¿No tienes cuenta?{' '}
+            <button className="register-link-btn" onClick={() => { if (onCloseModal) onCloseModal(); navigate('/registro'); }}>
+              <UserPlus size={14} /> Regístrate
+            </button>
+          </p>
         </div>
       ) : (
         <div className="form-container">

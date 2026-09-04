@@ -238,3 +238,30 @@
   font-weight: 700;
   margin-bottom: 20px;
 }
+
+/* ---------- Link a registro ---------- */
+.login-register-link {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 16px;
+}
+
+.register-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.register-link-btn:hover {
+  color: var(--accent-hover);
+}

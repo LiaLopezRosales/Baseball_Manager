@@ -7,6 +7,7 @@ import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import Landing from './components/Landing';
+import Register from './components/Register';
 import { TeamProfile, PlayerProfile } from './components/profilePages';
 import ProtectedRoute from './components/ProtectedRoute';
 import PlayerSwapForm from './components/PlayerSwapForm';
@@ -21,7 +22,7 @@ import {
 } from './path';
 
 // Componente interno que usa useNavigate (debe estar dentro del Router)
-function AppRoutes({ role, team, onModalOpen }) {
+function AppRoutes({ role, team, onModalOpen, onLogout, onSetLogin, onUpdateRole, onUpdateTeam, onNameChange }) {
   const navigate = useNavigate();
 
   const handleOptionSelect = (option, table = '') => {
@@ -61,7 +62,7 @@ function AppRoutes({ role, team, onModalOpen }) {
           <Menu size={20} />
         </button>
 
-        <Sidebar role={role} onOptionSelect={handleOptionSelect} onModalOpen={onModalOpen} />
+        <Sidebar role={role} onOptionSelect={handleOptionSelect} onModalOpen={onModalOpen} onLogout={onLogout} />
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -74,6 +75,7 @@ function AppRoutes({ role, team, onModalOpen }) {
           >
             <Routes>
               <Route path="/" element={<Landing />} />
+              <Route path="/registro" element={<Register setLogin={onSetLogin} updateRole={onUpdateRole} updateTeam={onUpdateTeam} NameOnChange={onNameChange} />} />
               <Route path="/admin/:slug" element={<ProtectedRoute roles={['Admin']}><CRUDRoute /></ProtectedRoute>} />
               <Route path="/reporte/:slug" element={<ProtectedRoute roles={['Admin']}><ReportRoute /></ProtectedRoute>} />
               <Route path="/consultas/:tabla" element={<ProtectedRoute roles={['Admin']}><QueryRoute /></ProtectedRoute>} />
@@ -118,6 +120,16 @@ function App() {
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
 
+  const handleLogout = () => {
+    localStorage.clear();
+    setLogin(false);
+    setRole('');
+    setTeam(null);
+    setUserName('');
+    setIsModalOpen(false);
+    window.location.reload();
+  };
+
   const updateRole = (newRole) => {
     setRole(newRole);
     localStorage.setItem('role', newRole);
@@ -131,7 +143,16 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <AppRoutes role={role} team={team} onModalOpen={handleModalOpen} />
+        <AppRoutes
+          role={role}
+          team={team}
+          onModalOpen={handleModalOpen}
+          onLogout={handleLogout}
+          onSetLogin={setLogin}
+          onUpdateRole={updateRole}
+          onUpdateTeam={updateTeam}
+          onNameChange={handleNameChange}
+        />
 
         <Modal isOpen={isModalOpen} onClose={handleModalClose}>
           <LoginBoard
@@ -142,6 +163,7 @@ function App() {
             NameOnChange={handleNameChange}
             updateRole={updateRole}
             updateTeam={updateTeam}
+            onCloseModal={handleModalClose}
           />
         </Modal>
       </div>

@@ -18,6 +18,8 @@ import StatCard from './ui/StatCard';
 import BarChart from './ui/BarChart';
 import ParticleField from './ui/Particles';
 import TextGenerateEffect from './ui/TextGenerateEffect';
+import FavoritesPanel, { FavoriteButton } from './FavoritesPanel';
+import UserDashboard from './UserDashboard';
 import './landing.css';
 
 const REPORT_URL = (id) => `/api/queries/reports/?report_id=${id}`;
@@ -245,6 +247,11 @@ function Landing() {
             ))}
       </section>
 
+      {/* DASHBOARD PERSONAL (solo usuarios logueados) */}
+      {localStorage.getItem('token') && (
+        <UserDashboard standings={standings} stars={stars} teamIdByName={teamIdByName} />
+      )}
+
       {/* STANDINGS */}
       <section className="landing__section">
         {sectionTitle(
@@ -268,6 +275,7 @@ function Landing() {
                 <th>Juegos</th>
                 <th>Pts ganados</th>
                 <th>Pts perdidos</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -291,6 +299,9 @@ function Landing() {
                     <td>{row['Total de juegos']}</td>
                     <td>{row['Total de puntos en juegos ganados']}</td>
                     <td>{row['Total de puntos en juegos perdidos']}</td>
+                    <td className="landing__fav-cell">
+                      {teamId && <FavoriteButton type="team" id={teamId} size={18} />}
+                    </td>
                   </tr>
                 );
               })}
@@ -298,6 +309,9 @@ function Landing() {
           </table>
         </div>
       </section>
+
+      {/* TUS FAVORITOS */}
+      <FavoritesPanel />
 
       {/* LÍDERES + ESTRELLAS */}
       <div className="landing__two-col">
@@ -330,6 +344,7 @@ function Landing() {
                     {['🥇', '🥈', '🥉'][i] || `${i + 1}°`}
                   </span>
                   {nameNode}
+                  {pid && <FavoriteButton type="player" id={pid} size={16} />}
                   <span className="landing__leader-val">
                     {Number(b['Promedio de Bateo'] || b.Average || 0).toFixed(3)}
                   </span>
@@ -360,10 +375,11 @@ function Landing() {
                       {s.Nombre} {s.Apellido}
                     </Link>
                   ) : (
-                    <span className="landing__star-name">
-                      {s.Nombre} {s.Apellido}
-                    </span>
+<span className="landing__star-name">
+                    {s.Nombre} {s.Apellido}
+                  </span>
                   )}
+                  {pid && <FavoriteButton type="player" id={pid} size={16} />}
                   <span className="landing__star-pos">{s.Posición}</span>
                   <span className="landing__star-val">
                     {Number(s.Efectividad).toFixed(3)}

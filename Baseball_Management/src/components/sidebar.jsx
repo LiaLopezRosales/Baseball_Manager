@@ -12,9 +12,11 @@ import {
   LayoutGrid,
   Sun,
   Moon,
+  LogOut,
 } from 'lucide-react';
 import Logo from '../logo.jpg';
 import { getInitialTheme, applyTheme } from '../theme';
+import NotificationBell from './NotificationBell';
 import './sidebar.css';
 
 const CONSULTAS = [
@@ -70,7 +72,7 @@ const ADMIN_FORMS = [
   { option: 'Jugadores Estrella', label: 'Jugadores Estrella' },
 ];
 
-function Sidebar({ role, onOptionSelect, onModalOpen }) {
+function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
   const [showReports, setShowReports] = useState(false);
   const [showForms, setShowForms] = useState(false);
@@ -128,6 +130,7 @@ function Sidebar({ role, onOptionSelect, onModalOpen }) {
         >
           {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
         </button>
+        {role && role !== 'Guest' && <NotificationBell />}
       </div>
 
       <nav className="sidebar__nav">
@@ -279,6 +282,17 @@ function Sidebar({ role, onOptionSelect, onModalOpen }) {
             </span>
           )}
         </button>
+
+        {role && role !== 'Guest' ? (
+          <button
+            className="sidebar__logout"
+            onClick={onLogout}
+            title="Cerrar sesión"
+          >
+            <LogOut size={18} className="sidebar__icon" />
+            {!collapsed && <span className="sidebar__label">Cerrar sesión</span>}
+          </button>
+        ) : null}
       </div>
     </div>
   );

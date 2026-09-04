@@ -46,6 +46,10 @@
   padding: 28px;
 }
 
+.profile__header .favorite-btn {
+  margin-left: auto;
+}
+
 .profile__avatar {
   display: flex;
   align-items: center;
