@@ -26,3 +26,4 @@ export const toQueryPath = (table) => `/consultas/${table}`;
 export const toMainPath = () => '/';
 export const toSwapDefinePath = () => '/dt/cambios';
 export const toSwapListPath = () => '/dt/listar-cambios';
+export const toComparePath = () => '/comparar';

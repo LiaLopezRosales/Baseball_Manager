@@ -566,6 +566,7 @@ services:
 | C8 | Logout accesible (botón en sidebar y en modal de cuenta) | ✅ |
 | C9 | Usuarios de prueba en `populate_db.py` (Admin, DT, Usuario General) | ✅ |
 | C10 | Verificación final (91 tests OK, check OK, curl, UI E2E, build) | ✅ |
+| C11 | **Deudas 04/09**: signal `post_save` en `Score` → notificaciones de resultados; fix `Pitcher.save()` (asignar, no acumular); quitar dead code tras `return` en `get_team_players_at_a_specified_serie`; Comparar jugadores (`/comparar`) | ✅ |
 
 **Archivos creados en Fase C (backend):**
 - `db_structure/models.py` — `FavoriteTeam`, `FavoritePlayer`, `Notification` (FK a `db_structure.User`)
@@ -593,7 +594,10 @@ services:
 - `RegisterView` debe crear con `CustomUser` (el `Token` FK exige el modelo de auth, no `db_structure.User`).
 - Favoritos/notificaciones filtran por `user_id` (`request.user` es `CustomUser`, el FK apunta a `db_structure.User`).
 - `DashboardView` usa `Game`/`TeamOnTheField` (el modelo `Score` no tiene campo `game`).
-- La auto-generación de notificaciones al registrar un resultado (signal) queda como TODO pendiente — las notificaciones se crean manualmente vía API/shell de momento.
+- Auto-gen de notificaciones de resultado: signal `post_save` de `Score` en `db_structure/signals.py`, registrado con
+  `DbStructureConfig.ready()` (`INSTALLED_APPS` usa `'db_structure.apps.DbStructureConfig'`). Tests en `db_structure/tests/test_signals.py`.
+- Comparar jugadores: `src/components/PlayerCompare.jsx` + `playerCompare.css`, ruta pública `/comparar`, acceso desde
+  sidebar ("Comparar jugadores"), datos de `/baseball-players/`, `/persons/`, `/players-in-position/` y `/positions/`.
 
 ---
 

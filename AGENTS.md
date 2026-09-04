@@ -97,10 +97,11 @@ Tests use `unittest` with `MagicMock` (no DB required). Located in `db_structure
 ## Gotchas
 
 - `db_structure.User` has a DB constraint: rol_id=2 (Director Técnico) requires non-null `TD_id`.
-- `Pitcher.save()` calls `get_pitcher_wins`/`get_pitcher_losses` and **accumulates** values — saving twice doubles the count.
-- `get_team_players_at_a_specified_serie` in `queries.py` has dead code after a `return` statement (ORM version unreachable).
+- `Pitcher.save()`/`refresh_from_db()` **recomputan** `No_games_won`/`No_games_lost` con `get_pitcher_wins`/`get_pitcher_losses` (asignación, no acumulación) — guardar dos veces NO duplica el conteo.
+- `api/reports/queries.py` importa `db_structure.models as db`; aquel código muerto tras `return` en `get_team_players_at_a_specified_serie` fue eliminado.
+- La auto-generación de notificaciones vive en `db_structure/signals.py` (signal `post_save` en `Score` → notificaciones para seguidores de ambos equipos). El app config `DbStructureConfig.ready()` la registra (`db_structure/apps.py`, `INSTALLED_APPS` usa `'db_structure.apps.DbStructureConfig'`). Los tests de signal están en `db_structure/tests/test_signals.py` (MagicMock, sin DB).
 - Report queries expect specific parameter shapes (e.g., `report_id` as int, season/series names as strings).
-- Frontend routing uses React Router with real URL paths (`/admin/:slug`, `/reporte/:slug`, `/consultas/:tabla`, `/equipo/:id`, `/jugador/:id`). Route definitions are in `src/routes.js` (slug→option maps), path helpers in `src/path.js`, route wrappers in `src/viewRoutes.jsx`.
+- Frontend routing uses React Router with real URL paths (`/admin/:slug`, `/reporte/:slug`, `/consultas/:tabla`, `/equipo/:id`, `/jugador/:id`, `/comparar`). Route definitions are in `src/routes.js` (slug→option maps), path helpers in `src/path.js`, route wrappers in `src/viewRoutes.jsx`.
 
 ## Frontend: cómo centrar iconos dentro de inputs (login, etc.)
 
@@ -206,5 +207,8 @@ así que **todos los filtros usan `user_id`** (nunca `request.user` directo en l
 ### Gotchas de Fase C
 - `DashboardView` usa `Game`/`TeamOnTheField` para últimos juegos (el modelo `Score` **no** tiene campo `game`).
 - `db_structure.User` limita a `db_structure.models.User`; el `Token` requiere `CustomUser`. No mezclar.
-- La auto-generación de notificaciones al registrar resultados (signal/endpoint) **aún no está implementada** — las
-  notificaciones se crean manualmente (shell o futura API).
+- La auto-generación de notificaciones al registrar un resultado ya está implementada vía signal `post_save` de
+  `Score` (ver `db_structure/signals.py`) — crea una `Notification` por cada seguidor de los equipos winner/loser.
+- "Comparar jugadores" (`/comparar`, público) está en `PlayerCompare.jsx` + `playerCompare.css`; se accede desde el
+  sidebar ("Comparar jugadores") y usa datos de `/baseball-players/`, `/persons/`, `/players-in-position/` y `/positions/`.
+- `UserDashboard.jsx` tiene un warning de eslint preexistente (`teamStars` sin usar) — no relacionado con cambios recientes.

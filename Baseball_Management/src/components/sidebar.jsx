@@ -3,6 +3,7 @@ import {
   Home,
   Database,
   BarChart3,
+  GitCompare,
   ChevronDown,
   ChevronRight,
   PanelLeftClose,
@@ -142,6 +143,15 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
           >
             <Home size={20} className="sidebar__icon" />
             {!collapsed && <span className="sidebar__label">Inicio</span>}
+          </li>
+
+          <li
+            className="sidebar__item"
+            onClick={() => onOptionSelect('Comparar Jugadores')}
+            title="Comparar jugadores"
+          >
+            <GitCompare size={20} className="sidebar__icon" />
+            {!collapsed && <span className="sidebar__label">Comparar jugadores</span>}
           </li>
 
           {/* Consultas */}

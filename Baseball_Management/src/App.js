@@ -9,6 +9,7 @@ import Modal from './components/Modal';
 import Landing from './components/Landing';
 import Register from './components/Register';
 import { TeamProfile, PlayerProfile } from './components/profilePages';
+import PlayerCompare from './components/PlayerCompare';
 import ProtectedRoute from './components/ProtectedRoute';
 import PlayerSwapForm from './components/PlayerSwapForm';
 import PlayerSwapTable from './components/PlayerSwapTable';
@@ -19,6 +20,7 @@ import {
   toQueryPath,
   toSwapDefinePath,
   toSwapListPath,
+  toComparePath,
 } from './path';
 
 // Componente interno que usa useNavigate (debe estar dentro del Router)
@@ -40,6 +42,10 @@ function AppRoutes({ role, team, onModalOpen, onLogout, onSetLogin, onUpdateRole
     }
     if (option === 'Listar Cambios') {
       navigate(toSwapListPath());
+      return;
+    }
+    if (option === 'Comparar Jugadores') {
+      navigate(toComparePath());
       return;
     }
     const reportPath = toReportPath(option);
@@ -77,12 +83,13 @@ function AppRoutes({ role, team, onModalOpen, onLogout, onSetLogin, onUpdateRole
               <Route path="/" element={<Landing />} />
               <Route path="/registro" element={<Register setLogin={onSetLogin} updateRole={onUpdateRole} updateTeam={onUpdateTeam} NameOnChange={onNameChange} />} />
               <Route path="/admin/:slug" element={<ProtectedRoute roles={['Admin']}><CRUDRoute /></ProtectedRoute>} />
-              <Route path="/reporte/:slug" element={<ProtectedRoute roles={['Admin']}><ReportRoute /></ProtectedRoute>} />
-              <Route path="/consultas/:tabla" element={<ProtectedRoute roles={['Admin']}><QueryRoute /></ProtectedRoute>} />
+              <Route path="/reporte/:slug" element={<ReportRoute />} />
+              <Route path="/consultas/:tabla" element={<QueryRoute />} />
               <Route path="/dt/cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapForm teamId={team} /></ProtectedRoute>} />
               <Route path="/dt/listar-cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapTable teamId={team} /></ProtectedRoute>} />
               <Route path="/equipo/:id" element={<TeamProfile />} />
               <Route path="/jugador/:id" element={<PlayerProfile />} />
+              <Route path="/comparar" element={<PlayerCompare />} />
               <Route path="*" element={<Landing />} />
             </Routes>
           </motion.div>

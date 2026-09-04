@@ -322,19 +322,24 @@ Añadir botón de logout en el sidebar footer cuando el usuario está logueado:
 | 7 — Export solo registrados | ✅ Implementada |
 | 4 — Dashboard | ✅ Implementada |
 | 6 — Notificaciones | ✅ Implementada |
-| 5 — Comparar jugadores | ❌ **Cancelada** (prioridad baja) |
+| 5 — Comparar jugadores | ✅ **Implementada** (04/09, ver notas) |
+| 6.3 — Auto-gen notificaciones | ✅ **Implementada** (04/09, vía signal) |
 
 ### Verificación final
 - `python manage.py check` → sin problemas.
-- `python manage.py test db_structure` → **91 tests OK**.
-- `npx react-scripts build` → OK.
+- `python manage.py test db_structure` → **94 tests OK** (91 + 3 de `test_signals.py`).
+- `npx react-scripts build` → OK (solo warning preexistente de `UserDashboard.jsx`).
 - Verificación E2E (Playwright): login UG muestra "Tu panel", favoritos con estado (Agregar/Quitar), campana de notificaciones con badge y "Marcar leídas", logout desde sidebar limpia localStorage.
 - Verificación curl: dashboard con favorito, toggle favoritos, notifications + read-all, export (401 sin token / 200 con token).
+- Comparar jugadores (`/comparar`): render de selectores, radar charts, tabla de métricas con "Mejor", navegación desde sidebar; verificado en Playwright (04/09).
+- Auto-notificaciones: `python manage.py shell` validó que crear un `Score` genera una `Notification` por seguidor de cada equipo (winner/loser) con mensaje y `link` correctos.
 
 ### Diferencias vs. lo planeado
 - `CustomUser.is_active = None` rompía `TokenAuthentication` → se creó `api/authentication.py` con `FlexibleTokenAuthentication`.
 - `RegisterView` usa `CustomUser` (el `Token` FK lo exige), no `db_structure.User`.
 - Dashboard usa `Game`/`TeamOnTheField` (el modelo `Score` no tiene campo `game`).
 - Los modelos `FavoriteTeam`/`FavoritePlayer`/`Notification` filtran por `user_id` (FK a `db_structure.User`).
-- Auto-generación de notificaciones al registrar resultados (Fase 6.3) **pendiente** — se crean manualmente por ahora.
-- `PlayerCompare.jsx` (Fase 5) no se implementó por prioridad baja.
+- Fase 5 se aterrizó igual a lo planeado (PlayerCompare.jsx + playerCompare.css + ruta `/comparar` en `App.js` + ítem en sidebar); además se enlaza cada jugador a su perfil `/jugador/:id`.
+- Fase 6.3 se resolvió con un signal `post_save` de `Score` en `db_structure/signals.py`, registrado desde `DbStructureConfig.ready()` (ver `db_structure/apps.py`).
+- Se eliminó el código muerto tras `return` en `get_team_players_at_a_specified_serie` (`api/reports/queries.py`).
+- `Pitcher.save()`/`refresh_from_db()` ahora **asignan** (no acumulan) `No_games_won`/`No_games_lost` — guardar dos veces ya no duplica el conteo.
