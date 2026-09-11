@@ -1,5 +1,11 @@
 import ReactECharts from 'echarts-for-react';
 
+const readVar = (name, fallback) => {
+  if (typeof document === 'undefined') return fallback;
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+};
+
 export default function RadarChart({ stats, title, compact }) {
   const indicators = stats.map((s) => ({
     name: s.label,
@@ -8,25 +14,18 @@ export default function RadarChart({ stats, title, compact }) {
 
   const values = stats.map((s) => s.value);
   const h = compact ? 160 : 280;
+  const amber = readVar('--accent', '#f59e0b');
 
   const option = {
-    ...(title && !compact
-      ? {
-          title: {
-            text: title,
-            left: 'center',
-            textStyle: { color: 'var(--text-primary)', fontSize: 13, fontWeight: 600 },
-          },
-        }
-      : {}),
     radar: {
       indicator: indicators,
       shape: 'polygon',
       axisName: { color: 'var(--text-muted)', fontSize: compact ? 10 : 11 },
-      splitArea: { areaStyle: { color: ['rgba(245,158,11,0.02)', 'rgba(245,158,11,0.05)'] } },
+      splitArea: { areaStyle: { color: ['rgba(242,169,59,0.03)', 'rgba(242,169,59,0.06)'] } },
       splitLine: { lineStyle: { color: 'var(--border-subtle)' } },
       axisLine: { lineStyle: { color: 'var(--border-subtle)' } },
-      radius: compact ? '68%' : '70%',
+      radius: compact ? '68%' : '72%',
+      center: compact ? ['50%', '50%'] : ['50%', '52%'],
     },
     series: [
       {
@@ -34,9 +33,9 @@ export default function RadarChart({ stats, title, compact }) {
         data: [
           {
             value: values,
-            areaStyle: { color: 'rgba(245,158,11,0.15)' },
-            lineStyle: { color: '#f59e0b', width: 2 },
-            itemStyle: { color: '#f59e0b' },
+            areaStyle: { color: 'rgba(242,169,59,0.16)' },
+            lineStyle: { color: amber, width: 2 },
+            itemStyle: { color: amber },
           },
         ],
       },
@@ -44,10 +43,15 @@ export default function RadarChart({ stats, title, compact }) {
   };
 
   return (
-    <ReactECharts
-      option={option}
-      style={{ height: h, width: '100%' }}
-      opts={{ renderer: 'svg' }}
-    />
+    <div className="radar-chart">
+      {title && !compact && (
+        <h3 className="radar-chart__title">{title}</h3>
+      )}
+      <ReactECharts
+        option={option}
+        style={{ height: h - (title && !compact ? 34 : 0), width: '100%' }}
+        opts={{ renderer: 'svg' }}
+      />
+    </div>
   );
 }

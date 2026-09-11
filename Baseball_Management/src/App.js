@@ -89,7 +89,7 @@ function AppRoutes({ role, team, onModalOpen, onLogout, onSetLogin, onUpdateRole
               <Route path="/dt/listar-cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapTable teamId={team} /></ProtectedRoute>} />
               <Route path="/equipo/:id" element={<TeamProfile />} />
               <Route path="/jugador/:id" element={<PlayerProfile />} />
-              <Route path="/comparar" element={<PlayerCompare />} />
+              <Route path="/comparar" element={<ProtectedRoute roles={['Admin', 'Director Técnico', 'Usuario General']}><PlayerCompare /></ProtectedRoute>} />
               <Route path="*" element={<Landing />} />
             </Routes>
           </motion.div>

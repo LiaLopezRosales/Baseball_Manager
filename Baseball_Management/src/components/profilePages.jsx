@@ -140,6 +140,7 @@ export function PlayerProfile() {
   const [player, setPlayer] = useState(null);
   const [person, setPerson] = useState(null);
   const [position, setPosition] = useState(null);
+  const [gamesPlayed, setGamesPlayed] = useState(0);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -148,20 +149,27 @@ export function PlayerProfile() {
       apiGet(`/baseball-players/${bpId}/`),
       apiGet('/players-in-position/'),
       apiGet('/positions/'),
+      apiGet('/bp-participations/'),
     ])
-      .then(([playerData, posData, posList]) => {
+      .then(([playerData, posData, posList, participations]) => {
         if (!active) return;
         return Promise.all([
           playerData,
           apiGet(`/persons/${playerData.P_id}/`),
           posData.find((p) => String(p.BP_id) === String(playerData.id)) || null,
           posList,
+          participations,
         ]);
       })
-      .then(([playerData, personData, myPos, posList]) => {
+      .then(([playerData, personData, myPos, posList, participations]) => {
         if (!active) return;
         setPlayer(playerData);
         setPerson(personData);
+        setGamesPlayed(
+          (participations || []).filter(
+            (p) => String(p.BP_id) === String(playerData.id)
+          ).length
+        );
         const posName =
           myPos &&
           posList.find((p) => String(p.id) === String(myPos.position));
@@ -236,6 +244,7 @@ export function PlayerProfile() {
           title="Rendimiento"
           stats={[
             { label: 'Bateo', value: player.batting_average, max: 1 },
+            { label: 'Juegos', value: Math.min(gamesPlayed / 50, 1), max: 1 },
             { label: 'Experiencia', value: Math.min(player.years_of_experience / 20, 1), max: 1 },
             { label: 'Edad', value: Math.min(person.age / 70, 1), max: 1 },
           ]}

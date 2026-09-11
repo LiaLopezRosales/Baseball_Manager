@@ -1,52 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 /* ============================================================
-   Diamond Plate — Sistema de tema (dark industrial + amber)
+   Diamond Plate — Sistema de tema (estadio nocturno + cal)
+   Paleta béisbol: night/turf/chalk/lights/clay/hairline.
    Usa data-theme en <html> para cambiar entre dark (default) y light.
    ============================================================ */
 
 :root,
 html[data-theme='dark'] {
-  /* Fondo principal */
-  --bg-primary: #0b0e11;
-  --bg-secondary: #141820;
-  --bg-tertiary: #1c212b;
-  --bg-elevated: #232936;
+  /* Identidad: paleta del estadio (vocabulario del diseño) */
+  --night: #0b1712;
+  --turf: #142c22;
+  --turf-2: #1c3a2c;
+  --chalk: #f3efe3;
+  --chalk-dim: #b9c2b7;
+  --lights: #f2a93b;
+  --clay: #b5502f;
+  --hairline: rgba(243, 239, 227, 0.12);
+
+  /* Fondo principal (apuntan a la paleta) */
+  --bg-primary: var(--night);
+  --bg-secondary: var(--turf);
+  --bg-tertiary: var(--turf);
+  --bg-elevated: var(--turf-2);
 
   /* Bordes */
-  --border-subtle: #2d333b;
-  --border-strong: #3a414d;
+  --border-subtle: var(--hairline);
+  --border-strong: rgba(243, 239, 227, 0.22);
 
   /* Texto */
-  --text-primary: #e8ecf1;
-  --text-secondary: #9aa5b1;
-  --text-muted: #6b7482;
-  --text-inverse: #0b0e11;
+  --text-primary: var(--chalk);
+  --text-secondary: var(--chalk-dim);
+  --text-muted: #9aa79e;
+  --text-inverse: var(--night);
 
-  /* Accent ámbar */
-  --accent: #f59e0b;
-  --accent-hover: #fbbe2e;
-  --accent-soft: rgba(245, 158, 11, 0.14);
-  --accent-glow: rgba(245, 158, 11, 0.35);
+  /* Accent ámbar (luces del estadio) */
+  --accent: var(--lights);
+  --accent-hover: #fbc55e;
+  --accent-soft: rgba(242, 169, 59, 0.14);
+  --accent-glow: rgba(242, 169, 59, 0.35);
 
   /* Estados semánticos */
-  --danger: #ef4444;
-  --success: #22c55e;
-  --info: #38bdf8;
-  --warning: #fbbf24;
+  --danger: #ee6c5b;
+  --success: #57b98b;
+  --info: #7cc0d8;
+  --warning: var(--lights);
 
-  /* Sombras */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+  /* Overlay de modales */
+  --overlay: rgba(11, 23, 18, 0.78);
+
+  /* Sombras: halo cálido sutil, sin gris genérico */
+  --shadow-sm: 0 1px 2px rgba(5, 12, 8, 0.5);
+  --shadow-md: 0 0 0 1px var(--hairline), 0 12px 32px -16px rgba(242, 169, 59, 0.18);
+  --shadow-lg: 0 0 0 1px var(--hairline), 0 24px 48px -20px rgba(242, 169, 59, 0.22);
+  --shadow-card: 0 0 0 1px var(--hairline), 0 12px 32px -16px rgba(242, 169, 59, 0.18);
 
   /* Radios */
   --radius-sm: 6px;
   --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-lg: 18px;
   --radius-full: 999px;
 
   /* Tipografía */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  --font-sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, Monaco, Consolas,
     'Courier New', monospace;
 
@@ -58,32 +76,45 @@ html[data-theme='dark'] {
 }
 
 html[data-theme='light'] {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f1f5f9;
-  --bg-elevated: #ffffff;
+  /* Identidad: paleta del estadio en claro */
+  --night: #f7f4ec;
+  --turf: #ffffff;
+  --turf-2: #efeadd;
+  --chalk: #16211c;
+  --chalk-dim: #56635b;
+  --lights: #9a5b10;
+  --clay: #9c4128;
+  --hairline: rgba(22, 33, 28, 0.12);
 
-  --border-subtle: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --bg-primary: var(--night);
+  --bg-secondary: var(--turf);
+  --bg-tertiary: var(--turf-2);
+  --bg-elevated: var(--turf-2);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --text-inverse: #ffffff;
+  --border-subtle: var(--hairline);
+  --border-strong: rgba(22, 33, 28, 0.22);
 
-  --accent: #d97706;
-  --accent-hover: #b45309;
-  --accent-soft: rgba(217, 119, 6, 0.12);
-  --accent-glow: rgba(217, 119, 6, 0.3);
+  --text-primary: var(--chalk);
+  --text-secondary: var(--chalk-dim);
+  --text-muted: #6b766e;
+  --text-inverse: var(--night);
 
-  --danger: #dc2626;
-  --success: #16a34a;
-  --info: #0284c7;
-  --warning: #d97706;
+  --accent: var(--lights);
+  --accent-hover: #a3680e;
+  --accent-soft: rgba(154, 91, 16, 0.12);
+  --accent-glow: rgba(154, 91, 16, 0.3);
 
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
-  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.1);
-  --shadow-lg: 0 16px 48px rgba(15, 23, 42, 0.12);
+  --danger: #c0392b;
+  --success: #2e7d4f;
+  --info: #0e7490;
+  --warning: var(--lights);
+
+  --overlay: rgba(23, 33, 25, 0.42);
+
+  --shadow-sm: 0 1px 2px rgba(22, 33, 28, 0.08);
+  --shadow-md: 0 0 0 1px var(--hairline), 0 12px 32px -16px rgba(201, 121, 28, 0.16);
+  --shadow-lg: 0 0 0 1px var(--hairline), 0 24px 48px -20px rgba(201, 121, 28, 0.2);
+  --shadow-card: 0 0 0 1px var(--hairline), 0 12px 32px -16px rgba(201, 121, 28, 0.16);
 
   color-scheme: light;
 }
@@ -111,6 +142,22 @@ body {
 
 code {
   font-family: var(--font-mono);
+}
+
+/* Tipografía de marca: titulares en Fraunces, números en JetBrains Mono */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Barra de scroll global acorde al tema */

@@ -79,8 +79,8 @@
   padding: 22px;
   border-radius: var(--radius-lg);
   background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--hairline);
+  box-shadow: none;
   transform-style: preserve-3d;
   transition: border-color 0.25s ease, box-shadow 0.25s ease,
     transform 0.25s ease;
@@ -123,10 +123,12 @@
 }
 
 .stat-card__value {
-  font-size: 2.6rem;
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 2.3rem;
+  font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1;
+  color: var(--accent);
   font-variant-numeric: tabular-nums;
   transform: translateZ(20px);
 }

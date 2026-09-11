@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Home,
   Database,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 import Logo from '../logo.jpg';
 import { getInitialTheme, applyTheme } from '../theme';
+import { REPORT_ROUTES, CRUD_ROUTES } from '../routes';
 import NotificationBell from './NotificationBell';
 import './sidebar.css';
 
@@ -74,15 +76,25 @@ const ADMIN_FORMS = [
 ];
 
 function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
+  const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [showReports, setShowReports] = useState(false);
-  const [showForms, setShowForms] = useState(false);
-  const [showQueries, setShowQueries] = useState(false);
+  const [showReports, setShowReports] = useState(() => pathname.startsWith('/reporte'));
+  const [showForms, setShowForms] = useState(
+    () => pathname.startsWith('/admin') || pathname.startsWith('/dt')
+  );
+  const [showQueries, setShowQueries] = useState(() => pathname.startsWith('/consultas'));
   const [theme, setTheme] = useState(getInitialTheme());
 
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
+
+  const reportSlugs = useMemo(() => Object.keys(REPORT_ROUTES), []);
+  const crudSlugs = useMemo(() => Object.keys(CRUD_ROUTES), []);
+
+  const isActive = (path) => pathname === path || (pathname.startsWith(path) && path !== '/');
+  const isReportActive = (slug) => pathname === `/reporte/${slug}`;
+  const isQueryActive = (table) => pathname === `/consultas/${table}`;
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
@@ -137,7 +149,7 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
       <nav className="sidebar__nav">
         <ul className="sidebar__list">
           <li
-            className="sidebar__item"
+            className={`sidebar__item${isActive('/') ? ' sidebar__item--active' : ''}`}
             onClick={() => onOptionSelect('Main')}
             title="Inicio"
           >
@@ -145,18 +157,20 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
             {!collapsed && <span className="sidebar__label">Inicio</span>}
           </li>
 
-          <li
-            className="sidebar__item"
-            onClick={() => onOptionSelect('Comparar Jugadores')}
-            title="Comparar jugadores"
-          >
-            <GitCompare size={20} className="sidebar__icon" />
-            {!collapsed && <span className="sidebar__label">Comparar jugadores</span>}
-          </li>
+          {role && role !== 'Guest' && (
+            <li
+              className={`sidebar__item${isActive('/comparar') ? ' sidebar__item--active' : ''}`}
+              onClick={() => onOptionSelect('Comparar Jugadores')}
+              title="Comparar jugadores"
+            >
+              <GitCompare size={20} className="sidebar__icon" />
+              {!collapsed && <span className="sidebar__label">Comparar jugadores</span>}
+            </li>
+          )}
 
           {/* Consultas */}
           <li
-            className="sidebar__item sidebar__item--group"
+            className={`sidebar__item sidebar__item--group${pathname.startsWith('/consultas') ? ' sidebar__item--active' : ''}`}
             onClick={handleQueriesClick}
             title="Consultas"
           >
@@ -170,7 +184,7 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
               {CONSULTAS.map((c) => (
                 <li
                   key={c.value}
-                  className="sidebar__subitem"
+                  className={`sidebar__subitem${isQueryActive(c.value) ? ' sidebar__subitem--active' : ''}`}
                   title={c.label}
                   onClick={() => handleQuerySelect(c.value)}
                 >
@@ -183,7 +197,7 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
 
           {/* Estadísticas */}
           <li
-            className="sidebar__item sidebar__item--group"
+            className={`sidebar__item sidebar__item--group${pathname.startsWith('/reporte') ? ' sidebar__item--active' : ''}`}
             onClick={handleReportsClick}
             title="Estadísticas"
           >
@@ -194,10 +208,10 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
 
           {showReports && !collapsed && (
             <ul className="sidebar__sublist">
-              {REPORTS.map((r) => (
+              {REPORTS.map((r, i) => (
                 <li
                   key={r}
-                  className="sidebar__subitem"
+                  className={`sidebar__subitem${isReportActive(reportSlugs[i]) ? ' sidebar__subitem--active' : ''}`}
                   title={r}
                   onClick={() => onOptionSelect(r)}
                 >
@@ -212,7 +226,7 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
           {role === 'Admin' && (
             <>
               <li
-                className="sidebar__item sidebar__item--group"
+                className={`sidebar__item sidebar__item--group${pathname.startsWith('/admin') ? ' sidebar__item--active' : ''}`}
                 onClick={handleFormsClick}
                 title="Formularios"
               >
@@ -223,17 +237,20 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
 
               {showForms && !collapsed && (
                 <ul className="sidebar__sublist">
-                  {ADMIN_FORMS.map((f) => (
-                    <li
-                      key={f.option}
-                      className="sidebar__subitem"
-                      title={f.label}
-                      onClick={() => onOptionSelect(f.option)}
-                    >
-                      <span className="sidebar__sub-dot" />
-                      {f.label}
-                    </li>
-                  ))}
+                  {ADMIN_FORMS.map((f) => {
+                    const slug = crudSlugs.find((s) => CRUD_ROUTES[s] === f.option);
+                    return (
+                      <li
+                        key={f.option}
+                        className={`sidebar__subitem${slug && pathname === `/admin/${slug}` ? ' sidebar__subitem--active' : ''}`}
+                        title={f.label}
+                        onClick={() => onOptionSelect(f.option)}
+                      >
+                        <span className="sidebar__sub-dot" />
+                        {f.label}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </>
@@ -242,7 +259,7 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
           {role === 'Director Técnico' && (
             <>
               <li
-                className="sidebar__item sidebar__item--group"
+                className={`sidebar__item sidebar__item--group${pathname.startsWith('/dt') ? ' sidebar__item--active' : ''}`}
                 onClick={handleFormsClick}
                 title="Alineaciones"
               >
@@ -256,14 +273,14 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
               {showForms && !collapsed && (
                 <ul className="sidebar__sublist">
                   <li
-                    className="sidebar__subitem"
+                    className={`sidebar__subitem${pathname === '/dt/cambios' ? ' sidebar__subitem--active' : ''}`}
                     onClick={() => onOptionSelect('Definir Cambios')}
                   >
                     <span className="sidebar__sub-dot" />
                     Establecer Cambios
                   </li>
                   <li
-                    className="sidebar__subitem"
+                    className={`sidebar__subitem${pathname === '/dt/listar-cambios' ? ' sidebar__subitem--active' : ''}`}
                     onClick={() => onOptionSelect('Listar Cambios')}
                   >
                     <span className="sidebar__sub-dot" />

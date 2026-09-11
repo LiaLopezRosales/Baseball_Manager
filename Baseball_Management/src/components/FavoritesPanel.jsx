@@ -69,6 +69,8 @@ export function FavoriteButton({ type, id, size = 20 }) {
     setActive(isFavorite(type, id));
   }, [isFavorite, type, id]);
 
+  if (!isLogged) return null;
+
   const handleClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();

@@ -133,8 +133,8 @@ se resuelve por píxeles, no por coordenadas del elemento.
 ### Arquitectura de rutas (URL-based)
 - `/` — Landing pública (hero, stat cards, standings, líderes de bateo, estrellas, campeones)
 - `/admin/:slug` — CRUD Admin (protegido, rol "Admin")
-- `/reporte/:slug` — Reportes (protegido, rol "Admin")
-- `/consultas/:tabla` — Consultas dinámicas (protegido, rol "Admin")
+- `/reporte/:slug` — Reportes (público, sin restricción de rol)
+- `/consultas/:tabla` — Consultas dinámicas (público, sin restricción de rol)
 - `/dt/cambios` — Definir cambios DT (protegido, rol "Director Técnico")
 - `/dt/listar-cambios` — Listar cambios DT (protegido, rol "Director Técnico")
 - `/equipo/:id` — Perfil de equipo (público, con lista de jugadores enlazados)
@@ -209,6 +209,105 @@ así que **todos los filtros usan `user_id`** (nunca `request.user` directo en l
 - `db_structure.User` limita a `db_structure.models.User`; el `Token` requiere `CustomUser`. No mezclar.
 - La auto-generación de notificaciones al registrar un resultado ya está implementada vía signal `post_save` de
   `Score` (ver `db_structure/signals.py`) — crea una `Notification` por cada seguidor de los equipos winner/loser.
-- "Comparar jugadores" (`/comparar`, público) está en `PlayerCompare.jsx` + `playerCompare.css`; se accede desde el
+- "Comparar jugadores" (`/comparar`) está en `PlayerCompare.jsx` + `playerCompare.css`; se accede desde el
   sidebar ("Comparar jugadores") y usa datos de `/baseball-players/`, `/persons/`, `/players-in-position/` y `/positions/`.
+  **Solo usuarios con cuenta** (roles Admin, Director Técnico o Usuario General): la ruta usa
+  `<ProtectedRoute roles={['Admin','Director Técnico','Usuario General']}>` y el item del sidebar se oculta para invitados.
+- `FavoriteButton` (corazones) y `FavoritesPanel` no se renderizan para invitados (`token` ausente) — los favoritos
+  requieren cuenta. `UserDashboard` ("Tu panel") también se condiciona a `localStorage.getItem('token')`.
 - `UserDashboard.jsx` tiene un warning de eslint preexistente (`teamStars` sin usar) — no relacionado con cambios recientes.
+
+## Frontend: Fase 0 — Fundamentos "Diamond Plate" (paleta de estadio)
+
+### Tokens CSS (`src/index.css`)
+- Paleta "night/turf/chalk/lights/clay/hairline". Los **nombres de variable NO cambian** (API estable), solo sus valores
+  (`--bg-*`, `--text-*`, `--border-*`, `--accent*`, sombras, radios) + tokens nuevos: `--night`, `--turf`, `--turf-2`,
+  `--chalk`, `--chalk-dim`, `--lights`, `--clay`, `--hairline`, `--overlay`, `--shadow-card`, `--font-display`.
+- Dark: `--night #0b1712`, `--turf #142c22`, `--turf-2 #1c3a2c`, `--chalk #f3efe3`, `--chalk-dim #b9c2b7`,
+  `--lights #f2a93b`, `--clay #b5502f`, `--hairline rgba(243,239,227,.12)`, `--radius-lg 18px`.
+- Light: crema con `--turf #ffffff`, `--chalk #16211c`, y **`--lights #9a5b10`** (oscurecido para alcanzar AA 4.5:1 sobre blanco).
+- Tipografía vía `@import` de Google Fonts: **Fraunces** (titulares, `h1–h4` global), **Instrument Sans** (body),
+  **JetBrains Mono** (números: `.num` y `.stat-card__value`).
+
+### Gotchas de Fase 0
+- `src/components/dashboard.css` está **huérfano** (no se importa en ningún componente activo). Los `StatCard` de la
+  landing quedaban SIN estilo; los `.stat-card*` viven ahora en `src/components/landing.css` (turf/hairline/radios, valor
+  JetBrains Mono ámbar). No "arreglar" estilos en dashboard.css: no llegan al DOM.
+- El **ítem activo del sidebar** (y la "costura" de clay) se computa con `useLocation` en `src/components/sidebar.jsx`;
+  los grupos Consultas/Estadísticas/Formularios se auto-abren al navegar directo a una ruta (`/reporte/...`,
+  `/consultas/...`, `/admin/...`, `/dt/...`).
+- Radar del perfil de jugador: el título es un `h3.radar-chart__title` (Fraunces) FUERA del chart ECharts (evita el
+  solapamiento del viejo `title` de ECharts). Tiene 4 ejes: Bateo, **Juegos** (conteo de `/bp-participations/` donde
+  `BP_id` == jugador), Experiencia, Edad.
+- Efectividad **redondeada a 3 decimales en backend** (decisión del plan): `api/reports/queries.py`
+  (`ROUND(::numeric,3)` en SQL crudo, `round(...,3)` en ORM con guard a `None`) y `PlayerInPositionSerializer`.
+  Tests de redondeo en `db_structure/tests/test_serializers.py`.
+- `BarChart` lee `--accent` vía `getComputedStyle` (fallback `#f59e0b`); eje X sin rotate con nombre truncado y la barra
+  líder lleva glow. `RadarChart` igual (fallback `#f59e0b`).
+- Overlay de modales (`.modal-overlay`): `--overlay` + `blur(4px)` + `z-index:1100`; el banner NO debe sangrar sobre el modal.
+- Verificación: `CI=false npx react-scripts build` + `python manage.py test db_structure` (96 tests) + smoke Playwright
+  (login, sidebar activo, radar 4 ejes, guards invitado/admin, decimales en reportes).
+
+## Herramienta: agente `redesign-expert` (global) + 7 skills
+
+- **Para qué**: produce la especificación/dirección de rediseño visual (diseño + CRO + psicología) en
+  `docs/design/REDESENO_*.md`, SIN tocar código. Es GLOBAL (cualquier proyecto), generalizado con 9
+  etapas y **adjudicación de sugerencias del usuario** (ADOPT/ADAPT/REJECT). Definido en
+  `~/.config/opencode/agents/redesign-expert.md` (subagent, `model: google/gemini-3.6-flash`,
+  `bash: deny`, `task: deny`, `skill: allow`, temperatura 0.4). Escrito en inglés (skills en inglés);
+  el idioma del deliverable lo fija `brief.language.deliverable`, no el prompt del agente.
+- **7 skills globales** en `~/.config/opencode/skills/<name>/SKILL.md` (auto-descubiertas, sin registro):
+  `design-brief`, `visual-audit`, `design-principles`, `design-tokens`, `cro-microcopy`,
+  `designlab-prototype`, `blueprint-template`. El agente las carga por etapa (`skill tool`).
+  Lista codificada en `docs/planning/PLAN_AGENTE_REDISENO.md` §5/§11.
+  Checklist/anti-slop enriquecidos con ideas de **Design Auditor** (Ashutos1997), **TasteCheck**
+  (KyaniteLabs, MIT) y **ui-audit** (tommygeoco/UxTools); `visual-audit/references/` alberga
+  Nielsen 10 heurísticas + capa cognitive-a11y. Atribución detallada al pie de `blueprint-template`.
+- **V1 (proyecto-local, obsoleta pero intacta)**: renombrada a `.opencode/agents/redesign-expert-v1.md`
+  para liberar el nombre `redesign-expert` y que la global V2 tome precedencia en este y cualquier
+  proyecto tras reiniciar opencode.
+- **Provider google global**: añadido a `~/.config/opencode/opencode.jsonc`
+  (`options.apiKey: "{file:~/.secrets/google-gemini.key}"`) para que el agente global corra en
+  cualquier proyecto.
+- **Gotcha "Requests ending with a model turn" (sept-2026)**: el subagente V2 (google/gemini-3.6-flash)
+  fallaba con `AI_APICallError` cuando su flujo **cerraba con un tool call de `write`** (read + texto
+  final sí pasaba). Google rechaza requests cuyo último contenido es un turno `model`. Fix como **plugin
+  global** en `~/.config/opencode/plugins/gemini-synthetic-user-turn.ts`: hook
+  `experimental.chat.messages.transform` (mutación in-place con `push`, condicionado a providerID
+  `google` y último mensaje role != user) anexa un turno de usuario sintético ("Continue.") antes de la
+  request. El fix upstream no está publicado (issue anomalyco/opencode#45359 abierto). Si el plugin no
+  está activo tras update/cambio de config: reiniciar opencode (los plugins globales se autodescubren en
+  `~/.config/opencode/plugins/` con extensión `.ts`/`.js`).
+- **Modelo con visión (gratis)**: `google/gemini-3.6-flash` vía proveedor `google` en `opencode.json`
+  con `options.apiKey: "{file:~/.secrets/google-gemini.key}"` (key fuera del repo; duplicada en `.env`
+  gitignored para scripts). Plan/alternativas y gotchas de instalación en
+  `docs/planning/PLAN_AGENTE_REDISENO.md`.
+- **Gotchas de la key free (verificadas)**:
+  - El formato `AQ....` de AI Studio funciona solo con `?key=` en `generativelanguage.googleapis.com`;
+    **no** con `Authorization: Bearer` (401 `API_KEY_SERVICE_BLOCKED`).
+  - `gemini-2.5-flash` **no está disponible para usuarios nuevos** (404); usar `gemini-3.6-flash`.
+  - En opencode la key va en **`provider.google.options.apiKey`** (la vía `api_key` a nivel provider NO surte efecto).
+  - `{env:VAR}` no resuelve si opencode no carga `.env` → se usa `{file:...}`.
+  - Cambios de agentes/proveedores en config requieren **reiniciar opencode**; `opencode run` es la vía
+    headless para probar sin reiniciar la TUI (los subagentes NO pueden usarse como agente primario de `run`).
+- **Cómo "ve" la UI**: MCP Playwright captura PNGs (dentro del workspace, p. ej. `.playwright-mcp/`) →
+  el subagente los lee con `read` (OpenCode dimensiona las imágenes automáticamente). Para validar
+  propuestas: prototipos estáticos desechables en `/tmp/opencode/designlab/` → captura → crítica →
+  iteración; cruzando siempre con medición objetiva (contraste AA, computed styles). Smoke test de la
+  Landing verificó que el modelo ve y describe los componentes con precisión.
+
+### Auditor local UXRay (`uxray`, Ollama + Gemma vision)
+
+- **Instalado**: Ollama v0.32.14 vía `sudo snap install ollama` (daemon en `127.0.0.1:11434`).
+  Modelo vision **`gemma4:12b`** (Vision+Thinking; `ollama pull gemma4:12b`, ~7.4GB, Q4_K_M)
+  — encaja en la RTX 4070 8GB. Alternativas `gemma4:e4b` (ligero) / `gemma4:31b` (pesado).
+- **Script global** `~/.local/bin/uxray` (Python stdlib, sin dependencias):
+  `uxray <captura.png> [...] [--lang es|en] [--model ...] [--out reporte.md] [--json|--raw]`.
+  Produce reporte estructurado: score 0-100, carga cognitiva, friction points (Nielsen/Gestalt/WCAG),
+  flags a11y, recomendaciones priorizadas. Env vars: `OLLAMA_HOST`, `UXRAY_MODEL`, `UXRAY_LANG`.
+- **Gotchas verificados**:
+  - `gemma4:12b` trae `thinking` activado por defecto → responde ~8x más lento y con `response`
+    vacío en `/api/generate`. Usar `"think": false` (el script lo hace; ~10s vs ~95s por llamada).
+  - `ollama show gemma4:12b` confirma capabilities `vision` (requiere Ollama ≥0.30.5).
+  - El modelo no distingue bien light/dark según el nombre del archivo; pasa como contexto las
+    capturas Light y Dark cuando el brief lo requiera.

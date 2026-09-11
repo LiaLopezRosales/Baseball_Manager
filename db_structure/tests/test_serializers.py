@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 from db_structure.serializers import (
     RolSerializer, UserSerializer, TeamSerializer, ScoreSerializer, PositionSerializer, SeasonSerializer, PersonSerializer,
-    BaseballPlayerSerializer, BPParticipationSerializer, PlayerInLineUpSerializer
+    BaseballPlayerSerializer, BPParticipationSerializer, PlayerInLineUpSerializer, PlayerInPositionSerializer
 )
 from db_structure.models import BaseballPlayer, BPParticipation, PlayerInLineUp
 
@@ -177,6 +177,18 @@ class TestSerializersWithMock(unittest.TestCase):
         data = {"line_up": 1}
         serializer = PlayerInLineUpSerializer(data=data)
         self.assertFalse(serializer.is_valid())
+
+    def test_player_in_position_serializer_rounds_effectiveness_to_3(self):
+        """✅ Redondear la efectividad a 3 decimales en el serializer"""
+        serializer = PlayerInPositionSerializer()
+        obj = MagicMock(effectiveness=0.99567)
+        self.assertEqual(serializer.get_effectiveness(obj), 0.996)
+
+    def test_player_in_position_serializer_effectiveness_none_stays_none(self):
+        """✅ Efectividad None permanece None (no quiebra round)"""
+        serializer = PlayerInPositionSerializer()
+        obj = MagicMock(effectiveness=None)
+        self.assertIsNone(serializer.get_effectiveness(obj))
 
     def test_player_in_lineup_serializer_invalid_missing_position(self):
         """❌ Intentar serializar alineación sin posición"""

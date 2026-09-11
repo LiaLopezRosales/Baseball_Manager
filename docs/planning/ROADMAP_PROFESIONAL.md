@@ -596,8 +596,55 @@ services:
 - `DashboardView` usa `Game`/`TeamOnTheField` (el modelo `Score` no tiene campo `game`).
 - Auto-gen de notificaciones de resultado: signal `post_save` de `Score` en `db_structure/signals.py`, registrado con
   `DbStructureConfig.ready()` (`INSTALLED_APPS` usa `'db_structure.apps.DbStructureConfig'`). Tests en `db_structure/tests/test_signals.py`.
-- Comparar jugadores: `src/components/PlayerCompare.jsx` + `playerCompare.css`, ruta pública `/comparar`, acceso desde
-  sidebar ("Comparar jugadores"), datos de `/baseball-players/`, `/persons/`, `/players-in-position/` y `/positions/`.
+- Comparar jugadores: `src/components/PlayerCompare.jsx` + `playerCompare.css`, ruta `/comparar` (solo usuarios con
+  cuenta vía `ProtectedRoute`), acceso desde sidebar ("Comparar jugadores", oculto para invitados),
+  datos de `/baseball-players/`, `/persons/`, `/players-in-position/` y `/positions/`.
+
+---
+
+## 8.7. Fase 0 — Fundamentos "Diamond Plate" con paleta de estadio (refactor visual)
+
+**Objetivo**: re-tema completo según `refactor-visual-baseball(1).md` (plan aprobado: alcance total, 3D diferido a fase final,
+redondeo de decimales en backend).
+
+**Tokens (`src/index.css`)**: la paleta pasa de "dark industrial + amber" a noche/turf/chalk/lights/clay/hairline.
+Se mantienen los **nombres de variable actuales** como API (`--bg-*`, `--text-*`, `--border-*`, `--accent*`, sombras, radios)
+y se **re-poblan sus valores**; además se añaden `--night`, `--turf`, `--turf-2`, `--chalk`, `--chalk-dim`, `--lights`,
+`--clay`, `--hairline`, `--overlay`, `--shadow-card`, `--font-display`. `--radius-lg` pasa a 18px.
+- Dark: `--night #0b1712`, `--turf #142c22`, `--turf-2 #1c3a2c`, `--chalk #f3efe3`, `--chalk-dim #b9c2b7`,
+  `--lights #f2a93b`, `--clay #b5502f`, `--hairline rgba(243,239,227,.12)`.
+- Light: crema, `--turf #ffffff`, `--turf-2 #efeadd`, `--chalk #16211c`, `--lights #9a5b10` (oscurecido para AA 4.5:1),
+  `--hairline rgba(22,33,28,.12)`.
+- Contraste validado por cálculo: dark ≥ 5.9:1 en todos los pares; light ≥ 4.5:1 (texto), acentos ≥ 4.5:1.
+
+**Tipografía**: Google Fonts vía `@import` en `index.css` — Fraunces (titulares, `h1–h4` global), Instrument Sans (body),
+JetBrains Mono (números, `.num` y `.stat-card__value`).
+
+**Shell**: sidebar con `--hairline` a la derecha y sin `box-shadow`, spacing vertical 12px, e **ítem activo** con
+"costura" de clay (`repeating-linear-gradient` 3px, `::before`) + fondo `--bg-elevated` + icono accent. El estado activo se
+computa con `useLocation` en `src/components/sidebar.jsx` (`Inicio`, `Comparar jugadores`, subitems consultas/reportes/admin/dt;
+los grupos se auto-abren al navegar directo a una ruta). Sidebar del móvil y overlay de modales usan `--overlay`.
+
+**Redondeo de efectividad (backend, 3 decimales)**:
+- `api/reports/queries.py`: `get_star_players_for_series_` (ORM, con guard a `None`), `get_star_players_for_series`
+  (SQL crudo: `ROUND(pip."effectiveness"::numeric, 3)`), `get_player_effectiveness_by_position`.
+- `db_structure/serializers.py`: `PlayerInPositionSerializer.get_effectiveness` → `round(...,3)` (None-safe).
+
+**Bugs puntuales de Fase 0**:
+- Highlight residual de la primera stat card: se quitó `accent: true` (Landing) y se eliminó la sombra genérica.
+- Los stat cards de la landing NO tenían estilos: `dashboard.css` quedó **huérfano** (ya nadie lo importa). Los estilos
+  `.stat-card*` ahora viven en `src/components/landing.css` (turf, hairline, radios, valor en JetBrains Mono ámbar).
+- Radar del perfil de jugador: título movido fuera del chart (`h3.radar-chart__title` en Fraunces, gap 12px) → sin
+  solapamiento; ahora tiene **4 ejes** (Bateo, Juegos, Experiencia, Edad; "Juegos" = participaciones de `/bp-participations/`).
+- Tabla de reportes: `th` dejó de ser ámbar (`--text-secondary`), se reduce el texto naranja.
+- `BarChart`: eje X sin `rotate` (nombres truncados + tooltip), degradado lee `--accent`, barra líder con glow.
+- `Modal.css`: overlay con `--overlay` + `blur(4px)` + `z-index:1100` + fade; content con pop-in.
+- Grid de jugadores del perfil de equipo: ya usaba `repeat(auto-fill, minmax(180px,1fr))` — verificado, sin cambio.
+
+**Verificación**: `CI=false npx react-scripts build` OK (solo warning preexistente `UserDashboard.jsx` `teamStars`);
+`python manage.py test db_structure` → **96 OK** (94 + 2 nuevos tests de redondeo);
+smoke Playwright: tokens dark/light aplicados, sidebar activo + costura en consultas/reportes, radar 4 ejes, login UG y
+`/comparar` OK, invitado no accede a `/comparar` ni `/admin`, reportes decimales a 3.
 
 ---
 
@@ -605,7 +652,7 @@ services:
 
 > Estado tras completar Fase 0, Fase 1 y Fase B. Items pendientes pertenecen a Fases 2–4.
 
-- [x] `manage.py test db_structure` → 0 failures (91 tests OK)
+- [x] `manage.py test db_structure` → 0 failures (96 tests OK)
 - [x] `npm test` → passes (2 tests)
 - [ ] `ruff check .` → 0 errors
 - [x] UI dark theme "Diamond Plate" funcional

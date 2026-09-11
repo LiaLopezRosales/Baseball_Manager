@@ -119,10 +119,15 @@ class StarPlayerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PlayerInPositionSerializer(serializers.ModelSerializer):
-    
+    effectiveness = serializers.SerializerMethodField()
+
     class Meta:
         model = PlayerInPosition
         fields = '__all__'
+
+    def get_effectiveness(self, obj):
+        value = obj.effectiveness
+        return round(value, 3) if value is not None else None
 
 class PlayerSwapSerializer(serializers.ModelSerializer):
     

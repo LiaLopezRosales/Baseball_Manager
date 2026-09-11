@@ -133,7 +133,8 @@ def get_star_players_for_series_(series_name):
         player = star_player.BP_id
         position = star_player.position
         # Obtener la efectividad del jugador en la posición específica
-        effectiveness = player.playerinposition_bp.filter(position=position).first().effectiveness
+        pip_entry = player.playerinposition_bp.filter(position=position).first()
+        effectiveness = round(pip_entry.effectiveness, 3) if pip_entry else None
 
         result.append({
             "Nombre": player.P_id.name,
@@ -151,7 +152,7 @@ def get_star_players_for_series(series_name):
         p."name" AS "Nombre",
         p."lastname" AS "Apellido",
         pos."name" AS "Posición",
-        pip."effectiveness" AS "Efectividad",
+        ROUND(pip."effectiveness"::numeric, 3) AS "Efectividad",
         s."name" AS "Serie"
     FROM 
         "db_structure_starplayer" sp
@@ -514,7 +515,7 @@ def get_player_effectiveness_by_position():
             "Posición": player.position.name,
             "Nombre": player.BP_id.P_id.name,
             "Apellido": player.BP_id.P_id.lastname,
-            "Efectividad": player.effectiveness,
+            "Efectividad": round(player.effectiveness, 3),
         }
         for player in players
     ]

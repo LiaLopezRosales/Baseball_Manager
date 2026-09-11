@@ -118,7 +118,6 @@ function Landing() {
         label: 'Equipos',
         sublabel: 'participantes',
         value: stats.teams,
-        accent: true,
         delay: 0.05,
       },
       {
