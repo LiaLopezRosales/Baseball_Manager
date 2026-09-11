@@ -453,6 +453,24 @@ def simulate_championship_with_participations(positions, team_player_mapping, se
                     date=game_date
                 )
             )
+
+        # Juegos programados (sin Score aún) para el denominador del calendario.
+        # Fecha posterior al fin de la serie y única por (local, date) vía offset idx.
+        SCHEDULED_PER_SERIES = 8
+        shuffled_pairs = random.sample(team_pairs, len(team_pairs))
+        for idx, (local_team_id, rival_team_id) in enumerate(shuffled_pairs[:SCHEDULED_PER_SERIES]):
+            local_lineup = lineups[local_team_id]
+            rival_lineup = lineups[rival_team_id]
+            scheduled_date = s.end_date + timedelta(days=1 + idx * 3)
+            games.append(
+                GameFactory(
+                    local=TeamOnTheFieldFactory(lineup_id=local_lineup),
+                    rival=TeamOnTheFieldFactory(lineup_id=rival_lineup),
+                    series=s,
+                    score=None,
+                    date=scheduled_date
+                )
+            )
             
 
     # Poblar tabla PlayerInLineUp con los mismos LineUps

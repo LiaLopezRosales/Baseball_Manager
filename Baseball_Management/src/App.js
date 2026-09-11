@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import './App.css';
@@ -24,8 +24,10 @@ import {
 } from './path';
 
 // Componente interno que usa useNavigate (debe estar dentro del Router)
-function AppRoutes({ role, team, onModalOpen, onLogout, onSetLogin, onUpdateRole, onUpdateTeam, onNameChange }) {
+function AppRoutes({ role, team, isLogged, onModalOpen, onLogout, onSetLogin, onUpdateRole, onUpdateTeam, onNameChange }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isStandalone = location.pathname === '/';
 
   const handleOptionSelect = (option, table = '') => {
     if (option === 'Main') {
@@ -61,7 +63,14 @@ function AppRoutes({ role, team, onModalOpen, onLogout, onSetLogin, onUpdateRole
     navigate('/');
   };
 
-  return (
+  return isStandalone ? (
+    <Landing
+      isLogged={isLogged}
+      role={role}
+      onModalOpen={onModalOpen}
+      onLogout={onLogout}
+    />
+  ) : (
     <>
       <header className="App-header">
         <button className="mobile-menu-btn" aria-label="Abrir menú">
@@ -153,6 +162,7 @@ function App() {
         <AppRoutes
           role={role}
           team={team}
+          isLogged={isLogged}
           onModalOpen={handleModalOpen}
           onLogout={handleLogout}
           onSetLogin={setLogin}
