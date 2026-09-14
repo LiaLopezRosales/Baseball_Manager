@@ -922,7 +922,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
                       <h4 className="landing__palmares-team">{c.Equipo}</h4>
                     )}
                     <p className="landing__palmares-dt">
-                      DT: <span>{c['Director Técnico']}</span>
+                      Dir. Técnico: <span>{c['Director Técnico']}</span>
                     </p>
                   </motion.div>
                 );
@@ -937,7 +937,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
                 </div>
                 <div>
                   <h3 className="landing__callout-title">
-                    ¿Eres Director Técnico (DT) o Anotador Oficial?
+                    ¿Eres Director Técnico o Anotador Oficial?
                   </h3>
                   <p className="landing__callout-sub">
                     Accede a la plataforma de gestión táctica: cambio de
@@ -952,7 +952,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
                   <span className="material-symbols-outlined" aria-hidden="true">
                     badge
                   </span>
-                  Portal DT / Cambios
+                  Portal de Cambios
                 </Link>
                 <Link to={isLogged && role === 'Admin' ? '/admin/posiciones' : '/registro'} className="landing__callout-btn solid">
                   <span className="material-symbols-outlined" aria-hidden="true">
@@ -1048,7 +1048,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
             <h4>Portales Técnicos</h4>
             <ul>
               <li>
-                <Link to="/dt/cambios">Portal Directores Técnicos (DT)</Link>
+                <Link to="/dt/cambios">Portal Directores Técnicos</Link>
               </li>
               <li>
                 <Link to="/dt/listar-cambios">Mesa de Control y Anotadores</Link>

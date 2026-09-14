@@ -144,7 +144,7 @@ function LandingHero({ label, leader, totalPlayed, metrics, theme = 'dark' }) {
                     {leader.Equipo || leader.name}
                   </h3>
                   <p className="landing__hero-card-dt">
-                    División {leader.division || 'Liga'} • DT:{' '}
+                    División {leader.division || 'Liga'} • Dir. Técnico: {' '}
                     <span>{leader.dt || '—'}</span>
                   </p>
                 </div>
