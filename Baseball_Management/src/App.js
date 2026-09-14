@@ -7,7 +7,7 @@ import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import Landing from './components/Landing';
-import Register from './components/Register';
+import RegisterBoard from './components/Register';
 import { TeamProfile, PlayerProfile } from './components/profilePages';
 import PlayerCompare from './components/PlayerCompare';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -23,8 +23,18 @@ import {
   toComparePath,
 } from './path';
 
+// El registro ya no es una página: navegar a /registro abre el modal y vuelve al inicio
+function RegisterRedirect({ onOpen }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    onOpen?.();
+    navigate('/', { replace: true });
+  }, [onOpen, navigate]);
+  return null;
+}
+
 // Componente interno que usa useNavigate (debe estar dentro del Router)
-function AppRoutes({ role, team, isLogged, onModalOpen, onLogout, onSetLogin, onUpdateRole, onUpdateTeam, onNameChange }) {
+function AppRoutes({ role, team, isLogged, onModalOpen, onRegisterOpen, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isStandalone = location.pathname === '/';
@@ -68,6 +78,7 @@ function AppRoutes({ role, team, isLogged, onModalOpen, onLogout, onSetLogin, on
       isLogged={isLogged}
       role={role}
       onModalOpen={onModalOpen}
+      onRegisterOpen={onRegisterOpen}
       onLogout={onLogout}
     />
   ) : (
@@ -90,7 +101,7 @@ function AppRoutes({ role, team, isLogged, onModalOpen, onLogout, onSetLogin, on
           >
             <Routes>
               <Route path="/" element={<Landing />} />
-              <Route path="/registro" element={<Register setLogin={onSetLogin} updateRole={onUpdateRole} updateTeam={onUpdateTeam} NameOnChange={onNameChange} />} />
+              <Route path="/registro" element={<RegisterRedirect onOpen={onRegisterOpen} />} />
               <Route path="/admin/:slug" element={<ProtectedRoute roles={['Admin']}><CRUDRoute /></ProtectedRoute>} />
               <Route path="/reporte/:slug" element={<ReportRoute />} />
               <Route path="/consultas/:tabla" element={<QueryRoute />} />
@@ -111,7 +122,7 @@ function AppRoutes({ role, team, isLogged, onModalOpen, onLogout, onSetLogin, on
 function App() {
   const [isLogged, setLogin] = useState(() => localStorage.getItem('isLogged') === 'true');
   const [userName, setUserName] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState(null); // 'login' | 'register' | null
   const [role, setRole] = useState(() => localStorage.getItem('role') || '');
   const [team, setTeam] = useState(() => {
     const savedTeam = localStorage.getItem('team');
@@ -133,8 +144,9 @@ function App() {
 
   const handleNameChange = (newName) => setUserName(newName);
 
-  const handleModalOpen = () => setIsModalOpen(true);
-  const handleModalClose = () => setIsModalOpen(false);
+  const handleModalOpen = () => setModalMode('login');
+  const handleRegisterOpen = () => setModalMode('register');
+  const handleModalClose = () => setModalMode(null);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -142,7 +154,7 @@ function App() {
     setRole('');
     setTeam(null);
     setUserName('');
-    setIsModalOpen(false);
+    setModalMode(null);
     window.location.reload();
   };
 
@@ -164,24 +176,32 @@ function App() {
           team={team}
           isLogged={isLogged}
           onModalOpen={handleModalOpen}
+          onRegisterOpen={handleRegisterOpen}
           onLogout={handleLogout}
-          onSetLogin={setLogin}
-          onUpdateRole={updateRole}
-          onUpdateTeam={updateTeam}
-          onNameChange={handleNameChange}
         />
 
-        <Modal isOpen={isModalOpen} onClose={handleModalClose}>
-          <LoginBoard
-            name={userName}
-            isLogged={isLogged}
-            setLogin={setLogin}
-            onButtonClick={handleClick}
-            NameOnChange={handleNameChange}
-            updateRole={updateRole}
-            updateTeam={updateTeam}
-            onCloseModal={handleModalClose}
-          />
+        <Modal isOpen={modalMode !== null} onClose={handleModalClose}>
+          {modalMode === 'register' ? (
+            <RegisterBoard
+              setLogin={setLogin}
+              updateRole={updateRole}
+              updateTeam={updateTeam}
+              NameOnChange={handleNameChange}
+              onClose={handleModalClose}
+              onSwitchToLogin={handleModalOpen}
+            />
+          ) : (
+            <LoginBoard
+              name={userName}
+              isLogged={isLogged}
+              setLogin={setLogin}
+              onButtonClick={handleClick}
+              NameOnChange={handleNameChange}
+              updateRole={updateRole}
+              updateTeam={updateTeam}
+              onSwitchToRegister={handleRegisterOpen}
+            />
+          )}
         </Modal>
       </div>
     </Router>

@@ -128,7 +128,7 @@ function lastSeasonNameFn(seasons) {
 
 /* ─── Componente ───────────────────────────────────────────────────────────── */
 
-function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
+function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onLogout }) {
   const [standingsReport, setStandingsReport] = useState([]);
   const [batters, setBatters] = useState([]);
   const [champions, setChampions] = useState([]);
@@ -550,6 +550,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
           theme={theme}
           onThemeChange={toggleTheme}
           onModalOpen={onModalOpen}
+          onRegisterOpen={onRegisterOpen}
           onLogout={onLogout}
         />
         <div className="landing__section">
@@ -575,6 +576,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
         theme={theme}
         onThemeChange={toggleTheme}
         onModalOpen={onModalOpen}
+        onRegisterOpen={onRegisterOpen}
         onLogout={onLogout}
       />
 
@@ -585,6 +587,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
         totalPlayed={totalPlayed}
         metrics={heroMetrics}
         theme={theme}
+        onRegisterOpen={onRegisterOpen}
       />
 
       {/* S3: RESUMEN EJECUTIVO DE CIRCUITO */}
@@ -662,10 +665,10 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
               <div className="landing__bento-big-text">Sigue a tu Franquicia</div>
               <p className="landing__bento-sub">Recibe boxscores oficiales, outs decisivos y jonrones vía alerta Push instantánea.</p>
               <div className="landing__bento-cta-wrap">
-                <Link to="/registro" className="landing__bento-cta">
+                <button type="button" onClick={onRegisterOpen} className="landing__bento-cta">
                   <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>send</span>
                   Activar Alertas
-                </Link>
+                </button>
               </div>
             </div>
           </div>
@@ -1027,12 +1030,21 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
                   </span>
                   Portal de Cambios
                 </Link>
-                <Link to={isLogged && role === 'Admin' ? '/admin/posiciones' : '/registro'} className="landing__callout-btn solid">
-                  <span className="material-symbols-outlined" aria-hidden="true">
-                    admin_panel_settings
-                  </span>
-                  Gestión de Liga (Admin)
-                </Link>
+                {isLogged && role === 'Admin' ? (
+                  <Link to="/admin/posiciones" className="landing__callout-btn solid">
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      admin_panel_settings
+                    </span>
+                    Gestión de Liga (Admin)
+                  </Link>
+                ) : (
+                  <button type="button" onClick={onModalOpen} className="landing__callout-btn solid">
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      admin_panel_settings
+                    </span>
+                    Gestión de Liga (Admin)
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -1133,7 +1145,9 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
                 <Link to="/consultas/Worker">Sala de Prensa y Acreditaciones</Link>
               </li>
               <li>
-                <Link to="/registro">Federación Deportiva Nacional</Link>
+                <button type="button" className="landing__footer-link" onClick={onRegisterOpen}>
+                  Federación Deportiva Nacional
+                </button>
               </li>
             </ul>
           </div>

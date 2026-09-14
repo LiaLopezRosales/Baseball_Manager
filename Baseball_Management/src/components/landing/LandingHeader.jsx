@@ -16,6 +16,7 @@ function LandingHeader({
   userName,
   role,
   onModalOpen,
+  onRegisterOpen,
   onLogout,
   theme,
   onThemeChange,
@@ -145,9 +146,13 @@ function LandingHeader({
               >
                 Iniciar Sesión
               </button>
-              <Link to="/registro" className="landing__btn landing__btn--solid">
+              <button
+                type="button"
+                className="landing__btn landing__btn--solid"
+                onClick={onRegisterOpen}
+              >
                 Crear Cuenta
-              </Link>
+              </button>
             </>
           )}
         </div>

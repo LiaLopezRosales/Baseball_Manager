@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, LogOut, LogIn, UserPlus } from 'lucide-react';
 import { API_URL } from '../api';
-import ParticleField from './ui/Particles';
 import './login.css';
 
 function LoginBoard({
@@ -13,7 +11,7 @@ function LoginBoard({
   NameOnChange,
   updateRole,
   updateTeam,
-  onCloseModal,
+  onSwitchToRegister,
 }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -62,8 +60,8 @@ function LoginBoard({
       updateTeam(team_id);
       updateRole(role_name);
       NameOnChange(email);
+      localStorage.setItem('isLogged', 'true');
       setLogin(true);
-      onButtonClick();
 
       if (role_name === 'Director Técnico') navigate('/dt/cambios');
       else navigate('/');
@@ -87,80 +85,90 @@ function LoginBoard({
   const togglePasswordVisibility = () => setShowPassword((s) => !s);
 
   return (
-    <div className="login-board">
-      <ParticleField className="login-board__particles" quantity={28} />
-
-      {!isLogged ? (
-        <div className="form-container">
-          <h2 className="login-title">Iniciar sesión</h2>
-          <p className="login-subtitle">Accede a tu cuenta de la plataforma</p>
-
-          <div className="form-group">
-            <label className="input-label">Email</label>
-            <div className="login-field">
-              <Mail size={18} className="login-input-icon" />
-              <input
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="login-input"
-                placeholder="usuario@ejemplo.com"
-                autoComplete="email"
-              />
+    <div className="auth-board">
+      <div className="auth-card">
+        {!isLogged ? (
+          <>
+            <div className="auth-overline">
+              <span className="auth-overline__dot" />
+              LNB Pro · Plataforma Oficial
             </div>
-          </div>
 
-          <div className="form-group">
-            <label className="input-label">Contraseña</label>
-            <div className="login-field login-field--password">
-              <Lock size={18} className="login-input-icon" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="login-input login-input--password"
-                placeholder="••••••••"
-                autoComplete="current-password"
-                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-              />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="toggle-password"
-                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            <h2 className="auth-title">Iniciar Sesión</h2>
+            <p className="auth-subtitle">
+              Accede con tu cuenta oficial para seguir a tus equipos favoritos, consultar estadísticas en vivo y recibir las noticias exclusivas de la liga.
+            </p>
+
+            <div className="auth-field">
+              <label className="auth-label">Correo Electrónico</label>
+              <div className="auth-input-wrap">
+                <span className="material-symbols-outlined auth-input-icon">mail</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="auth-input"
+                  placeholder="tu.correo@ejemplo.com"
+                  autoComplete="email"
+                />
+              </div>
             </div>
-          </div>
 
-          <button onClick={handleLogin} className="login-button">
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              <LogIn size={18} /> Iniciar sesión
-            </span>
-          </button>
+            <div className="auth-field">
+              <label className="auth-label">Contraseña</label>
+              <div className="auth-input-wrap">
+                <span className="material-symbols-outlined auth-input-icon">lock</span>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="auth-input auth-input--with-eye"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="auth-eye"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                </button>
+              </div>
+            </div>
 
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
-
-          <p className="login-register-link">
-            ¿No tienes cuenta?{' '}
-            <button className="register-link-btn" onClick={() => { if (onCloseModal) onCloseModal(); navigate('/registro'); }}>
-              <UserPlus size={14} /> Regístrate
+            <button onClick={handleLogin} className="auth-submit">
+              <span>Iniciar Sesión</span>
+              <span className="material-symbols-outlined">login</span>
             </button>
-          </p>
-        </div>
-      ) : (
-        <div className="form-container">
-          <p className="welcome-message">
-            Bienvenido, <strong>{roleName}</strong>
-          </p>
-          <button onClick={handleLogout} className="logout-button">
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              <LogOut size={18} /> Cerrar sesión
-            </span>
-          </button>
-        </div>
-      )}
+
+            {errorMessage && <p className="auth-error">{errorMessage}</p>}
+
+            <p className="auth-switch">
+              ¿No tienes cuenta?
+              <button className="auth-switch-btn" onClick={onSwitchToRegister}>
+                Crear cuenta <span className="material-symbols-outlined">person_add</span>
+              </button>
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="auth-overline">
+              <span className="auth-overline__dot" />
+              Sesión Activa
+            </div>
+
+            <p className="auth-welcome">
+              Bienvenido, <strong>{roleName}</strong>
+            </p>
+            <button onClick={handleLogout} className="auth-logout">
+              <span>Cerrar sesión</span>
+              <span className="material-symbols-outlined">logout</span>
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

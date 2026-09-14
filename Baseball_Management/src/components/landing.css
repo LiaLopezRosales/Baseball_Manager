@@ -1179,13 +1179,18 @@ html[data-theme='light'] .landing__callout-ico,
   min-height: 44px;
   padding: 10px 18px;
   border-radius: 10px;
+  border: 0;
   font-family: var(--lnd-font-display);
   font-size: 0.82rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   text-decoration: none;
+  cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+button.landing__callout-btn {
+  appearance: none;
 }
 .landing__callout-btn.ghost {
   background: rgba(255,255,255,0.08);
@@ -1301,7 +1306,20 @@ html[data-theme='light'] .landing__footer-badge--gold,
   text-decoration: none;
   transition: color 0.2s ease;
 }
-.landing__footer-col li a:hover { color: #f3efe3; }
+.landing__footer-col li button.landing__footer-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--lnd-font-body);
+  font-size: 0.82rem;
+  text-align: left;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.landing__footer-col li a:hover,
+.landing__footer-col li button.landing__footer-link:hover { color: #f3efe3; }
 
 .landing__footer-bottom {
   max-width: 1180px;
@@ -1506,11 +1524,16 @@ html[data-theme='light'] .landing__bento-bar-fill { background: var(--lnd-lights
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; min-height: 48px;
   padding: 12px 18px; border-radius: 10px;
+  border: 0;
   background: var(--lnd-clay); color: #fff;
   font-family: var(--lnd-font-display);
   font-size: 14px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.08em; text-decoration: none;
+  cursor: pointer;
   transition: filter 0.2s;
+}
+button.landing__bento-cta {
+  appearance: none;
 }
 html[data-theme='dark'] .landing__bento-cta:hover { filter: brightness(1.15); }
 html[data-theme='light'] .landing__bento-cta:hover { filter: brightness(0.92); }
