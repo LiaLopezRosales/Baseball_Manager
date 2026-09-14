@@ -642,6 +642,8 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
             </div>
             <div className="landing__standings-tabs">
               <button className="landing__tab landing__tab--active">General</button>
+              <button className="landing__tab" disabled>Div. Norte</button>
+              <button className="landing__tab" disabled>Div. Sur</button>
             </div>
           </div>
           <div className="landing__standings-grid">

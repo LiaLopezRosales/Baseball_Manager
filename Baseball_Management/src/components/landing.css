@@ -1382,11 +1382,11 @@ html[data-theme='light'] .landing__footer-badge--gold,
    S3 — RESUMEN EJECUTIVO (Bento 4 cards)
    ============================================================ */
 .landing__bento {
-  padding: 64px 0;
+  padding: 80px 0;
   border-bottom: 1px solid var(--lnd-hairline);
 }
-.landing__bento-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.landing__bento-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; gap: 12px; flex-wrap: wrap; }
+.landing__bento-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.landing__bento-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 36px; gap: 12px; flex-wrap: wrap; }
 .landing__bento-eyebrow {
   font-family: var(--lnd-font-display);
   font-size: 12px; font-weight: 700; text-transform: uppercase;
@@ -1401,13 +1401,13 @@ html[data-theme='light'] .landing__footer-badge--gold,
 .landing__bento-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 28px;
 }
 .landing__bento-card {
   background: var(--lnd-surface);
   border: 1px solid var(--lnd-hairline);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 18px;
+  padding: 28px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1423,60 +1423,60 @@ html[data-theme='light'] .landing__bento-card:hover,
 }
 .landing__bento-card-top {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .landing__bento-label {
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.1em; color: var(--lnd-dim);
 }
 .landing__bento-label--rose { color: #f43f5e; }
 html[data-theme='light'] .landing__bento-label--rose { color: #dc2626; }
 .landing__bento-big {
   font-family: var(--lnd-font-display);
-  font-size: 48px; font-weight: 700; line-height: 1;
+  font-size: 56px; font-weight: 700; line-height: 1;
   color: var(--lnd-text);
 }
 .landing__bento-big--amber { color: var(--lnd-lights); }
 .landing__bento-big-text {
   font-family: var(--lnd-font-display);
-  font-size: 24px; font-weight: 700; text-transform: uppercase;
+  font-size: 28px; font-weight: 700; text-transform: uppercase;
   line-height: 1.3; color: var(--lnd-text);
 }
 .landing__bento-sub {
-  font-size: 14px; color: var(--lnd-dim); margin-top: 6px;
+  font-size: 15px; color: var(--lnd-dim); margin-top: 8px;
 }
-.landing__bento-chips { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+.landing__bento-chips { margin-top: 22px; display: flex; flex-direction: column; gap: 10px; }
 .landing__bento-chip {
   background: var(--lnd-bg-2);
   border: 1px solid var(--lnd-hairline);
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 10px;
+  padding: 10px 14px;
   font-family: var(--lnd-font-num);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--lnd-text);
 }
 .landing__bento-chip-text { font-weight: 600; }
 .landing__bento-footer-row {
-  margin-top: 20px; padding-top: 16px;
+  margin-top: 24px; padding-top: 18px;
   border-top: 1px solid var(--lnd-hairline);
   display: flex; align-items: center; justify-content: space-between;
 }
 .landing__bento-footer-num {
   font-family: var(--lnd-font-display);
-  font-size: 24px; font-weight: 700; color: var(--lnd-text);
+  font-size: 28px; font-weight: 700; color: var(--lnd-text);
   display: block;
 }
 .landing__bento-footer-label {
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.1em; color: var(--lnd-dim);
 }
 .landing__bento-k-badge {
-  width: 48px; height: 48px; border-radius: 12px;
+  width: 56px; height: 56px; border-radius: 14px;
   background: rgba(248,175,60,0.1);
   border: 1px solid rgba(248,175,60,0.3);
   display: grid; place-items: center;
   font-family: var(--lnd-font-display);
-  font-size: 22px; font-weight: 700; color: var(--lnd-lights);
+  font-size: 24px; font-weight: 700; color: var(--lnd-lights);
 }
 html[data-theme='light'] .landing__bento-k-badge {
   background: rgba(2,132,199,0.1);
@@ -1485,7 +1485,7 @@ html[data-theme='light'] .landing__bento-k-badge {
 }
 .landing__bento-bar-wrap { width: 100%; }
 .landing__bento-bar {
-  width: 100%; height: 10px;
+  width: 100%; height: 12px;
   background: var(--lnd-bg-2);
   border: 1px solid var(--lnd-hairline);
   border-radius: 99px; overflow: hidden;
@@ -1497,16 +1497,16 @@ html[data-theme='light'] .landing__bento-k-badge {
 }
 html[data-theme='light'] .landing__bento-bar-fill { background: var(--lnd-lights); }
 .landing__bento-bar-label {
-  font-size: 11px; color: var(--lnd-dim); margin-top: 6px; display: block;
+  font-size: 12px; color: var(--lnd-dim); margin-top: 8px; display: block;
 }
-.landing__bento-cta-wrap { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--lnd-hairline); }
+.landing__bento-cta-wrap { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--lnd-hairline); }
 .landing__bento-cta {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; min-height: 44px;
-  padding: 10px 16px; border-radius: 8px;
+  width: 100%; min-height: 48px;
+  padding: 12px 18px; border-radius: 10px;
   background: var(--lnd-clay); color: #fff;
   font-family: var(--lnd-font-display);
-  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  font-size: 14px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.08em; text-decoration: none;
   transition: filter 0.2s;
 }
@@ -1551,6 +1551,13 @@ html[data-theme='light'] .landing__bento-cta:hover { filter: brightness(0.92); }
 }
 .landing__tab--active {
   background: var(--lnd-clay); color: #fff;
+}
+.landing__tab:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.landing__tab:disabled:hover {
+  background: transparent; color: var(--lnd-dim);
 }
 .landing__standings-grid {
   display: grid; grid-template-columns: 2fr 1fr; gap: 32px;
@@ -1601,11 +1608,15 @@ html[data-theme='light'] .landing__table tbody tr.landing__table-row--leader { b
 .landing__table-row--leader .landing__table-pos { color: var(--lnd-lights); }
 html[data-theme='light'] .landing__table-row--leader .landing__table-pos { color: #b45309; }
 .landing__table-team {
-  display: flex; align-items: center; gap: 10px;
   font-family: var(--lnd-font-display); font-weight: 700;
   font-size: 16px; text-transform: uppercase; color: var(--lnd-text);
+  white-space: nowrap;
 }
-.landing__table-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.landing__table-dot {
+  display: inline-block; vertical-align: middle;
+  width: 10px; height: 10px; border-radius: 50%;
+  margin-right: 10px; flex-shrink: 0;
+}
 .landing__table-bold { font-weight: 700; color: var(--lnd-text); }
 .landing__table-pct { font-weight: 700; color: var(--lnd-lights); }
 .landing__table-streak {
@@ -1736,22 +1747,26 @@ html[data-theme='light'] .landing__podium,
   width: 100%;
   padding: 24px;
   text-align: center;
-  border-radius: 16px;
+  border-radius: 16px 16px 0 0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .landing__podium-card:hover { transform: translateY(-4px); }
+.landing__podium-card--gold { padding: 28px; }
+.landing__podium-card--bronze { padding: 20px; }
 html[data-theme='dark'] .landing__podium-card--silver,
 html[data-theme='dark'] .landing__podium-card--bronze,
 .landing[data-theme='dark'] .landing__podium-card--silver,
 .landing[data-theme='dark'] .landing__podium-card--bronze {
   background: #0d1f35;
   border: 1px solid rgba(148,163,184,0.25);
+  border-bottom: none;
   box-shadow: 0 18px 40px -18px rgba(0,0,0,0.45);
 }
 html[data-theme='dark'] .landing__podium-card--gold,
 .landing[data-theme='dark'] .landing__podium-card--gold {
   background: linear-gradient(180deg, #132842, #1a2b3d);
   border: 2px solid rgba(248,175,60,0.5);
+  border-bottom: none;
   box-shadow: 0 24px 60px -20px rgba(248,175,60,0.25);
 }
 html[data-theme='light'] .landing__podium-card--silver,
@@ -1760,12 +1775,14 @@ html[data-theme='light'] .landing__podium-card--bronze,
 .landing[data-theme='light'] .landing__podium-card--bronze {
   background: #f8fafc;
   border: 1px solid #cbd5e1;
+  border-bottom: none;
   box-shadow: 0 8px 24px -12px rgba(15,23,42,0.12);
 }
 html[data-theme='light'] .landing__podium-card--gold,
 .landing[data-theme='light'] .landing__podium-card--gold {
   background: linear-gradient(180deg, rgba(255,251,235,0.4), #ffffff 50%, rgba(255,251,235,0.2));
   border: 2px solid #f59e0b;
+  border-bottom: none;
   box-shadow: 0 20px 48px -18px rgba(245,158,11,0.25);
 }
 
@@ -1805,6 +1822,9 @@ html[data-theme='light'] .landing__podium-rank-badge--gold,
 .landing__podium-card--gold .landing__podium-rank-badge {
   margin-top: -52px; width: 52px; height: 52px; border-radius: 14px; font-size: 24px;
 }
+.landing__podium-card--bronze .landing__podium-rank-badge {
+  margin-top: -40px; width: 36px; height: 36px; border-radius: 9px; font-size: 18px;
+}
 html[data-theme='light'] .landing__podium-card--gold .landing__podium-rank-badge,
 .landing[data-theme='light'] .landing__podium-card--gold .landing__podium-rank-badge {
   box-shadow: 0 0 0 2px rgba(251,191,36,0.4);
@@ -1836,6 +1856,12 @@ html[data-theme='light'] .landing__podium-avatar--bronze,
 .landing__podium-avatar--gold {
   width: 96px; height: 96px; font-size: 24px;
   margin: 20px auto 12px;
+}
+.landing__podium-avatar--silver {
+  width: 88px; height: 88px; font-size: 20px;
+}
+.landing__podium-avatar--bronze {
+  width: 72px; height: 72px; font-size: 18px;
 }
 html[data-theme='dark'] .landing__podium-avatar--gold,
 .landing[data-theme='dark'] .landing__podium-avatar--gold {
@@ -1874,6 +1900,8 @@ html[data-theme='light'] .landing__podium-leader-badge,
   margin: 0;
 }
 .landing__podium-name--gold { font-size: 24px; }
+.landing__podium-name--silver { font-size: 22px; }
+.landing__podium-name--bronze { font-size: 18px; }
 html[data-theme='dark'] .landing__podium-name,
 .landing[data-theme='dark'] .landing__podium-name { color: #fff; }
 html[data-theme='light'] .landing__podium-name,
@@ -1921,6 +1949,7 @@ html[data-theme='light'] .landing__podium-card--gold .landing__podium-hero-stat,
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.12em; display: block;
 }
+.landing__podium-card--bronze .landing__podium-hero-label { font-size: 10px; }
 html[data-theme='dark'] .landing__podium-hero-label,
 .landing[data-theme='dark'] .landing__podium-hero-label { color: #cbd5e1; }
 html[data-theme='dark'] .landing__podium-card--gold .landing__podium-hero-label,
@@ -1935,6 +1964,8 @@ html[data-theme='light'] .landing__podium-card--gold .landing__podium-hero-label
   display: block; margin-top: 4px;
 }
 .landing__podium-card--gold .landing__podium-hero-num { font-size: 48px; }
+.landing__podium-card--silver .landing__podium-hero-num { font-size: 40px; }
+.landing__podium-card--bronze .landing__podium-hero-num { font-size: 34px; }
 html[data-theme='dark'] .landing__podium-hero-num,
 .landing[data-theme='dark'] .landing__podium-hero-num { color: #e2e8f0; }
 html[data-theme='dark'] .landing__podium-card--gold .landing__podium-hero-num,
@@ -1988,6 +2019,7 @@ html[data-theme='dark'] .landing__podium-sub-stats span:last-child,
 html[data-theme='light'] .landing__podium-sub-stats span:last-child,
 .landing[data-theme='light'] .landing__podium-sub-stats span:last-child { color: #0f172a; }
 .landing__podium-sub-stats--gold span:last-child { font-size: 14px; }
+.landing__podium-sub-stats--silver span:last-child { font-size: 13px; }
 html[data-theme='dark'] .landing__podium-card--gold .landing__podium-sub-stats--gold .landing__podium-sub-ops,
 .landing[data-theme='dark'] .landing__podium-card--gold .landing__podium-sub-stats--gold .landing__podium-sub-ops,
 .landing__podium-sub-stats .landing__podium-sub-ops { color: #f8af3c; }
@@ -2003,19 +2035,22 @@ html[data-theme='light'] .landing__podium-sub-stats .landing__podium-sub-ops,
   font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.1em; text-align: center;
 }
-.landing__podium-step--silver { height: 48px; font-size: 14px; }
+.landing__podium-step--silver { height: 52px; font-size: 14px; }
 .landing__podium-step--gold { height: 64px; font-size: 16px; }
-.landing__podium-step--bronze { height: 40px; font-size: 14px; }
+.landing__podium-step--bronze { height: 44px; font-size: 13px; }
 html[data-theme='dark'] .landing__podium-step,
 .landing[data-theme='dark'] .landing__podium-step {
   background: #1a2b3d; border: 1px solid rgba(148,163,184,0.25); border-top: none;
   color: #cbd5e1;
 }
 html[data-theme='dark'] .landing__podium-step--gold,
-.landing[data-theme='dark'] .landing__podium-step--gold { color: #f8af3c; }
+.landing[data-theme='dark'] .landing__podium-step--gold {
+  border: 2px solid rgba(248,175,60,0.5); border-top: none;
+  color: #f8af3c;
+}
 html[data-theme='light'] .landing__podium-step--gold,
 .landing[data-theme='light'] .landing__podium-step--gold {
-  background: #fef3c7; border: 1px solid #fcd34d; border-top: none;
+  background: #fef3c7; border: 2px solid #f59e0b; border-top: none;
   color: #78350f;
 }
 html[data-theme='light'] .landing__podium-step--silver,
