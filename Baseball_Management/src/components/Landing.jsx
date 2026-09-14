@@ -140,6 +140,8 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
   const [positions, setPositions] = useState([]);
   const [bpParticipations, setBpParticipations] = useState([]);
   const [games, setGames] = useState([]);
+  const [teamOnFields, setTeamOnFields] = useState([]);
+  const [lineups, setLineups] = useState([]);
   const [playerInPositions, setPlayerInPositions] = useState([]);
   const [directionTeams, setDirectionTeams] = useState([]);
   const [technicalDirectors, setTechnicalDirectors] = useState([]);
@@ -169,6 +171,8 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
       apiGet('/bp-participations/'),
       apiGet('/games/'),
       apiGet('/players-in-position/'),
+      apiGet('/teams-on-field/'),
+      apiGet('/lineups/'),
     ])
       .then(
         ([
@@ -188,6 +192,8 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
           bpParticipationsData,
           gamesData,
           playerInPositionsData,
+          teamOnFieldsData,
+          lineupsData,
         ]) => {
           if (!active) return;
 
@@ -207,6 +213,8 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
           setBpParticipations(bpParticipationsData || []);
           setGames(gamesData || []);
           setPlayerInPositions(playerInPositionsData || []);
+          setTeamOnFields(teamOnFieldsData || []);
+          setLineups(lineupsData || []);
 
           const teamMap = {};
           (teamsData || []).forEach((t) => { teamMap[t.name] = t.id; });
@@ -252,6 +260,38 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
   const leader = standings[0] || null;
   const totalPlayed = scores.length;
   const lastSeasonName = lastSeasonNameFn(seasons);
+
+  /* Próximos juegos: sin score aún, fecha futura (o todos los pendientes),
+     resolviendo equipos vía teams-on-field → lineups → teams. */
+  const upcomingGames = useMemo(() => {
+    const totfById = {};
+    (teamOnFields || []).forEach((t) => { totfById[t.id] = t; });
+    const lineupById = {};
+    (lineups || []).forEach((l) => { lineupById[l.id] = l; });
+    const teamById = {};
+    (teams || []).forEach((t) => { teamById[t.id] = t; });
+
+    const resolve = (game) => {
+      const date = (game.date || '').slice(0, 10);
+      const resolveTeam = (totfId) => {
+        const totf = totfById[totfId];
+        if (!totf) return null;
+        const lineup = lineupById[totf.lineup_id];
+        if (!lineup) return null;
+        return teamById[lineup.team_id] || null;
+      };
+      return { ...game, date, localTeam: resolveTeam(game.local), rivalTeam: resolveTeam(game.rival) };
+    };
+
+    const pending = (games || []).filter((g) => g.score === null).map(resolve);
+    if (!pending.length) return [];
+    const today = new Date().toISOString().slice(0, 10);
+    const source = pending.some((g) => g.date >= today) ? pending.filter((g) => g.date >= today) : pending;
+    return source
+      .filter((g) => g.localTeam && g.rivalTeam)
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+      .slice(0, 5);
+  }, [games, teamOnFields, lineups, teams]);
 
   /* Cadena DT (resuelta una vez que todo esté cargado) */
   const resolveDT = useMemo(
@@ -746,6 +786,39 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
                 </span>
               </div>
             </div>
+            {/* Próximos juegos (solo escritorio ancho, min-width: 1600px) */}
+            {upcomingGames.length > 0 && (
+              <aside className="landing__recent">
+                <div className="landing__recent-head">
+                  <h3 className="landing__recent-title">Próximos Juegos</h3>
+                  <span className="landing__recent-badge">{upcomingGames.length}</span>
+                </div>
+                <div className="landing__recent-list">
+                  {upcomingGames.map((g) => {
+                    const [, mm, dd] = (g.date || '').split('-');
+                    return (
+                      <div key={g.id} className="landing__recent-item">
+                        <div className="landing__recent-mid">
+                          <span className="landing__recent-team">
+                            <span className="landing__recent-dot" style={{ background: g.localTeam.color || '#888' }} />
+                            {g.localTeam.name}
+                          </span>
+                          <span className="landing__recent-vs">vs</span>
+                          <span className="landing__recent-team">
+                            <span className="landing__recent-dot" style={{ background: g.rivalTeam.color || '#888' }} />
+                            {g.rivalTeam.name}
+                          </span>
+                        </div>
+                        <div className="landing__recent-date">
+                          <span>{dd}/{mm}</span>
+                          <span className="landing__recent-live">Por jugar</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </aside>
+            )}
           </div>
         </div>
       </section>

@@ -311,28 +311,31 @@ def populate_users_and_workers(team_numbers=6):
             'lastname': 'Garcia',
         }
     )
+    # Montar la cadena Worker -> DirectionTeam -> TechnicalDirector ANTES de
+    # insertar el usuario: la constraint a nivel BD exige TD_id no nulo para
+    # el rol "Director Técnico" en el propio INSERT.
+    first_team = teams[0] if teams else None
+    dt_td = None
+    if first_team:
+        dt_worker = Worker.objects.filter(P_id=dt_person).first()
+        if not dt_worker:
+            dt_worker = Worker.objects.create(P_id=dt_person, DT_id=None)
+        dt_dir_team = DirectionTeam.objects.filter(Team_id=first_team).first()
+        if not dt_dir_team:
+            dt_dir_team = DirectionTeam.objects.create(Team_id=first_team)
+        dt_td = TechnicalDirector.objects.filter(direction_team=dt_dir_team).first()
+        if not dt_td:
+            dt_td = TechnicalDirector.objects.create(direction_team=dt_dir_team, W_id=dt_worker)
+
     dt_user, created = User.objects.get_or_create(
         email='director@test.com',
         defaults={
             'password': 'director',
             'rol_id': roles['Director Técnico'],
-            'TD_id': None,
+            'TD_id': dt_td,
         }
     )
     if created:
-        first_team = teams[0] if teams else None
-        if first_team:
-            dt_worker = Worker.objects.filter(P_id=dt_person).first()
-            if not dt_worker:
-                dt_worker = Worker.objects.create(P_id=dt_person, DT_id=None)
-            dt_dir_team = DirectionTeam.objects.filter(Team_id=first_team).first()
-            if not dt_dir_team:
-                dt_dir_team = DirectionTeam.objects.create(Team_id=first_team)
-            dt_td = TechnicalDirector.objects.filter(direction_team=dt_dir_team).first()
-            if not dt_td:
-                dt_td = TechnicalDirector.objects.create(direction_team=dt_dir_team, W_id=dt_worker)
-            dt_user.TD_id = dt_td
-            dt_user.save()
         print("Director Técnico conocido creado: director@test.com / director")
     else:
         print("Director Técnico conocido ya existía: director@test.com")
@@ -407,8 +410,12 @@ def simulate_championship_with_participations(positions, team_player_mapping, se
     seasons = SeasonFactory.create_batch(season_numbers)
     series = []
 
+    # Anclar la temporada más reciente cerca de hoy: la última serie termina
+    # ~10 días antes del presente y sus juegos programados (sin score) caen en
+    # el futuro, alimentando el panel "Próximos Juegos" de la landing.
+    base_date = datetime.now(pytz.UTC) - timedelta(days=320)
     for i, season in enumerate(seasons):
-        start_date = datetime(2024, 1, 1) + timedelta(days=i * 80)  # Espaciado entre temporadas
+        start_date = base_date + timedelta(days=i * 80)  # Espaciado entre temporadas
         for j in range(2):  # 2 series por temporada
             series.append(
                 SeriesFactory(

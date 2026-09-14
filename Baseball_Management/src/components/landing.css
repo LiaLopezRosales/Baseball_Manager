@@ -12,6 +12,8 @@
   --lnd-font-display: 'Oswald', 'Inter', system-ui, sans-serif;
   --lnd-font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --lnd-font-num: 'JetBrains Mono', ui-monospace, "SF Mono", monospace;
+  /* Gutter fluido: sin bandas laterales vacías en ningún ancho de escritorio */
+  --lnd-gutter: clamp(1.25rem, 4vw, 3rem);
 
   display: flex;
   flex-direction: column;
@@ -78,9 +80,8 @@ html[data-theme='light'] .landing,
 }
 
 .landing__nav-inner {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 14px 24px;
+  width: 100%;
+  padding: 14px var(--lnd-gutter);
   display: flex;
   align-items: center;
   gap: 24px;
@@ -286,7 +287,7 @@ html[data-theme='light'] .landing__btn--solid {
 .landing__hero {
   position: relative;
   overflow: hidden;
-  padding: 96px 24px 72px;
+  padding: 96px 0 72px;
   background: var(--lnd-bg);
 }
 html[data-theme='light'] .landing__hero,
@@ -375,8 +376,8 @@ html[data-theme='light'] .landing__hero-scrim,
 /* inner grid: copy 7 / card 5 */
 .landing__hero-inner {
   position: relative;
-  max-width: 1180px;
-  margin: 0 auto;
+  width: 100%;
+  padding-inline: var(--lnd-gutter);
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: 48px;
@@ -933,8 +934,8 @@ html[data-theme='light'] .landing__palmares,
   background: #ffffff;
 }
 .landing__palmares-inner {
-  max-width: 1180px;
-  margin: 0 auto;
+  width: 100%;
+  padding-inline: var(--lnd-gutter);
   text-align: center;
 }
 .landing__palmares-head {
@@ -982,7 +983,7 @@ html[data-theme='light'] .landing__palmares-sub,
 
 .landing__palmares-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 20px;
   text-align: left;
 }
@@ -1224,8 +1225,8 @@ html[data-theme='light'] .landing__callout-btn.ghost,
   text-align: left;
 }
 .landing__footer-top {
-  max-width: 1180px;
-  margin: 0 auto;
+  width: 100%;
+  padding-inline: var(--lnd-gutter);
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 40px;
@@ -1386,7 +1387,7 @@ html[data-theme='light'] .landing__footer-badge--gold,
   padding: 80px 0;
   border-bottom: 1px solid var(--lnd-hairline);
 }
-.landing__bento-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.landing__bento-inner { width: 100%; padding: 0 var(--lnd-gutter); }
 .landing__bento-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 36px; gap: 12px; flex-wrap: wrap; }
 .landing__bento-eyebrow {
   font-family: var(--lnd-font-display);
@@ -1521,7 +1522,7 @@ html[data-theme='light'] .landing__bento-cta:hover { filter: brightness(0.92); }
   padding: 64px 0;
   border-bottom: 1px solid var(--lnd-hairline);
 }
-.landing__standings-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.landing__standings-inner { width: 100%; padding: 0 var(--lnd-gutter); }
 .landing__standings-head {
   display: flex; align-items: flex-end; justify-content: space-between;
   margin-bottom: 32px; gap: 16px; flex-wrap: wrap;
@@ -1563,6 +1564,58 @@ html[data-theme='light'] .landing__bento-cta:hover { filter: brightness(0.92); }
 .landing__standings-grid {
   display: grid; grid-template-columns: 2fr 1fr; gap: 32px;
 }
+
+/* Panel lateral "Próximos Juegos": solo en pantallas anchas (min-width) */
+.landing__recent {
+  display: none;
+}
+.landing__recent-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-bottom: 16px;
+}
+.landing__recent-title {
+  font-family: var(--lnd-font-display);
+  font-size: 15px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--lnd-text); margin: 0;
+}
+.landing__recent-badge {
+  font-family: var(--lnd-font-num);
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--lnd-dim); background: var(--lnd-surface);
+  border: 1px solid var(--lnd-hairline); border-radius: 999px;
+  padding: 4px 10px;
+}
+.landing__recent-list { display: flex; flex-direction: column; gap: 10px; }
+.landing__recent-item {
+  background: var(--lnd-surface);
+  border: 1px solid var(--lnd-hairline);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.landing__recent-mid {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 8px; margin-bottom: 6px;
+}
+.landing__recent-team {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--lnd-font-display);
+  font-size: 14px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--lnd-text); min-width: 0;
+}
+.landing__recent-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex: none;
+}
+.landing__recent-vs {
+  font-family: var(--lnd-font-body);
+  font-size: 11px; font-weight: 700; color: var(--lnd-dim);
+  text-transform: uppercase; letter-spacing: 0.08em; flex: none;
+}
+.landing__recent-date {
+  font-family: var(--lnd-font-num);
+  font-size: 12px; color: var(--lnd-dim);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.landing__recent-live { color: var(--lnd-lights); }
 
 /* Table */
 .landing__table-wrap {
@@ -1711,7 +1764,7 @@ html[data-theme='dark'] .landing__podium,
 .landing[data-theme='dark'] .landing__podium { background: #06101d; }
 html[data-theme='light'] .landing__podium,
 .landing[data-theme='light'] .landing__podium { background: #ffffff; }
-.landing__podium-inner { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+.landing__podium-inner { width: 100%; padding: 0 var(--lnd-gutter); }
 .landing__podium-head { text-align: center; max-width: 640px; margin: 0 auto 56px; }
 .landing__podium-eyebrow {
   font-family: var(--lnd-font-display);
@@ -1727,7 +1780,7 @@ html[data-theme='light'] .landing__podium,
 
 .landing__podium-grid {
   display: grid; grid-template-columns: 1fr 1fr 1fr;
-  gap: 32px; align-items: end; max-width: 1000px; margin: 0 auto;
+  gap: 32px; align-items: end;
 }
 
 /* Columna: card + base step apilados */
@@ -2117,7 +2170,7 @@ html[data-theme='light'] .landing__podium-cta .material-symbols-outlined,
   padding: 64px 0;
   border-bottom: 1px solid var(--lnd-hairline);
 }
-.landing__stars-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.landing__stars-inner { width: 100%; padding: 0 var(--lnd-gutter); }
 .landing__stars-head {
   display: flex; align-items: flex-end; justify-content: space-between;
   margin-bottom: 40px; gap: 16px; flex-wrap: wrap;
@@ -2134,7 +2187,7 @@ html[data-theme='light'] .landing__podium-cta .material-symbols-outlined,
 }
 .landing__stars-sub { font-size: 14px; color: var(--lnd-dim); max-width: 420px; }
 .landing__stars-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 24px;
 }
 .landing__star-card {
   background: var(--lnd-surface);
@@ -2223,8 +2276,14 @@ html[data-theme='light'] .landing__star-card:hover { border-color: rgba(0,0,0,0.
   .landing__stars-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
-  .landing__hero { padding: 56px 16px 48px; }
+  .landing__hero { padding: 56px 0 48px; }
   .landing__grid { grid-template-columns: 1fr; }
   .landing__hero-card-stats { grid-template-columns: repeat(3, 1fr); }
   .landing__hero-metrics { grid-template-columns: 1fr; gap: 16px; }
+}
+
+/* ── Escritorio ancho: la tanda añade su 3ª columna "Próximos Juegos" ─────── */
+@media (min-width: 1600px) {
+  .landing__standings-grid { grid-template-columns: 2fr 1fr 1fr; }
+  .landing__recent { display: flex; flex-direction: column; }
 }
