@@ -102,6 +102,10 @@ Tests use `unittest` with `MagicMock` (no DB required). Located in `db_structure
 - La auto-generación de notificaciones vive en `db_structure/signals.py` (signal `post_save` en `Score` → notificaciones para seguidores de ambos equipos). El app config `DbStructureConfig.ready()` la registra (`db_structure/apps.py`, `INSTALLED_APPS` usa `'db_structure.apps.DbStructureConfig'`). Los tests de signal están en `db_structure/tests/test_signals.py` (MagicMock, sin DB).
 - Report queries expect specific parameter shapes (e.g., `report_id` as int, season/series names as strings).
 - Frontend routing uses React Router with real URL paths (`/admin/:slug`, `/reporte/:slug`, `/consultas/:tabla`, `/equipo/:id`, `/jugador/:id`, `/comparar`). Route definitions are in `src/routes.js` (slug→option maps), path helpers in `src/path.js`, route wrappers in `src/viewRoutes.jsx`.
+- **Campos nuevos en landing (migración 0004)**: `BaseballPlayer` suma `home_runs`, `rbi`, `obp`, `slg`, `war`; `Pitcher` suma `strikeouts`, `innings_pitched`, `saves`, `whip`; `PlayerInPosition` suma `fielding_pct`, `double_plays`, `bases_stolen`, `assists_of`. Los serializers usan `fields='__all__'` y los incluyen automáticamente. `populate_db.py` los popula; si la BD ya estaba sembrada, hay que **backfill manual** (los nuevos campos quedan a 0).
+- **FKs de landing en frontend**: `PlayerInPosition.BP_id` == `BaseballPlayer.id`, `BPParticipation.BP_id` == `BaseballPlayer.P_id` (por la persona, `to_field='P_id'`), y `Pitcher.P_id` == `BaseballPlayer.P_id`. `BaseballPlayer.pitcher` suele ser `None` aunque exista el registro en `Pitcher` → unir pitcheo por `P_id` de la persona, no por el campo FK.
+- **Formato decimal en frontend**: se usa `.toFixed(3).replace(/^0/, '')` para `.313` (NO `.replace(/^0/, '.')` que duplicaría el punto: `0.979` → `..979`).
+- `docs/planning/PLAN_SECCIONES_LANDING.md` documenta las 4 secciones nuevas de la landing (bento, tabla, podio, estrellas) y su pipeline de datos.
 
 ## Frontend: cómo centrar iconos dentro de inputs (login, etc.)
 

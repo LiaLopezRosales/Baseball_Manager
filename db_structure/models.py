@@ -148,14 +148,19 @@ class BaseballPlayer(models.Model):
         null=False,
         related_name='baseball_player'                                   
     )
-    batting_average = models.FloatField()                  
-    years_of_experience = models.IntegerField()            
-    pitcher = models.OneToOneField(                        
-        'Pitcher',                                        
+    batting_average = models.FloatField()
+    years_of_experience = models.IntegerField()
+    home_runs = models.PositiveIntegerField(default=0)
+    rbi = models.PositiveIntegerField(default=0)
+    obp = models.FloatField(default=0)
+    slg = models.FloatField(default=0)
+    war = models.FloatField(default=0)
+    pitcher = models.OneToOneField(
+        'Pitcher',
         on_delete=models.SET_NULL,
-        null=True,                                         
+        null=True,
         blank=True,
-        related_name='baseball_pitcher'                                       
+        related_name='baseball_pitcher'
     )
 
     def __str__(self):
@@ -217,9 +222,13 @@ class Pitcher(models.Model):
             ('ambas','Ambas')
         ]
     )
-    No_games_won = models.PositiveIntegerField()                   
-    No_games_lost = models.PositiveIntegerField()                  
-    running_average = models.PositiveIntegerField()               
+    No_games_won = models.PositiveIntegerField()
+    No_games_lost = models.PositiveIntegerField()
+    running_average = models.PositiveIntegerField()
+    strikeouts = models.PositiveIntegerField(default=0)
+    innings_pitched = models.FloatField(default=0)
+    saves = models.PositiveIntegerField(default=0)
+    whip = models.FloatField(default=0)               
 
     def __str__(self):
         return f"Lanzador {self.id} (Mano Dominante: {self.dominant_hand})"
@@ -341,7 +350,11 @@ class PlayerInPosition(models.Model):
         null=False, 
         related_name='playerinposition_position'
     )
-    effectiveness = models.FloatField()                    
+    effectiveness = models.FloatField()
+    fielding_pct = models.FloatField(default=0)
+    double_plays = models.PositiveIntegerField(default=0)
+    bases_stolen = models.PositiveIntegerField(default=0)
+    assists_of = models.PositiveIntegerField(default=0)
 
     class Meta:
         constraints = [

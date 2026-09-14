@@ -19,6 +19,7 @@ function buildStandingsFromScores(scores, teams) {
       id: t.id,
       name: t.name,
       initials: t.initials,
+      color: t.color,
       w: 0,
       l: 0,
       pf: 0,
@@ -135,6 +136,11 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
   const [scores, setScores] = useState([]);
   const [seasons, setSeasons] = useState([]);
   const [players, setPlayers] = useState([]);
+  const [pitchers, setPitchers] = useState([]);
+  const [positions, setPositions] = useState([]);
+  const [bpParticipations, setBpParticipations] = useState([]);
+  const [games, setGames] = useState([]);
+  const [playerInPositions, setPlayerInPositions] = useState([]);
   const [directionTeams, setDirectionTeams] = useState([]);
   const [technicalDirectors, setTechnicalDirectors] = useState([]);
   const [workers, setWorkers] = useState([]);
@@ -158,6 +164,11 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
       apiGet('/direction-teams/'),
       apiGet('/technical-directors/'),
       apiGet('/workers/'),
+      apiGet('/pitchers/'),
+      apiGet('/positions/'),
+      apiGet('/bp-participations/'),
+      apiGet('/games/'),
+      apiGet('/players-in-position/'),
     ])
       .then(
         ([
@@ -172,6 +183,11 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
           directionTeamsData,
           technicalDirectorsData,
           workersData,
+          pitchersData,
+          positionsData,
+          bpParticipationsData,
+          gamesData,
+          playerInPositionsData,
         ]) => {
           if (!active) return;
 
@@ -186,6 +202,11 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
           setTechnicalDirectors(technicalDirectorsData || []);
           setWorkers(workersData || []);
           setPersons(personsData || []);
+          setPitchers(pitchersData || []);
+          setPositions(positionsData || []);
+          setBpParticipations(bpParticipationsData || []);
+          setGames(gamesData || []);
+          setPlayerInPositions(playerInPositionsData || []);
 
           const teamMap = {};
           (teamsData || []).forEach((t) => { teamMap[t.name] = t.id; });
@@ -210,12 +231,22 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
   /* ─── Datos derivados (useMemo) ─────────────────────────────────────────── */
 
   const standings = useMemo(() => {
-    const byName = {};
-    buildStandingsFromScores(scores, teams).forEach((r) => { byName[r.name] = r; });
-    return (standingsReport || []).map((row) => ({
-      ...row,
-      ...(byName[row.Equipo] || {}),
+    const reportByName = {};
+    (standingsReport || []).forEach((row) => { reportByName[row.Equipo] = row; });
+    const list = buildStandingsFromScores(scores, teams).map((r) => ({
+      ...r,
+      ...(reportByName[r.name] || {}),
     }));
+    const leaderRow = list[0];
+    const leaderW = leaderRow?.w || 0;
+    const leaderL = leaderRow?.l || 0;
+    return list.map((r) => {
+      const gb = (leaderW - r.w + r.l - leaderL) / 2;
+      return {
+        ...r,
+        gamesBack: leaderRow && leaderRow.id !== r.id ? gb.toFixed(1).replace(/\.0$/, '') : '-',
+      };
+    });
   }, [standingsReport, scores, teams]);
 
   const leader = standings[0] || null;
@@ -274,6 +305,141 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
     });
   }, [champions]);
 
+  /* ─── S3: Resumen Ejecutivo ─────────────────────────────────────────────── */
+  const bentoData = useMemo(() => {
+    const totalGames = games.length || 1;
+    const gamesPlayed = scores.length;
+    const calendarPct = Math.round((gamesPlayed / totalGames) * 100);
+    const lastTwoScores = [...scores].sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 2);
+    const pitchersList = pitchers || [];
+    const totalK = pitchersList.reduce((sum, p) => sum + (Number(p.strikeouts) || 0), 0);
+    const avgEra = pitchersList.length
+      ? pitchersList.reduce((sum, p) => sum + (Number(p.running_average) || 0), 0) / pitchersList.length
+      : 0;
+    return {
+      gamesPlayed,
+      calendarPct: Math.min(calendarPct, 100),
+      lastTwoScores,
+      totalK,
+      avgEra: avgEra.toFixed(2),
+      teamCount: teams.length,
+      pitcherCount: pitchersList.length,
+    };
+  }, [games, scores, pitchers, teams]);
+
+  /* ─── S5: Podio de Bateo — enriquecer top 3 del reporte 5 ───────────────── */
+  const podiumData = useMemo(() => {
+    if (!batters.length) return [];
+    const top3 = batters.slice(0, 3);
+    const personsById = {};
+    (persons || []).forEach((p) => { personsById[p.id] = p; });
+    const bpById = {};
+    (players || []).forEach((bp) => { bpById[bp.id] = bp; });
+    const bpByPersonId = {};
+    (players || []).forEach((bp) => { bpByPersonId[bp.P_id] = bp; });
+    const pipByBpId = {};
+    (playerInPositions || []).forEach((pip) => { pipByBpId[pip.BP_id] = pip; });
+    const partByPersonId = {};
+    (bpParticipations || []).forEach((part) => { partByPersonId[part.BP_id] = part; });
+
+    return top3.map((b) => {
+      const person = (persons || []).find(
+        (p) => `${p.name} ${p.lastname}`.trim() === `${b.Nombre} ${b.Apellido}`.trim()
+      );
+      const bp = person ? bpByPersonId[person.id] : null;
+      const pip = bp ? pipByBpId[bp.id] : null;
+      const part = bp ? partByPersonId[bp.P_id] : null;
+      const pos = pip ? (positions || []).find((pos) => pos.id === pip.position) : null;
+      const team = part ? (teams || []).find((t) => t.id === part.team_id) : null;
+      return {
+        name: `${b.Nombre} ${b.Apellido}`.trim(),
+        avg: Number(b['Promedio de Bateo'] || b.Average || 0),
+        hr: bp ? bp.home_runs : 0,
+        rbi: bp ? bp.rbi : 0,
+        obp: bp ? bp.obp : 0,
+        slg: bp ? bp.slg : 0,
+        teamName: team ? team.name : '',
+        position: pos ? pos.name : '',
+      };
+    });
+  }, [batters, persons, players, playerInPositions, bpParticipations, positions, teams]);
+
+  /* ─── S6: Estrellas por Posición ────────────────────────────────────────── */
+  const starsData = useMemo(() => {
+    if (!playerInPositions.length) return [];
+    const personsById = {};
+    (persons || []).forEach((p) => { personsById[p.id] = p; });
+    const bpById = {};
+    (players || []).forEach((bp) => { bpById[bp.id] = bp; });
+    const bpByPersonId = {};
+    (players || []).forEach((bp) => { bpByPersonId[bp.P_id] = bp; });
+    const partByPersonId = {};
+    (bpParticipations || []).forEach((part) => { partByPersonId[part.BP_id] = part; });
+    const pitcherByPersonId = {};
+    (pitchers || []).forEach((p) => { pitcherByPersonId[p.P_id] = p; });
+
+    const posGroups = {};
+    (playerInPositions || []).forEach((pip) => {
+      const posObj = (positions || []).find((p) => p.id === pip.position);
+      const posName = posObj ? posObj.name : String(pip.position);
+      if (!posGroups[posName]) posGroups[posName] = [];
+      posGroups[posName].push(pip);
+    });
+
+    const positionOrder = ['Pitcher', 'Catcher', 'First Base', 'Second Base', 'Third Base', 'Shortstop', 'Left Field', 'Center Field', 'Right Field'];
+    const starCards = [];
+    const ofPositions = ['Left Field', 'Center Field', 'Right Field'];
+
+    const resolveCard = (pip) => {
+      const bp = bpById[pip.BP_id];
+      const person = bp ? personsById[bp.P_id] : null;
+      const part = bp ? partByPersonId[bp.P_id] : null;
+      const team = part ? (teams || []).find((t) => t.id === part.team_id) : null;
+      return {
+        fullName: person ? `${person.name} ${person.lastname}` : '?',
+        team: team ? team.name : '?',
+        war: bp ? bp.war : 0,
+        effectiveness: pip.effectiveness,
+        bp,
+        pitcher: bp ? pitcherByPersonId[bp.P_id] : null,
+      };
+    };
+
+    for (const posName of positionOrder) {
+      if (posName === 'Pitcher') {
+        const sps = [...(posGroups['Pitcher'] || [])].sort(
+          (a, b) => (Number(b.effectiveness) || 0) - (Number(a.effectiveness) || 0)
+        );
+        const rps = [...(posGroups['Pitcher'] || [])]
+          .sort((a, b) => (Number(b.effectiveness) || 0) - (Number(a.effectiveness) || 0));
+        (sps[0]) && starCards.push({ label: 'SP', ...resolveCard(sps[0]) });
+        (rps[1]) && starCards.push({ label: 'RP', ...resolveCard(rps[1]) });
+        continue;
+      }
+      if (posName === 'Left Field') {
+        const ofPips = [...ofPositions.flatMap((op) => posGroups[op] || [])].sort(
+          (a, b) => (Number(b.effectiveness) || 0) - (Number(a.effectiveness) || 0)
+        );
+        if (ofPips[0]) starCards.push({ label: 'OF', ...resolveCard(ofPips[0]) });
+        continue;
+      }
+      if (ofPositions.includes(posName)) continue;
+      const group = posGroups[posName] || [];
+      if (!group.length) continue;
+      group.sort((a, b) => (Number(b.effectiveness) || 0) - (Number(a.effectiveness) || 0));
+      const shortLabel = {
+        Catcher: 'C',
+        'First Base': '1B',
+        'Second Base': '2B',
+        'Third Base': '3B',
+        Shortstop: 'SS',
+      }[posName] || posName;
+      starCards.push({ label: shortLabel, ...resolveCard(group[0]) });
+    }
+
+    return starCards;
+  }, [playerInPositions, positions, persons, players, bpParticipations, teams, pitchers]);
+
   /* ─── Error state ────────────────────────────────────────────────────────── */
 
   if (error) {
@@ -321,6 +487,293 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
         metrics={heroMetrics}
         theme={theme}
       />
+
+      {/* S3: RESUMEN EJECUTIVO DE CIRCUITO */}
+      <section className="landing__bento">
+        <div className="landing__bento-inner">
+          <div className="landing__bento-head">
+            <div>
+              <span className="landing__bento-eyebrow">Centro de Telemetría WBSC</span>
+              <h2 className="landing__bento-title">Resumen Ejecutivo de Circuito</h2>
+            </div>
+          </div>
+          <div className="landing__bento-grid">
+            {/* Calendario */}
+            <div className="landing__bento-card">
+              <div className="landing__bento-card-top">
+                <span className="landing__bento-label">Calendario Oficial</span>
+              </div>
+              <div className="landing__bento-big">{bentoData.gamesPlayed}</div>
+              <p className="landing__bento-sub">Juegos oficiales disputados</p>
+              {bentoData.lastTwoScores.length > 0 && (
+                <div className="landing__bento-chips">
+                  {bentoData.lastTwoScores.map((sc, i) => {
+                    const wTeam = teams.find((t) => t.id === sc.winner);
+                    const lTeam = teams.find((t) => t.id === sc.loser);
+                    return (
+                      <div key={i} className="landing__bento-chip">
+                        <span className="landing__bento-chip-text">
+                          {wTeam?.initials || '—'} {sc.w_points} - {sc.l_points} {lTeam?.initials || '—'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            {/* Pitcheo */}
+            <div className="landing__bento-card">
+              <div className="landing__bento-card-top">
+                <span className="landing__bento-label">Pitcheo Colectivo</span>
+              </div>
+              <div className="landing__bento-big landing__bento-big--amber">{bentoData.avgEra}</div>
+              <p className="landing__bento-sub">Efectividad ERA promedio de liga</p>
+              <div className="landing__bento-footer-row">
+                <div>
+                  <span className="landing__bento-footer-num">{bentoData.totalK.toLocaleString()}</span>
+                  <span className="landing__bento-footer-label">Ponches Registrados</span>
+                </div>
+                <div className="landing__bento-k-badge">K</div>
+              </div>
+            </div>
+            {/* Formato */}
+            <div className="landing__bento-card">
+              <div className="landing__bento-card-top">
+                <span className="landing__bento-label">Formato de Liga</span>
+              </div>
+              <div className="landing__bento-big">{bentoData.teamCount}</div>
+              <p className="landing__bento-sub">Franquicias en competencia</p>
+              <div className="landing__bento-footer-row">
+                <div className="landing__bento-bar-wrap">
+                  <div className="landing__bento-bar">
+                    <div
+                      className="landing__bento-bar-fill"
+                      style={{ width: `${bentoData.calendarPct}%` }}
+                    />
+                  </div>
+                  <span className="landing__bento-bar-label">{bentoData.calendarPct}% del calendario cumplido</span>
+                </div>
+              </div>
+            </div>
+            {/* Comunidad */}
+            <div className="landing__bento-card landing__bento-card--accent">
+              <div className="landing__bento-card-top">
+                <span className="landing__bento-label landing__bento-label--rose">Comunidad Fan Plus</span>
+              </div>
+              <div className="landing__bento-big-text">Sigue a tu Franquicia</div>
+              <p className="landing__bento-sub">Recibe boxscores oficiales, outs decisivos y jonrones vía alerta Push instantánea.</p>
+              <div className="landing__bento-cta-wrap">
+                <Link to="/registro" className="landing__bento-cta">
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>send</span>
+                  Activar Alertas
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* S4: TABLA DE POSICIONES + DIFERENCIAL NETO */}
+      <section className="landing__standings">
+        <div className="landing__standings-inner">
+          <div className="landing__standings-head">
+            <div>
+              <span className="landing__standings-eyebrow">{lastSeasonName}</span>
+              <h2 className="landing__standings-title">Tabla Oficial de Posiciones</h2>
+            </div>
+            <div className="landing__standings-tabs">
+              <button className="landing__tab landing__tab--active">General</button>
+            </div>
+          </div>
+          <div className="landing__standings-grid">
+            {/* Tabla */}
+            <div className="landing__table-wrap">
+              <div className="landing__table-scroll">
+                <table className="landing__table">
+                  <thead>
+                    <tr>
+                      <th>POS</th>
+                      <th>EQUIPO</th>
+                      <th>JJ</th>
+                      <th>JG</th>
+                      <th>JP</th>
+                      <th>PCT</th>
+                      <th>DIF</th>
+                      <th>U10</th>
+                      <th>RACHA</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {standings.map((row, i) => (
+                      <tr key={row.id || i}>
+                        <td className="landing__table-pos">{String(i + 1).padStart(2, '0')}</td>
+                        <td className="landing__table-team">
+                          <span className="landing__table-dot" style={{ background: row.color || '#888' }} />
+                          {row.name}
+                        </td>
+                        <td>{(row.w || 0) + (row.l || 0)}</td>
+                        <td className="landing__table-bold">{row.w || 0}</td>
+                        <td>{row.l || 0}</td>
+                        <td className="landing__table-pct">{row.pctStr || '0'}</td>
+                        <td>{row.gamesBack ?? row.dif ?? '-'}</td>
+                        <td>{row.last10 || '—'}</td>
+                        <td>
+                          <span className={`landing__table-streak ${(streakFor(row.id, scores) || '').startsWith('W') ? 'landing__table-streak--w' : 'landing__table-streak--l'}`}>
+                            {streakFor(row.id, scores) || '—'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="landing__table-footer">
+                <span>LOS 4 PRIMEROS CLASIFICAN DIRECTO AL ROUND ROBIN SEMIFINAL</span>
+              </div>
+            </div>
+            {/* Diferencial */}
+            <div className="landing__diff">
+              <div className="landing__diff-head">
+                <h3 className="landing__diff-title">Diferencial Neto (+/-)</h3>
+                <span className="landing__diff-badge">CA - CP</span>
+              </div>
+              <p className="landing__diff-sub">Balance acumulado entre carreras anotadas y carreras permitidas.</p>
+              <div className="landing__diff-bars">
+                {standings.map((row, i) => {
+                  const difVal = Number(row.dif) || 0;
+                  const maxAbs = Math.max(...standings.map((s) => Math.abs(Number(s.dif) || 1)), 1);
+                  const pct = Math.min((Math.abs(difVal) / maxAbs) * 100, 100);
+                  const isPos = difVal >= 0;
+                  return (
+                    <div key={i} className="landing__diff-bar-row">
+                      <div className="landing__diff-bar-head">
+                        <span className="landing__diff-bar-name">{row.name}</span>
+                        <span className={`landing__diff-bar-val ${isPos ? 'landing__diff-bar-val--pos' : 'landing__diff-bar-val--neg'}`}>
+                          {isPos ? '+' : ''}{difVal}
+                        </span>
+                      </div>
+                      <div className={`landing__diff-bar ${!isPos ? 'landing__diff-bar--neg' : ''}`}>
+                        <div
+                          className={`landing__diff-bar-fill ${isPos ? 'landing__diff-bar-fill--pos' : 'landing__diff-bar-fill--neg'}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="landing__diff-legend">
+                <span className="landing__diff-legend-item">
+                  <span className="landing__diff-legend-dot landing__diff-legend-dot--pos" /> Superávit
+                </span>
+                <span className="landing__diff-legend-item">
+                  <span className="landing__diff-legend-dot landing__diff-legend-dot--neg" /> Déficit
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* S5: PODIO DE LÍDERES DE BATEO */}
+      {podiumData.length > 0 && (
+        <section className="landing__podium">
+          <div className="landing__podium-inner">
+            <div className="landing__podium-head">
+              <span className="landing__podium-eyebrow">Premio Bate de Plata WBSC</span>
+              <h2 className="landing__podium-title">Líderes de Bateo de la Liga</h2>
+              <p className="landing__podium-sub">Top 3 por promedio oficial ofensivo (mínimo reglamentario: 3.1 apariciones al plato por juego).</p>
+            </div>
+            <div className="landing__podium-grid">
+              {podiumData.map((player, i) => {
+                const order = i === 0 ? 2 : i === 1 ? 1 : 3;
+                const medalLabel = i === 0 ? 'LÍDER ABSOLUTO' : i === 1 ? 'PLATA' : 'BRONCE';
+                const medalColor = i === 0 ? 'gold' : i === 1 ? 'silver' : 'bronze';
+                return (
+                  <div key={i} className={`landing__podium-card landing__podium-card--${medalColor}`} style={{ order }}>
+                    <div className="landing__podium-rank-badge">{i + 1}</div>
+                    <div className="landing__podium-info">
+                      <h3 className="landing__podium-name">{player.name}</h3>
+                      <span className="landing__podium-meta">{player.teamName} • {player.position}</span>
+                    </div>
+                    <div className="landing__podium-hero-stat">
+                      <span className="landing__podium-hero-label">PROMEDIO</span>
+                      <span className="landing__podium-hero-num">{player.avg.toFixed(3).replace(/^0/, '')}</span>
+                    </div>
+                    <div className="landing__podium-sub-stats">
+                      <div><span className="landing__podium-sub-label">HR</span><span>{player.hr}</span></div>
+                      <div><span className="landing__podium-sub-label">RBI</span><span>{player.rbi}</span></div>
+                      <div><span className="landing__podium-sub-label">OBP</span><span>{player.obp.toFixed(3).replace(/^0/, '')}</span></div>
+                      <div><span className="landing__podium-sub-label">SLG</span><span>{player.slg.toFixed(3).replace(/^0/, '')}</span></div>
+                    </div>
+                    <div className="landing__podium-step">{medalLabel}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* S6: JUGADORES ESTRELLA POR POSICIÓN */}
+      {starsData.length > 0 && (
+        <section className="landing__stars">
+          <div className="landing__stars-inner">
+            <div className="landing__stars-head">
+              <div>
+                <span className="landing__stars-eyebrow">Cuadro de Honor WBSC</span>
+                <h2 className="landing__stars-title">Jugadores Estrella por Posición</h2>
+              </div>
+              <p className="landing__stars-sub">
+                Evaluados mediante métricas avanzadas WAR (Wins Above Replacement), efectividad de fildeo y DRS defensivo.
+              </p>
+            </div>
+            <div className="landing__stars-grid">
+              {starsData.map((star, i) => (
+                <div key={i} className="landing__star-card">
+                  <div className="landing__star-card-top">
+                    <span className="landing__star-position">{star.label}</span>
+                    <span className="landing__star-war">+{Number(star.war).toFixed(1)} WAR</span>
+                  </div>
+                  <h4 className="landing__star-name">{star.fullName}</h4>
+                  <p className="landing__star-team">{star.team}</p>
+                  <div className="landing__star-stats">
+                    {star.pitcher ? (
+                      <>
+                        <div className="landing__star-stat">
+                          <span className="landing__star-stat-label">Récord / ERA:</span>
+                          <span className="landing__star-stat-val landing__star-stat-val--amber">{star.pitcher.No_games_won}-{star.pitcher.No_games_lost} • {Number(star.pitcher.running_average).toFixed(2)} ERA</span>
+                        </div>
+                        <div className="landing__star-stat">
+                          <span className="landing__star-stat-label">Ponches (K):</span>
+                          <span className="landing__star-stat-val">{star.pitcher.strikeouts || 0} K ({star.pitcher.innings_pitched || 0} IP)</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {star.bp && (
+                          <>
+                            <div className="landing__star-stat">
+                              <span className="landing__star-stat-label">AVG / OPS:</span>
+                              <span className="landing__star-stat-val landing__star-stat-val--amber">
+                                {Number(star.bp.batting_average).toFixed(3).replace(/^0/, '')} / {(Number(star.bp.obp) + Number(star.bp.slg)).toFixed(3).replace(/^0/, '')}
+                              </span>
+                            </div>
+                            <div className="landing__star-stat">
+                              <span className="landing__star-stat-label">HR / RBI:</span>
+                              <span className="landing__star-stat-val">{star.bp.home_runs} / {star.bp.rbi}</span>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* PALMARÉS + CALLOUT — fiel al mockup dark/light */}
       {palmares.length > 0 && (

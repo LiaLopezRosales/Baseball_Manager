@@ -504,6 +504,7 @@ migrations/
 .playwright-mcp/
 
 # capturas QA del landing (no forman parte del código)
+qa-landing-*.png
 landing-dark-full.png
 landing-light-full.png
 landing-hero-*-new.png

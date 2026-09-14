@@ -103,6 +103,11 @@ class BaseballPlayerFactory(DjangoModelFactory):
     P_id = factory.SubFactory(PersonFactory)  # Assume PersonFactory exists
     batting_average = factory.Faker('pyfloat', positive=True, max_value=1, right_digits=3)
     years_of_experience = factory.Faker('random_int', min=1, max=20)
+    home_runs = factory.Faker('random_int', min=0, max=40)
+    rbi = factory.Faker('random_int', min=0, max=120)
+    obp = factory.Faker('pyfloat', positive=True, min_value=0.200, max_value=0.500, right_digits=3)
+    slg = factory.Faker('pyfloat', positive=True, min_value=0.250, max_value=0.700, right_digits=3)
+    war = factory.Faker('pyfloat', min_value=-1.0, max_value=8.0, right_digits=1)
     pitcher = None  # Can be set explicitly
 
 # Season Factory
@@ -133,6 +138,10 @@ class PitcherFactory(DjangoModelFactory):
     No_games_won = factory.Faker('random_int', min=0, max=20)
     No_games_lost = factory.Faker('random_int', min=0, max=20)
     running_average = factory.Faker('pyfloat', positive=True, max_value=5, right_digits=2)
+    strikeouts = factory.Faker('random_int', min=20, max=200)
+    innings_pitched = factory.Faker('pyfloat', positive=True, min_value=30, max_value=200, right_digits=1)
+    saves = factory.Faker('random_int', min=0, max=35)
+    whip = factory.Faker('pyfloat', positive=True, min_value=0.80, max_value=2.00, right_digits=2)
 
 # BPParticipation Factory
 class BPParticipationFactory(DjangoModelFactory):
@@ -178,9 +187,13 @@ class PlayerInPositionFactory(DjangoModelFactory):
     class Meta:
         model = PlayerInPosition
 
-    BP_id = factory.SubFactory(BaseballPlayerFactory)  
-    position = factory.SubFactory(PositionFactory)  
+    BP_id = factory.SubFactory(BaseballPlayerFactory)
+    position = factory.SubFactory(PositionFactory)
     effectiveness = factory.Faker('pyfloat', positive=True, max_value=1, right_digits=3)
+    fielding_pct = factory.Faker('pyfloat', positive=True, min_value=0.900, max_value=1.000, right_digits=3)
+    double_plays = factory.Faker('random_int', min=0, max=150)
+    bases_stolen = factory.Faker('random_int', min=0, max=40)
+    assists_of = factory.Faker('random_int', min=0, max=300)
 
 # Score Factory
 class ScoreFactory(DjangoModelFactory):
