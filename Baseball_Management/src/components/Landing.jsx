@@ -351,13 +351,19 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
       const part = bp ? partByPersonId[bp.P_id] : null;
       const pos = pip ? (positions || []).find((pos) => pos.id === pip.position) : null;
       const team = part ? (teams || []).find((t) => t.id === part.team_id) : null;
+      const fullName = `${b.Nombre} ${b.Apellido}`.trim();
+      const initials = fullName.split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+      const obp = bp ? Number(bp.obp) || 0 : 0;
+      const slg = bp ? Number(bp.slg) || 0 : 0;
       return {
-        name: `${b.Nombre} ${b.Apellido}`.trim(),
+        name: fullName,
+        initials: initials || '—',
         avg: Number(b['Promedio de Bateo'] || b.Average || 0),
         hr: bp ? bp.home_runs : 0,
         rbi: bp ? bp.rbi : 0,
-        obp: bp ? bp.obp : 0,
-        slg: bp ? bp.slg : 0,
+        obp,
+        slg,
+        ops: obp + slg,
         teamName: team ? team.name : '',
         position: pos ? pos.name : '',
       };
@@ -401,6 +407,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
         war: bp ? bp.war : 0,
         effectiveness: pip.effectiveness,
         bp,
+        pip,
         pitcher: bp ? pitcherByPersonId[bp.P_id] : null,
       };
     };
@@ -439,6 +446,58 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
 
     return starCards;
   }, [playerInPositions, positions, persons, players, bpParticipations, teams, pitchers]);
+
+  const starStatRows = (star) => {
+    const p = star.pitcher;
+    const b = star.bp;
+    const pp = star.pip;
+    const fmt = (v) => Number(v).toFixed(3).replace(/^0/, '');
+    if (p) {
+      if (star.label === 'RP') {
+        return [
+          { label: 'Salvamentos', val: `${p.saves || 0}`, amber: true },
+          { label: 'WHIP', val: (Number(p.whip) || 0).toFixed(2) },
+        ];
+      }
+      return [
+        { label: 'Récord / ERA', val: `${p.No_games_won}-${p.No_games_lost} • ${(Number(p.running_average) || 0).toFixed(2)} ERA`, amber: true },
+        { label: 'Ponches (K)', val: `${p.strikeouts || 0} K (${p.innings_pitched || 0} IP)` },
+      ];
+    }
+    switch (star.label) {
+      case 'C':
+        return [
+          { label: 'Fildeo PCT', val: fmt(pp.fielding_pct), amber: true },
+          { label: 'HR / RBI', val: `${b.home_runs} / ${b.rbi}` },
+        ];
+      case '1B':
+        return [
+          { label: 'AVG / OPS', val: `${fmt(b.batting_average)} / ${fmt((Number(b.obp) || 0) + (Number(b.slg) || 0))}`, amber: true },
+          { label: 'Fildeo PCT', val: fmt(pp.fielding_pct) },
+        ];
+      case '3B':
+        return [
+          { label: 'Fildeo PCT', val: fmt(pp.fielding_pct), amber: true },
+          { label: 'HR / RBI', val: `${b.home_runs} / ${b.rbi}` },
+        ];
+      case '2B':
+      case 'SS':
+        return [
+          { label: 'Double Plays', val: `${pp.double_plays} DP`, amber: true },
+          { label: 'Bases Robadas', val: `${pp.bases_stolen} SB` },
+        ];
+      case 'OF':
+        return [
+          { label: 'Asistencias OF', val: `${pp.assists_of} AST`, amber: true },
+          { label: 'AVG / HR', val: `${fmt(b.batting_average)} / ${b.home_runs}` },
+        ];
+      default:
+        return [
+          { label: 'AVG / OPS', val: `${fmt(b.batting_average)} / ${fmt((Number(b.obp) || 0) + (Number(b.slg) || 0))}`, amber: true },
+          { label: 'HR / RBI', val: `${b.home_runs} / ${b.rbi}` },
+        ];
+    }
+  };
 
   /* ─── Error state ────────────────────────────────────────────────────────── */
 
@@ -605,7 +664,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
                   </thead>
                   <tbody>
                     {standings.map((row, i) => (
-                      <tr key={row.id || i}>
+                      <tr key={row.id || i} className={i === 0 ? 'landing__table-row--leader' : ''}>
                         <td className="landing__table-pos">{String(i + 1).padStart(2, '0')}</td>
                         <td className="landing__table-team">
                           <span className="landing__table-dot" style={{ background: row.color || '#888' }} />
@@ -628,7 +687,21 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
                 </table>
               </div>
               <div className="landing__table-footer">
-                <span>LOS 4 PRIMEROS CLASIFICAN DIRECTO AL ROUND ROBIN SEMIFINAL</span>
+                <span className="landing__table-footer-text">
+                  <span className="landing__table-footer-dot" />
+                  LOS 4 PRIMEROS CLASIFICAN DIRECTO AL ROUND ROBIN SEMIFINAL
+                </span>
+                <a
+                  className="landing__table-footer-link"
+                  href="#reglamento"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const el = document.getElementById('reglamento');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  REGLAMENTO SERIE 2026
+                </a>
               </div>
             </div>
             {/* Diferencial */}
@@ -685,31 +758,66 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
               <p className="landing__podium-sub">Top 3 por promedio oficial ofensivo (mínimo reglamentario: 3.1 apariciones al plato por juego).</p>
             </div>
             <div className="landing__podium-grid">
-              {podiumData.map((player, i) => {
-                const order = i === 0 ? 2 : i === 1 ? 1 : 3;
-                const medalLabel = i === 0 ? 'LÍDER ABSOLUTO' : i === 1 ? 'PLATA' : 'BRONCE';
-                const medalColor = i === 0 ? 'gold' : i === 1 ? 'silver' : 'bronze';
+              {['gold', 'silver', 'bronze'].map((medal, i) => {
+                const player = podiumData[i];
+                const isGold = i === 0;
+                const stepText = isGold
+                  ? 'Líder Absoluto'
+                  : `${medal.toUpperCase()} • ${player.avg.toFixed(3).replace(/^0/, '')}`;
                 return (
-                  <div key={i} className={`landing__podium-card landing__podium-card--${medalColor}`} style={{ order }}>
-                    <div className="landing__podium-rank-badge">{i + 1}</div>
-                    <div className="landing__podium-info">
-                      <h3 className="landing__podium-name">{player.name}</h3>
-                      <span className="landing__podium-meta">{player.teamName} • {player.position}</span>
+                  <div key={medal} className={`landing__podium-col landing__podium-col--${medal}`}>
+                    <div className={`landing__podium-card landing__podium-card--${medal}`}>
+                      <div className={`landing__podium-rank-badge landing__podium-rank-badge--${medal}`}>
+                        {i + 1}
+                      </div>
+                      <div className={`landing__podium-avatar landing__podium-avatar--${medal}`}>
+                        <span>{player.initials}</span>
+                      </div>
+                      {isGold && (
+                        <span className="landing__podium-leader-badge">★ Líder de Bateo Activo</span>
+                      )}
+                      <h3 className={`landing__podium-name landing__podium-name--${medal}`}>
+                        {player.name}
+                      </h3>
+                      <span className="landing__podium-meta">
+                        {player.teamName} • {player.position}
+                      </span>
+                      <div className={`landing__podium-hero-stat landing__podium-hero-stat--${medal}`}>
+                        <span className={`landing__podium-hero-label landing__podium-hero-label--${medal}`}>
+                          {isGold ? 'Promedio Oficial' : 'Promedio'}
+                        </span>
+                        <span className={`landing__podium-hero-num landing__podium-hero-num--${medal}`}>
+                          {player.avg.toFixed(3).replace(/^0/, '')}
+                        </span>
+                      </div>
+                      <div className={`landing__podium-sub-stats landing__podium-sub-stats--${medal}`}>
+                        <div><span className="landing__podium-sub-label">HR</span><span>{player.hr}</span></div>
+                        <div><span className="landing__podium-sub-label">RBI</span><span>{player.rbi}</span></div>
+                        <div><span className="landing__podium-sub-label">OBP</span><span>{player.obp.toFixed(3).replace(/^0/, '')}</span></div>
+                        {isGold ? (
+                          <div>
+                            <span className="landing__podium-sub-label landing__podium-sub-label--ops">OPS</span>
+                            <span className="landing__podium-sub-ops">{player.ops.toFixed(3).replace(/^0/, '')}</span>
+                          </div>
+                        ) : (
+                          <div><span className="landing__podium-sub-label">SLG</span><span>{player.slg.toFixed(3).replace(/^0/, '')}</span></div>
+                        )}
+                      </div>
                     </div>
-                    <div className="landing__podium-hero-stat">
-                      <span className="landing__podium-hero-label">PROMEDIO</span>
-                      <span className="landing__podium-hero-num">{player.avg.toFixed(3).replace(/^0/, '')}</span>
+                    <div className={`landing__podium-step landing__podium-step--${medal}`}>
+                      {stepText}
                     </div>
-                    <div className="landing__podium-sub-stats">
-                      <div><span className="landing__podium-sub-label">HR</span><span>{player.hr}</span></div>
-                      <div><span className="landing__podium-sub-label">RBI</span><span>{player.rbi}</span></div>
-                      <div><span className="landing__podium-sub-label">OBP</span><span>{player.obp.toFixed(3).replace(/^0/, '')}</span></div>
-                      <div><span className="landing__podium-sub-label">SLG</span><span>{player.slg.toFixed(3).replace(/^0/, '')}</span></div>
-                    </div>
-                    <div className="landing__podium-step">{medalLabel}</div>
                   </div>
                 );
               })}
+            </div>
+            <div className="landing__podium-cta-wrap">
+              <Link to="/reporte/average" className="landing__podium-cta">
+                Ver Tabla Completa de Bateadores
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  sports_baseball
+                </span>
+              </Link>
             </div>
           </div>
         </section>
@@ -738,35 +846,14 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
                   <h4 className="landing__star-name">{star.fullName}</h4>
                   <p className="landing__star-team">{star.team}</p>
                   <div className="landing__star-stats">
-                    {star.pitcher ? (
-                      <>
-                        <div className="landing__star-stat">
-                          <span className="landing__star-stat-label">Récord / ERA:</span>
-                          <span className="landing__star-stat-val landing__star-stat-val--amber">{star.pitcher.No_games_won}-{star.pitcher.No_games_lost} • {Number(star.pitcher.running_average).toFixed(2)} ERA</span>
-                        </div>
-                        <div className="landing__star-stat">
-                          <span className="landing__star-stat-label">Ponches (K):</span>
-                          <span className="landing__star-stat-val">{star.pitcher.strikeouts || 0} K ({star.pitcher.innings_pitched || 0} IP)</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {star.bp && (
-                          <>
-                            <div className="landing__star-stat">
-                              <span className="landing__star-stat-label">AVG / OPS:</span>
-                              <span className="landing__star-stat-val landing__star-stat-val--amber">
-                                {Number(star.bp.batting_average).toFixed(3).replace(/^0/, '')} / {(Number(star.bp.obp) + Number(star.bp.slg)).toFixed(3).replace(/^0/, '')}
-                              </span>
-                            </div>
-                            <div className="landing__star-stat">
-                              <span className="landing__star-stat-label">HR / RBI:</span>
-                              <span className="landing__star-stat-val">{star.bp.home_runs} / {star.bp.rbi}</span>
-                            </div>
-                          </>
-                        )}
-                      </>
-                    )}
+                    {starStatRows(star).map((row, j) => (
+                      <div className="landing__star-stat" key={j}>
+                        <span className="landing__star-stat-label">{row.label}</span>
+                        <span className={`landing__star-stat-val${row.amber ? ' landing__star-stat-val--amber' : ''}`}>
+                          {row.val}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
