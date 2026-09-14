@@ -1,16 +1,15 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import {
-  Menu,
-  Sun,
-  Moon,
-  Bell,
-  LogOut,
-  UserRound,
-  ChevronRight,
-} from 'lucide-react';
 import { applyTheme } from '../../theme';
+
+const NAV = [
+  { to: '/', label: 'Inicio' },
+  { to: '/reporte/estadisticas-juegos-por-equipos', label: 'Posiciones' },
+  { to: '/reporte/average', label: 'Líderes & Stats' },
+  { to: '/consultas/Series', label: 'Series & Calendario' },
+  { to: '/reporte/equipos-ganadores', label: 'Reportes Oficiales' },
+  { to: '/comparar', label: 'Comparador', protect: true },
+];
 
 function LandingHeader({
   isLogged,
@@ -22,52 +21,56 @@ function LandingHeader({
   onThemeChange,
   onNameChange,
 }) {
-  const [isScrolled, setScrolled] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isUserOpen, setIsUserOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const handler = () => setScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  const navLinks = [
-    { href: '#formato', label: 'Formato' },
-    { href: '#posiciones', label: 'Posiciones' },
-    { href: '#lideres', label: 'Líderes' },
-    { href: '#estrellas', label: 'Estrellas' },
-    { href: '#campeones', label: 'Campeones' },
-  ];
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    onThemeChange?.(next);
+  };
 
-  const handleThemeKey = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+  const handleNavClick = (e, link) => {
+    if (link.protect && !isLogged) {
       e.preventDefault();
-      onThemeChange();
+      onModalOpen?.();
+      return;
     }
+    setMenuOpen(false);
   };
 
   return (
-    <header
-      className={`landing__nav ${isScrolled ? 'landing__nav--scrolled' : ''}`}
-    >
+    <header className={`landing__nav ${scrolled ? 'landing__nav--scrolled' : ''}`}>
       <div className="landing__nav-inner">
-        <Link to="/" className="landing__brand" aria-label="Liga Nacional de Béisbol — inicio">
+        <Link to="/" className="landing__brand" aria-label="LNB PRO — Inicio">
           <span className="landing__brand-badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 12 L6 12 L8 20 L16 20 L18 12 L21 12" />
-              <path d="M12 3 L12 9 M9 6 L15 6" />
-            </svg>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              sports_baseball
+            </span>
           </span>
           <span className="landing__brand-text">
-            <strong>Liga Nacional</strong>
-            <em>de Béisbol</em>
+            <strong>
+              LNB <em className="landing__brand-accent">PRO</em>
+            </strong>
+            <em>Liga Nacional de Béisbol</em>
           </span>
         </Link>
 
         <nav className="landing__nav-links" aria-label="Navegación principal">
-          {navLinks.map((l) => (
-            <a key={l.href} href={l.href} className="landing__nav-link">
+          {NAV.map((l) => (
+            <a
+              key={l.to}
+              href={l.to}
+              onClick={(e) => handleNavClick(e, l)}
+              className="landing__nav-link"
+            >
               {l.label}
             </a>
           ))}
@@ -79,44 +82,55 @@ function LandingHeader({
             className="landing__icon-btn"
             aria-label="Cambiar tema"
             title="Cambiar tema"
-            onClick={onThemeChange}
-            onKeyDown={handleThemeKey}
+            onClick={toggleTheme}
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <span className="material-symbols-outlined" aria-hidden="true">
+              {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+            </span>
           </button>
 
           {isLogged ? (
             <>
-              <button
-                type="button"
+              <Link
+                to="/"
                 className="landing__icon-btn"
                 aria-label="Notificaciones"
                 title="Notificaciones"
               >
-                <Bell size={18} />
-              </button>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  notifications
+                </span>
+              </Link>
 
               <div className="landing__usermenu">
                 <button
                   type="button"
                   className="landing__userchip"
-                  onClick={() => setIsUserOpen((o) => !o)}
+                  onClick={() => setUserOpen((o) => !o)}
                   aria-haspopup="true"
-                  aria-expanded={isUserOpen}
+                  aria-expanded={userOpen}
                 >
-                  <UserRound size={16} />
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    person
+                  </span>
                   <span>{userName || 'Usuario'}</span>
                 </button>
 
-                {isUserOpen && (
+                {userOpen && (
                   <div className="landing__dropdown">
                     <span className="landing__dropdown-role">{role}</span>
                     <button
                       type="button"
                       className="landing__dropdown-btn"
-                      onClick={onLogout}
+                      onClick={() => {
+                        setUserOpen(false);
+                        onLogout?.();
+                      }}
                     >
-                      <LogOut size={15} /> Cerrar sesión
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        logout
+                      </span>
+                      Cerrar sesión
                     </button>
                   </div>
                 )}
@@ -129,10 +143,10 @@ function LandingHeader({
                 className="landing__btn landing__btn--ghost"
                 onClick={onModalOpen}
               >
-                Iniciar sesión
+                Iniciar Sesión
               </button>
               <Link to="/registro" className="landing__btn landing__btn--solid">
-                Crear cuenta
+                Crear Cuenta
               </Link>
             </>
           )}
@@ -142,27 +156,40 @@ function LandingHeader({
           type="button"
           className="landing__hamb"
           aria-label="Abrir menú"
-          aria-expanded={isMobileOpen}
-          onClick={() => setIsMobileOpen((o) => !o)}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((o) => !o)}
         >
-          <Menu size={20} />
+          <span className="material-symbols-outlined" aria-hidden="true">
+            menu
+          </span>
         </button>
       </div>
 
-      {isMobileOpen && (
+      {menuOpen && (
         <nav className="landing__nav-mobile" aria-label="Menú móvil">
-          {navLinks.map((l) => (
-            <a key={l.href} href={l.href} className="landing__nav-link" onClick={() => setIsMobileOpen(false)}>
-              <ChevronRight size={14} /> {l.label}
+          {NAV.map((l) => (
+            <a
+              key={l.to}
+              href={l.to}
+              className="landing__nav-link"
+              onClick={(e) => handleNavClick(e, l)}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">
+                arrow_forward_ios
+              </span>
+              {l.label}
             </a>
           ))}
           {!isLogged && (
             <button
               type="button"
               className="landing__btn landing__btn--solid"
-              onClick={onModalOpen}
+              onClick={() => {
+                setMenuOpen(false);
+                onModalOpen?.();
+              }}
             >
-              Iniciar sesión
+              Iniciar Sesión
             </button>
           )}
         </nav>

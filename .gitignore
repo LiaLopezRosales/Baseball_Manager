@@ -502,3 +502,8 @@ migrations/
 
 # artefactos de autoevaluación de UI (Playwright MCP)
 .playwright-mcp/
+
+# capturas QA del landing (no forman parte del código)
+landing-dark-full.png
+landing-light-full.png
+landing-hero-*-new.png

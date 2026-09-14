@@ -1,24 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-  Shield,
-  Users,
-  Trophy,
-  CalendarRange,
-  BarChart3,
-  Target,
-  Crown,
-  Star,
-  TrendingUp,
-  Award,
-} from 'lucide-react';
 import { apiGet } from '../api';
-import StatCard from './ui/StatCard';
-import BarChart from './ui/BarChart';
-import ParticleField from './ui/Particles';
-import FavoritesPanel, { FavoriteButton } from './FavoritesPanel';
-import UserDashboard from './UserDashboard';
+import FavoritesPanel from './FavoritesPanel';
 import LandingHeader from './landing/LandingHeader';
 import LandingHero from './landing/LandingHero';
 import { getInitialTheme, applyTheme } from '../theme';
@@ -26,12 +10,31 @@ import './landing.css';
 
 const REPORT_URL = (id) => `/api/queries/reports/?report_id=${id}`;
 
-/* Deriva récord, PCT y DIF reales por equipo a partir de los Scores
-   (winner/loser son FK a Team; w_points/l_points reales). */
+/* ─── helpers de datos ─────────────────────────────────────────────────────── */
+
 function buildStandingsFromScores(scores, teams) {
   const byId = {};
   (teams || []).forEach((t) => {
-    byId[t.id] = { id: t.id, name: t.name, initials: t.initials, w: 0, l: 0, pf: 0, pc: 0 };
+    byId[t.id] = {
+      id: t.id,
+      name: t.name,
+      initials: t.initials,
+      w: 0,
+      l: 0,
+      pf: 0,
+      pc: 0,
+    };
+  });
+
+  /* Indexar scores por teamId (para last10) */
+  const scoresByTeam = {};
+  (scores || []).forEach((s) => {
+    const wid = s.winner;
+    const lid = s.loser;
+    if (wid && !scoresByTeam[wid]) scoresByTeam[wid] = [];
+    if (lid && !scoresByTeam[lid]) scoresByTeam[lid] = [];
+    if (wid) scoresByTeam[wid].push({ id: s.id, win: true });
+    if (lid) scoresByTeam[lid].push({ id: s.id, win: false });
   });
 
   (scores || []).forEach((s) => {
@@ -49,27 +52,39 @@ function buildStandingsFromScores(scores, teams) {
     }
   });
 
-  const rows = Object.values(byId).map((t) => {
-    const total = t.w + t.l;
-    const pct = total ? t.w / total : 0;
-    const dif = (t.pf - t.pc) || 0;
-    return {
-      ...t,
-      pct,
-      pctStr: pct.toFixed(3).replace(/^0/, ''),
-      dif: dif > 0 ? `+${dif}` : String(dif),
-      jg: t.w,
-      jp: t.l,
-    };
-  });
+  return Object.values(byId)
+    .map((t) => {
+      const total = t.w + t.l;
+      const pct = total ? t.w / total : 0;
+      const dif = t.pf - t.pc || 0;
 
-  return rows.sort((a, b) => b.w - a.w || b.pct - a.pct || b.dif - a.dif);
+      /* last10: últimos 10 juegos ordenados por id (cronológico) */
+      const hist = (scoresByTeam[t.id] || []).sort((a, b) => a.id - b.id);
+      const last10Slice = hist.slice(-10);
+      const last10W = last10Slice.filter((s) => s.win).length;
+      const last10L = last10Slice.length - last10W;
+      const last10 = hist.length ? `${last10W}–${last10L}` : '—';
+
+      return {
+        ...t,
+        pct,
+        pctStr: pct.toFixed(3).replace(/^0/, ''),
+        dif: dif > 0 ? `+${dif}` : String(dif),
+        jg: t.w,
+        jp: t.l,
+        runsFor: t.pf,
+        runsAgainst: t.pc,
+        last10,
+      };
+    })
+    .sort((a, b) => b.w - a.w || b.pct - a.pct || b.dif - a.dif);
 }
 
-/* ÚltimoscCoreces: racha W/L simple para el líder. */
+/* Racha W/L para el líder. */
 function streakFor(teamId, scores) {
   const seq = (scores || [])
     .filter((s) => s.winner === teamId || s.loser === teamId)
+    .sort((a, b) => (a.id || 0) - (b.id || 0))
     .map((s) => (s.winner === teamId ? 'W' : 'L'));
   let cnt = 0;
   const last = seq[seq.length - 1];
@@ -78,21 +93,53 @@ function streakFor(teamId, scores) {
     if (seq[i] === last) cnt += 1;
     else break;
   }
-  return `${cnt}${last === 'W' ? 'G' : 'P'}`;
+  return `${last}${cnt}`;
 }
 
+/* Cadena DT: direction-team → technical-directors → workers → persons. */
+function buildDTChain(directionTeams, technicalDirectors, workers, persons) {
+  const personsById = {};
+  (persons || []).forEach((p) => { personsById[p.id] = p; });
+  const workersById = {};
+  (workers || []).forEach((w) => { workersById[w.id] = w; });
+  const tdirsByDtId = {};
+  (technicalDirectors || []).forEach((td) => {
+    tdirsByDtId[td.direction_team] = td;
+  });
+
+  return (teamId) => {
+    const dtm = (directionTeams || []).find((d) => Number(d.Team_id) === Number(teamId));
+    if (!dtm) return null;
+    const tdir = tdirsByDtId[dtm.id];
+    if (!tdir) return null;
+    const w = workersById[tdir.W_id];
+    if (!w) return null;
+    const p = personsById[w.P_id];
+    if (!p) return null;
+    return `${p.name} ${p.lastname}`.trim() || null;
+  };
+}
+
+/* Última temporada de la lista de temporadas */
+function lastSeasonNameFn(seasons) {
+  return seasons[seasons.length - 1]?.name || '—';
+}
+
+/* ─── Componente ───────────────────────────────────────────────────────────── */
+
 function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
-  const [stats, setStats] = useState(null);
   const [standingsReport, setStandingsReport] = useState([]);
   const [batters, setBatters] = useState([]);
-  const [stars, setStars] = useState([]);
   const [champions, setChampions] = useState([]);
   const [teams, setTeams] = useState([]);
   const [scores, setScores] = useState([]);
-  const [games, setGames] = useState([]);
   const [seasons, setSeasons] = useState([]);
+  const [players, setPlayers] = useState([]);
+  const [directionTeams, setDirectionTeams] = useState([]);
+  const [technicalDirectors, setTechnicalDirectors] = useState([]);
+  const [workers, setWorkers] = useState([]);
+  const [persons, setPersons] = useState([]);
   const [teamIdByName, setTeamIdByName] = useState({});
-  const [playerIdByName, setPlayerIdByName] = useState({});
   const [error, setError] = useState(null);
   const [theme, setThemeState] = useState(() => getInitialTheme());
 
@@ -103,79 +150,53 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
       apiGet('/teams/'),
       apiGet('/baseball-players/'),
       apiGet('/persons/'),
-      apiGet('/games/'),
       apiGet('/seasons/'),
       apiGet('/scores/'),
-      apiGet(REPORT_URL(6)), // estadísticas por equipo (standings)
-      apiGet(REPORT_URL(5)), // average de bateo (líderes)
-      apiGet(REPORT_URL(1)), // jugadores estrella
-      apiGet(REPORT_URL(0)), // campeones por temporada
+      apiGet(REPORT_URL(6)),
+      apiGet(REPORT_URL(5)),
+      apiGet(REPORT_URL(0)),
+      apiGet('/direction-teams/'),
+      apiGet('/technical-directors/'),
+      apiGet('/workers/'),
     ])
       .then(
         ([
           teamsData,
-          players,
-          persons,
-          gamesData,
+          playersData,
+          personsData,
           seasonsData,
           scoresData,
           standingsData,
           battersData,
-          starsData,
           championsData,
+          directionTeamsData,
+          technicalDirectorsData,
+          workersData,
         ]) => {
           if (!active) return;
-          const totalPoints = (scoresData || []).reduce(
-            (acc, s) =>
-              acc + (Number(s.w_points) || 0) + (Number(s.l_points) || 0),
-            0
-          );
-          setStats({
-            teams: teamsData.length,
-            players: players.length,
-            games: gamesData.length,
-            played: (scoresData || []).length,
-            seasons: seasonsData.length,
-            avgPoints: scoresData.length
-              ? totalPoints / scoresData.length
-              : 0,
-            lastSeason: seasonsData[seasonsData.length - 1]?.name || '—',
-          });
-          setStandingsReport(standingsData || []);
-          setBatters((battersData || []).slice(0, 5));
-          setStars((starsData || []).slice(0, 6));
-          setChampions(championsData || []);
+
           setTeams(teamsData || []);
           setScores(scoresData || []);
-          setGames(gamesData || []);
           setSeasons(seasonsData || []);
+          setPlayers(playersData || []);
+          setStandingsReport(standingsData || []);
+          setBatters((battersData || []).slice(0, 5));
+          setChampions(championsData || []);
+          setDirectionTeams(directionTeamsData || []);
+          setTechnicalDirectors(technicalDirectorsData || []);
+          setWorkers(workersData || []);
+          setPersons(personsData || []);
 
           const teamMap = {};
-          (teamsData || []).forEach((t) => {
-            teamMap[t.name] = t.id;
-          });
+          (teamsData || []).forEach((t) => { teamMap[t.name] = t.id; });
           setTeamIdByName(teamMap);
-
-          const personById = {};
-          (persons || []).forEach((p) => {
-            personById[p.id] = p;
-          });
-          const playerMap = {};
-          (players || []).forEach((pl) => {
-            const per = personById[pl.P_id];
-            if (per)
-              playerMap[`${per.name} ${per.lastname}`.toLowerCase()] = pl.id;
-          });
-          setPlayerIdByName(playerMap);
         }
       )
       .catch((err) => {
         if (active) setError(err);
       });
 
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
   const toggleTheme = () => {
@@ -186,12 +207,11 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
     });
   };
 
-  /* Standings con datos de reporte 6 (puntos) + récord derivado real. */
+  /* ─── Datos derivados (useMemo) ─────────────────────────────────────────── */
+
   const standings = useMemo(() => {
     const byName = {};
-    buildStandingsFromScores(scores, teams).forEach((r) => {
-      byName[r.name] = r;
-    });
+    buildStandingsFromScores(scores, teams).forEach((r) => { byName[r.name] = r; });
     return (standingsReport || []).map((row) => ({
       ...row,
       ...(byName[row.Equipo] || {}),
@@ -200,72 +220,61 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
 
   const leader = standings[0] || null;
   const totalPlayed = scores.length;
-  const seriesTotal = games.length;
+  const lastSeasonName = lastSeasonNameFn(seasons);
 
-  const cards = useMemo(() => {
-    if (!stats) return [];
-    return [
-      {
-        key: 'teams',
-        icon: Shield,
-        label: 'Equipos',
-        sublabel: 'participantes',
-        value: stats.teams,
-        delay: 0.05,
-      },
-      {
-        key: 'players',
-        icon: Users,
-        label: 'Jugadores',
-        sublabel: 'registrados',
-        value: stats.players,
-        delay: 0.12,
-      },
-      {
-        key: 'played',
-        icon: Trophy,
-        label: 'Juegos',
-        sublabel: 'disputados',
-        value: stats.played,
-        delay: 0.18,
-      },
-      {
-        key: 'scores',
-        icon: BarChart3,
-        label: 'Puntuaciones',
-        sublabel: 'registradas',
-        value: stats.played,
-        delay: 0.24,
-      },
-      {
-        key: 'seasons',
-        icon: CalendarRange,
-        label: 'Temporadas',
-        sublabel: stats.lastSeason,
-        value: stats.seasons,
-        delay: 0.3,
-      },
-      {
-        key: 'avg',
-        icon: Target,
-        label: 'Promedio pts/juego',
-        sublabel: 'rendimiento',
-        value: stats.avgPoints,
-        decimals: 1,
-        delay: 0.36,
-      },
-    ];
-  }, [stats]);
-
-  const sortedStandings = useMemo(
-    () =>
-      [...standings].sort(
-        (a, b) =>
-          Number(b['Total de puntos en juegos ganados'] || 0) -
-          Number(a['Total de puntos en juegos ganados'] || 0)
-      ),
-    [standings]
+  /* Cadena DT (resuelta una vez que todo esté cargado) */
+  const resolveDT = useMemo(
+    () => buildDTChain(directionTeams, technicalDirectors, workers, persons),
+    [directionTeams, technicalDirectors, workers, persons]
   );
+
+  /* Líder enriquecido (con DT, streak, last10, runsFor/Against) */
+  const leaderEnriched = useMemo(() => {
+    if (!leader) return null;
+    return {
+      ...leader,
+      dt: resolveDT(leader.id) || null,
+      streak: streakFor(leader.id, scores),
+    };
+  }, [leader, resolveDT, scores]);
+
+  /* Promedio liga: media de batting_average de todos los jugadores */
+  const leagueAvg = useMemo(() => {
+    const avgs = (players || [])
+      .map((p) => Number(p.batting_average))
+      .filter((v) => !isNaN(v) && v > 0);
+    if (!avgs.length) return 0;
+    return avgs.reduce((a, b) => a + b, 0) / avgs.length;
+  }, [players]);
+
+  /* Top bateo: mejor promedio del reporte 5 */
+  const topBateo = useMemo(() => {
+    if (!batters.length) return null;
+    const best = batters[0];
+    const avg = Number(best['Promedio de Bateo'] || best.Average || 0);
+    return { promedio: avg, nombre: `${best.Nombre} ${best.Apellido}` };
+  }, [batters]);
+
+  /* Métricas para el hero */
+  const heroMetrics = useMemo(
+    () => ({
+      topBateo,
+      promedioLiga: leagueAvg,
+      franquicias: teams.length,
+    }),
+    [topBateo, leagueAvg, teams]
+  );
+
+  /* Palmarés: campeones ordenados cronológicamente */
+  const palmares = useMemo(() => {
+    return [...champions].sort((a, b) => {
+      if (a.Temporada < b.Temporada) return -1;
+      if (a.Temporada > b.Temporada) return 1;
+      return 0;
+    });
+  }, [champions]);
+
+  /* ─── Error state ────────────────────────────────────────────────────────── */
 
   if (error) {
     return (
@@ -286,256 +295,244 @@ function Landing({ isLogged = false, role = '', onModalOpen, onLogout }) {
     );
   }
 
-  const sectionTitle = (icon, title, sub) => (
-    <div className="landing__section-head">
-      <span className="landing__section-icon">{icon}</span>
-      <div>
-        <h2 className="landing__section-title">{title}</h2>
-        {sub && <p className="landing__section-sub">{sub}</p>}
-      </div>
-    </div>
-  );
-
-  const renderChampTeam = (name) => {
-    const teamId = teamIdByName[name];
-    return teamId ? (
-      <Link to={`/equipo/${teamId}`} className="landing__champ-team landing__link">
-        {name}
-      </Link>
-    ) : (
-      <span className="landing__champ-team">{name}</span>
-    );
-  };
-
-  const lastSeasonName = seasons[seasons.length - 1]?.name || 'Temporada actual';
+  /* ─── Render ─────────────────────────────────────────────────────────────── */
 
   return (
     <div className="landing" data-theme={theme}>
       <LandingHeader
         isLogged={isLogged}
         role={role}
-        userName={typeof localStorage !== 'undefined' ? localStorage.getItem('userName') || '' : ''}
+        userName={
+          typeof localStorage !== 'undefined'
+            ? localStorage.getItem('userName') || ''
+            : ''
+        }
         theme={theme}
         onThemeChange={toggleTheme}
         onModalOpen={onModalOpen}
         onLogout={onLogout}
       />
 
+      {/* HERO */}
       <LandingHero
-        serieId="current"
         label={lastSeasonName}
-        roundLabel="Temporada actual"
-        standing={leader ? [leader] : []}
-        standings={standings}
-        isLogged={isLogged}
-        onModalOpen={onModalOpen}
+        leader={leaderEnriched}
         totalPlayed={totalPlayed}
-        seriesTotal={seriesTotal}
+        metrics={heroMetrics}
+        theme={theme}
       />
 
-      {/* STATS */}
-      <section className="landing__grid">
-        {stats
-          ? cards.map((c) => (
-              <StatCard
-                key={c.key}
-                icon={c.icon}
-                label={c.label}
-                sublabel={c.sublabel}
-                value={c.value}
-                decimals={c.decimals || 0}
-                delay={c.delay}
-                accent={c.accent}
-              />
-            ))
-          : Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="stat-card stat-card--skeleton" />
-            ))}
-      </section>
-
-      {/* DASHBOARD PERSONAL (solo usuarios logueados) */}
-      {localStorage.getItem('token') && (
-        <UserDashboard standings={standings} stars={stars} teamIdByName={teamIdByName} />
-      )}
-
-      {/* STANDINGS */}
-      <section className="landing__section">
-        {sectionTitle(
-          <Trophy size={20} />,
-          'Tabla de posiciones',
-          'Ganadores, puntos y diferencial por equipo'
-        )}
-        <div className="landing__standings">
-          {sortedStandings.length > 0 && (
-            <BarChart
-              teams={sortedStandings.map((r) => r.Equipo)}
-              values={sortedStandings.map(
-                (r) => r['Total de puntos en juegos ganados']
-              )}
-              title="Puntos ganados por equipo"
-            />
-          )}
-          <table className="landing__table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Equipo</th>
-                <th>Juegos</th>
-                <th>Pts ganados</th>
-                <th>Pts perdidos</th>
-                <th>Récord</th>
-                <th>DIF</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedStandings.map((row, i) => {
-                const teamId = teamIdByName[row.Equipo];
-                const rec = row.w != null ? `${row.w}–${row.l}` : '—';
-                return (
-                  <tr key={row.Equipo}>
-                    <td>{i + 1}</td>
-                    <td className="landing__team">
-                      {i === 0 && (
-                        <Crown size={14} className="landing__crown" />
-                      )}
-                      {teamId ? (
-                        <Link to={`/equipo/${teamId}`} className="landing__team-link">
-                          {row.Equipo}
-                        </Link>
-                      ) : (
-                        row.Equipo
-                      )}
-                    </td>
-                    <td>{row['Total de juegos']}</td>
-                    <td>{row['Total de puntos en juegos ganados']}</td>
-                    <td>{row['Total de puntos en juegos perdidos']}</td>
-                    <td>{rec}</td>
-                    <td>{row.dif != null ? row.dif : '—'}</td>
-                    <td className="landing__fav-cell">
-                      {teamId && <FavoriteButton type="team" id={teamId} size={18} />}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* TUS FAVORITOS */}
-      <FavoritesPanel />
-
-      {/* LÍDERES + ESTRELLAS */}
-      <div className="landing__two-col">
-        <section className="landing__section">
-          {sectionTitle(
-            <TrendingUp size={20} />,
-            'Líderes de bateo',
-            'Mejor promedio de bateo'
-          )}
-          <ol className="landing__leaders">
-            {batters.map((b, i) => {
-              const pid =
-                playerIdByName[`${b.Nombre} ${b.Apellido}`.toLowerCase()];
-              const nameNode = pid ? (
-                <Link
-                  to={`/jugador/${pid}`}
-                  className="landing__leader-name landing__link"
-                >
-                  {b.Nombre} {b.Apellido}
-                </Link>
-              ) : (
-                <span className="landing__leader-name">
-                  {b.Nombre} {b.Apellido}
-                </span>
-              );
-              return (
-                <li
-                  key={`${b.Nombre}-${b.Apellido}`}
-                  className="landing__leader"
-                >
-                  <span className="landing__leader-rank">
-                    {['🥇', '🥈', '🥉'][i] || `${i + 1}°`}
-                  </span>
-                  {nameNode}
-                  {pid && <FavoriteButton type="player" id={pid} size={16} />}
-                  <span className="landing__leader-val">
-                    {Number(b['Promedio de Bateo'] || b.Average || 0).toFixed(3)}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-        </section>
-
-        <section className="landing__section">
-          {sectionTitle(
-            <Star size={20} />,
-            'Jugadores estrella',
-            'Efectividad destacada'
-          )}
-          <div className="landing__stars">
-            {stars.map((s, i) => {
-              const pid =
-                playerIdByName[`${s.Nombre} ${s.Apellido}`.toLowerCase()];
-              return (
-                <div key={i} className="landing__star">
-                  {pid ? (
-                    <Link
-                      to={`/jugador/${pid}`}
-                      className="landing__star-name landing__link"
-                    >
-                      {s.Nombre} {s.Apellido}
-                    </Link>
-                  ) : (
-                    <span className="landing__star-name">
-                      {s.Nombre} {s.Apellido}
-                    </span>
-                  )}
-                  {pid && <FavoriteButton type="player" id={pid} size={16} />}
-                  <span className="landing__star-pos">{s.Posición}</span>
-                  <span className="landing__star-val">
-                    {Number(s.Efectividad).toFixed(3)}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      </div>
-
-      {/* CAMPEONES TIMELINE */}
-      <section className="landing__section">
-        {sectionTitle(
-          <Award size={20} />,
-          'Campeones por temporada',
-          'Ganadores y directores técnicos'
-        )}
-        <div className="landing__timeline">
-          {champions.map((c, i) => (
+      {/* PALMARÉS + CALLOUT — fiel al mockup dark/light */}
+      {palmares.length > 0 && (
+        <section className="landing__palmares">
+          <div className="landing__palmares-inner">
             <motion.div
-              key={i}
-              className="landing__champ"
+              className="landing__palmares-head"
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
             >
-              <span className="landing__champ-season">{c.Temporada}</span>
-              {renderChampTeam(c.Equipo)}
-              <span className="landing__champ-dt">{c['Director Técnico']}</span>
-              <span className="landing__champ-serie">{c.Serie}</span>
+              <span className="landing__palmares-eyebrow">
+                Palmarés y Glorias del Béisbol
+              </span>
+              <h2 className="landing__palmares-title">
+                Campeones de las Últimas Temporadas
+              </h2>
+              <p className="landing__palmares-sub">
+                Registro histórico de las Series Finales y sus directores
+                técnicos laureados.
+              </p>
             </motion.div>
-          ))}
-        </div>
-      </section>
 
-      {/* FOOTER */}
+            <div className="landing__palmares-grid">
+              {palmares.map((c, i) => {
+                const teamId = teamIdByName[c.Equipo];
+                const year = c.Temporada || '—';
+                const yearClass = [
+                  'landing__palmares-year--rose',
+                  'landing__palmares-year--amber',
+                  'landing__palmares-year--muted',
+                  'landing__palmares-year--muted',
+                ][i] || 'landing__palmares-year--muted';
+                return (
+                  <motion.div
+                    key={i}
+                    className="landing__palmares-card"
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.04 }}
+                  >
+                    <div className="landing__palmares-card-top">
+                      <span className={`landing__palmares-year ${yearClass}`}>
+                        {year}
+                      </span>
+                      <span className="landing__palmares-serie">{c.Serie}</span>
+                    </div>
+                    {teamId ? (
+                      <Link
+                        to={`/equipo/${teamId}`}
+                        className="landing__palmares-team"
+                      >
+                        {c.Equipo}
+                      </Link>
+                    ) : (
+                      <h4 className="landing__palmares-team">{c.Equipo}</h4>
+                    )}
+                    <p className="landing__palmares-dt">
+                      DT: <span>{c['Director Técnico']}</span>
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Callout DT — banner CTA fiel */}
+            <div className="landing__callout">
+              <div className="landing__callout-left">
+                <div className="landing__callout-ico" aria-hidden="true">
+                  <span className="material-symbols-outlined">sports</span>
+                </div>
+                <div>
+                  <h3 className="landing__callout-title">
+                    ¿Eres Director Técnico (DT) o Anotador Oficial?
+                  </h3>
+                  <p className="landing__callout-sub">
+                    Accede a la plataforma de gestión táctica: cambio de
+                    rosters en tiempo real, validación de lineup card 45
+                    minutos antes del playball y descarga de reportes oficiales
+                    WBSC.
+                  </p>
+                </div>
+              </div>
+              <div className="landing__callout-actions">
+                <Link to="/dt/cambios" className="landing__callout-btn ghost">
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    badge
+                  </span>
+                  Portal DT / Cambios
+                </Link>
+                <Link to={isLogged && role === 'Admin' ? '/admin/posiciones' : '/registro'} className="landing__callout-btn solid">
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    admin_panel_settings
+                  </span>
+                  Gestión de Liga (Admin)
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* FAVORITOS (solo logueados) */}
+      {isLogged && <FavoritesPanel />}
+
+      {/* FOOTER 5-COLUMNAS — fiel al mockup (bg #081626) */}
       <footer className="landing__footer">
-        <div className="landing__footer-inner">
-          <span className="landing__footer-brand">Liga Nacional de Béisbol</span>
-          <span>{stats ? `${stats.teams} equipos · ${stats.played} juegos disputados · ${stats.seasons} temporadas` : 'Cargando…'}</span>
+        <div className="landing__footer-top">
+          <div className="landing__footer-brand-col">
+            <span className="landing__footer-name">
+              Liga Nacional de Béisbol
+            </span>
+            <p className="landing__footer-tagline">
+              Órgano rector y circuito élite del béisbol profesional nacional.
+              Plataforma de telemetría, asignaciones oficiales de rosters,
+              boxscores en vivo y recopilación estadística certificada para la
+              Serie Nacional 2025-2026.
+            </p>
+            <div className="landing__footer-badges">
+              <span className="landing__footer-badge landing__footer-badge--gold">
+                Homologación WBSC
+              </span>
+              <span className="landing__footer-badge landing__footer-badge--slate">
+                Radar Statcast Sync
+              </span>
+            </div>
+          </div>
+
+          <div className="landing__footer-col">
+            <h4>Competición</h4>
+            <ul>
+              <li>
+                <Link to="/reporte/estadisticas-juegos-por-equipos">
+                  Tabla de Posiciones
+                </Link>
+              </li>
+              <li>
+                <Link to="/reporte/average">Líderes Ofensivos y Pitcheo</Link>
+              </li>
+              <li>
+                <Link to="/consultas/Series">Calendario de Temporada</Link>
+              </li>
+              <li>
+                <Link to="/comparar">Comparador de Peloteros</Link>
+              </li>
+              <li>
+                <Link to="/consultas/Game">Cuadro de Play-Offs</Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="landing__footer-col">
+            <h4>Reportes Oficiales</h4>
+            <ul>
+              <li>
+                <Link to="/reporte/equipos-ganadores">
+                  Anotaciones Certificadas
+                </Link>
+              </li>
+              <li>
+                <Link to="/reporte/jugadores-estrellas">Altas y Bajas Semanales</Link>
+              </li>
+              <li>
+                <Link to="/reporte/carreras-limpias-juegos-ganados">
+                  Reglamento de Campeonato 2025
+                </Link>
+              </li>
+              <li>
+                <Link to="/reporte/efectividad-por-posicion">
+                  Protocolo Antidopaje
+                </Link>
+              </li>
+              <li>
+                <Link to="/reporte/jugadores-de-un-equipo">
+                  API Pública de Estadísticas
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="landing__footer-col">
+            <h4>Portales Técnicos</h4>
+            <ul>
+              <li>
+                <Link to="/dt/cambios">Portal Directores Técnicos (DT)</Link>
+              </li>
+              <li>
+                <Link to="/dt/listar-cambios">Mesa de Control y Anotadores</Link>
+              </li>
+              <li>
+                <Link to="/consultas/Team">Comisión de Arbitraje</Link>
+              </li>
+              <li>
+                <Link to="/consultas/Worker">Sala de Prensa y Acreditaciones</Link>
+              </li>
+              <li>
+                <Link to="/registro">Federación Deportiva Nacional</Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="landing__footer-bottom">
+          <span className="landing__footer-copy">
+            © 2025-2026 Liga Nacional de Béisbol. Todos los derechos reservados.
+          </span>
+          <div className="landing__footer-legal">
+            <a href="/registro" className="landing__footer-legal-link">Términos de Uso</a>
+            <a href="/registro" className="landing__footer-legal-link">Política de Privacidad</a>
+            <a href="/registro" className="landing__footer-legal-link">Auditoría de Datos</a>
+          </div>
         </div>
       </footer>
     </div>
