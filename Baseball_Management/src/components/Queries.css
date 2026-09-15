@@ -58,8 +58,7 @@ html[data-theme='light'] .qry {
 }
 
 .qry {
-  max-width: 1440px;
-  margin: 0 auto;
+  width: 100%;
   padding: 24px clamp(1rem, 4vw, 2.5rem);
   display: flex;
   flex-direction: column;
@@ -216,37 +215,50 @@ html[data-theme='light'] .qry__export-menu { box-shadow: 0 10px 22px -8px rgba(1
 .qry__kpis {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 0;
+  border-bottom: 1px solid var(--qry-border);
 }
 @media (min-width: 1024px) {
   .qry__kpis { grid-template-columns: repeat(4, 1fr); }
 }
 
 .qry__kpi {
-  position: relative;
-  overflow: hidden;
-  background: var(--qry-surface);
-  border: 1px solid var(--qry-border);
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  padding: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 12px 16px;
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.qry__kpi:not(:first-child) {
+  border-left: 1px solid var(--qry-border);
+}
+
+.qry__kpi-label-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 6px;
 }
-.qry__kpi::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--qry-slate);
+
+.qry__kpi-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--qry-surface-3);
+  border: 1px solid var(--qry-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--qry-dim);
+  flex-shrink: 0;
 }
-.qry__kpi--green::before { background: var(--qry-emerald); }
-.qry__kpi--amber::before { background: var(--qry-amber); }
-.qry__kpi--red::before { background: var(--qry-primary); }
+.qry__kpi--green .qry__kpi-icon { color: var(--qry-emerald); border-color: var(--qry-emerald); }
+.qry__kpi--amber .qry__kpi-icon { color: var(--qry-amber); border-color: var(--qry-amber); }
+.qry__kpi--red .qry__kpi-icon { color: var(--qry-primary); border-color: var(--qry-primary); }
 
 .qry__kpi-body {
   display: flex;
@@ -284,29 +296,15 @@ html[data-theme='light'] .qry__export-menu { box-shadow: 0 10px 22px -8px rgba(1
   font-size: 13px;
   color: var(--qry-dim);
 }
-.qry__kpi-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: var(--qry-surface-3);
-  border: 1px solid var(--qry-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--qry-dim);
-  flex-shrink: 0;
-}
-.qry__kpi--green .qry__kpi-icon { color: var(--qry-emerald); }
-.qry__kpi--amber .qry__kpi-icon { color: var(--qry-amber); }
-.qry__kpi--red .qry__kpi-icon { color: var(--qry-primary); }
 
 /* ═══════════════ RAIL DE FILTROS ═══════════════ */
 .qry__filters {
-  background: var(--qry-surface);
-  border: 1px solid var(--qry-border);
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  padding: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  border-bottom: 1px solid var(--qry-border);
+  padding: 4px 0 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -342,7 +340,7 @@ html[data-theme='light'] .qry__export-menu { box-shadow: 0 10px 22px -8px rgba(1
   background: var(--qry-input);
   border: 1px solid var(--qry-border);
   border-radius: 6px;
-  padding: 4px 8px 8px;
+  padding: 6px 8px;
   transition: border-color 0.2s;
 }
 .qry__filters .filter-item:focus-within {
@@ -388,6 +386,47 @@ html[data-theme='light'] .qry__export-menu { box-shadow: 0 10px 22px -8px rgba(1
   color: var(--qry-text);
   padding: 2px 0;
   appearance: none;
+}
+
+/* Filtro numérico compacto: dos mini-campos Mín/Máx en una fila */
+.qry__filters .filter-minmax {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.qry__filters .filter-minmax__field {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 6px;
+  background: var(--qry-input);
+  border: 1px solid var(--qry-border);
+  border-radius: 6px;
+  transition: border-color 0.2s;
+}
+.qry__filters .filter-minmax__field:focus-within {
+  border-color: var(--qry-primary);
+}
+.qry__filters .filter-minmax__tag {
+  font-family: var(--qry-font-body);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--qry-muted);
+  flex-shrink: 0;
+}
+.qry__filters .filter-minmax__field input[type='number'] {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  font-size: 12px;
 }
 .qry__filters select {
   cursor: pointer;
@@ -499,18 +538,18 @@ html[data-theme='light'] .qry__export-menu { box-shadow: 0 10px 22px -8px rgba(1
 
 /* ═══════════════ TABLA DE DATOS ═══════════════ */
 .qry__table-card {
-  background: var(--qry-surface);
-  border: 1px solid var(--qry-border);
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  border-top: 1px solid var(--qry-border);
   display: flex;
   flex-direction: column;
 }
 
 .qry__table-headbar {
-  padding: 10px 16px;
-  background: var(--qry-surface-2);
+  padding: 12px 0;
+  background: transparent;
   border-bottom: 1px solid var(--qry-border);
   display: flex;
   flex-direction: column;
@@ -582,14 +621,14 @@ html[data-theme='light'] .qry__export-menu { box-shadow: 0 10px 22px -8px rgba(1
   text-align: left;
 }
 .qry__table thead th {
-  background: var(--qry-surface-2);
+  background: transparent;
   color: var(--qry-dim);
   font-family: var(--qry-font-display);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 12px 16px;
+  padding: 12px 8px;
   border-bottom: 1px solid var(--qry-border);
   white-space: nowrap;
   user-select: none;
@@ -604,7 +643,7 @@ html[data-theme='light'] .qry__export-menu { box-shadow: 0 10px 22px -8px rgba(1
   border-top: 1px solid color-mix(in srgb, var(--qry-border) 60%, transparent);
 }
 .qry__table td {
-  padding: 12px 16px;
+  padding: 12px 8px;
   font-family: var(--qry-font-body);
   font-size: 13px;
   color: var(--qry-text);
@@ -668,8 +707,8 @@ html[data-theme='light'] .qry__export-menu { box-shadow: 0 10px 22px -8px rgba(1
 
 /* ═══════════════ PAGINACIÓN ═══════════════ */
 .qry__pagination {
-  padding: 12px 16px;
-  background: var(--qry-surface-2);
+  padding: 12px 0;
+  background: transparent;
   border-top: 1px solid var(--qry-border);
   display: flex;
   flex-direction: column;
@@ -747,63 +786,9 @@ html[data-theme='light'] .qry__export-menu { box-shadow: 0 10px 22px -8px rgba(1
   box-shadow: var(--qry-primary-glow);
 }
 
-/* ═══════════════ NOTA REGLAMENTARIA ═══════════════ */
-.qry__notice {
-  margin-top: 4px;
-  padding: 16px;
-  border-radius: 8px;
-  background: var(--qry-surface);
-  border: 1px solid var(--qry-border);
-  border-left: 4px solid var(--qry-amber);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-@media (min-width: 768px) {
-  .qry__notice { flex-direction: row; align-items: center; justify-content: space-between; }
-}
-.qry__notice-inner { display: flex; align-items: flex-start; gap: 12px; }
-.qry__notice-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--qry-surface-3);
-  border: 1px solid var(--qry-border);
-  color: var(--qry-amber);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 18px;
-}
-.qry__notice h3 {
-  margin: 0 0 2px;
-  font-family: var(--qry-font-body);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--qry-amber);
-}
-.qry__notice p {
-  margin: 0;
-  font-family: var(--qry-font-body);
-  font-size: 13px;
-  color: var(--qry-dim);
-  line-height: 1.5;
-}
-.qry__notice p em { color: var(--qry-emerald); font-style: normal; font-weight: 600; }
-
-.qry__disclaimer {
-  font-family: var(--qry-font-body);
-  font-size: 11px;
-  color: var(--qry-muted);
-  text-align: center;
-}
-
+/* ═══════════════ IMPRESIÓN ═══════════════ */
 @media print {
-  .qry__head, .qry__kpis, .qry__filters, .qry__pagination, .qry__notice, .qry__export-menu {
+  .qry__head, .qry__kpis, .qry__filters, .qry__pagination, .qry__export-menu {
     display: none !important;
   }
 }

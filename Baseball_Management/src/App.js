@@ -7,14 +7,14 @@ import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import Landing from './components/Landing';
-import PublicDataLayout from './components/landing/PublicDataLayout';
+import ConsultasLayout from './components/landing/ConsultasLayout';
 import RegisterBoard from './components/Register';
 import { TeamProfile, PlayerProfile } from './components/profilePages';
 import PlayerCompare from './components/PlayerCompare';
 import ProtectedRoute from './components/ProtectedRoute';
 import PlayerSwapForm from './components/PlayerSwapForm';
 import PlayerSwapTable from './components/PlayerSwapTable';
-import { CRUDRoute, ReportRoute, QueryRoute } from './viewRoutes';
+import { CRUDRoute, ReportRoute } from './viewRoutes';
 import {
   toCRUDPath,
   toReportPath,
@@ -35,7 +35,7 @@ function RegisterRedirect({ onOpen }) {
 }
 
 // Componente interno que usa useNavigate (debe estar dentro del Router)
-function AppRoutes({ role, team, isLogged, onModalOpen, onRegisterOpen, onLogout }) {
+function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isStandalone = location.pathname === '/';
@@ -82,8 +82,11 @@ function AppRoutes({ role, team, isLogged, onModalOpen, onRegisterOpen, onLogout
       onRegisterOpen={onRegisterOpen}
       onLogout={onLogout}
     />
-  ) : !isLogged && location.pathname.startsWith('/consultas') ? (
-    <PublicDataLayout
+  ) : location.pathname.startsWith('/consultas') ? (
+    <ConsultasLayout
+      isLogged={isLogged}
+      userName={userName}
+      role={role}
       onModalOpen={onModalOpen}
       onRegisterOpen={onRegisterOpen}
       onLogout={onLogout}
@@ -111,7 +114,6 @@ function AppRoutes({ role, team, isLogged, onModalOpen, onRegisterOpen, onLogout
               <Route path="/registro" element={<RegisterRedirect onOpen={onRegisterOpen} />} />
               <Route path="/admin/:slug" element={<ProtectedRoute roles={['Admin']}><CRUDRoute /></ProtectedRoute>} />
               <Route path="/reporte/:slug" element={<ReportRoute />} />
-              <Route path="/consultas/:tabla" element={<QueryRoute />} />
               <Route path="/dt/cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapForm teamId={team} /></ProtectedRoute>} />
               <Route path="/dt/listar-cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapTable teamId={team} /></ProtectedRoute>} />
               <Route path="/equipo/:id" element={<TeamProfile />} />
@@ -182,6 +184,7 @@ function App() {
           role={role}
           team={team}
           isLogged={isLogged}
+          userName={userName}
           onModalOpen={handleModalOpen}
           onRegisterOpen={handleRegisterOpen}
           onLogout={handleLogout}

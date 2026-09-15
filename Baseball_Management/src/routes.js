@@ -38,22 +38,15 @@ export const REPORT_ROUTES = {
 };
 
 // Consultas: tabla (value) -> ruta
+// Solo tablas con datos legibles en el padrón público (las de solo IDs/FKs no se ofrecen).
 export const QUERY_TABLES = [
   { value: 'Team', label: 'Equipos' },
   { value: 'Game', label: 'Juegos' },
   { value: 'Series', label: 'Series' },
-  { value: 'Worker', label: 'Trabajadores' },
-  { value: 'DirectionTeam', label: 'Equipos de Dirección' },
-  { value: 'BaseballPlayer', label: 'Jugadores de Baseball' },
   { value: 'Season', label: 'Temporadas' },
+  { value: 'BaseballPlayer', label: 'Jugadores de Baseball' },
   { value: 'Pitcher', label: 'Pitchers' },
-  { value: 'TeamOnTheField', label: 'Equipo en Campo' },
-  { value: 'StarPlayer', label: 'Jugador Estrella' },
   { value: 'PlayerInPosition', label: 'Jugadores en Posición' },
-  { value: 'Score', label: 'Puntuaciones' },
-  { value: 'BPParticipation', label: 'Participación de los Jugadores' },
-  { value: 'PlayerSwap', label: 'Cambio de Jugador' },
-  { value: 'PlayerInLineUp', label: 'Jugadores en Alineación' },
 ];
 
 // Helper: slug desde cadena (acentos/espacios)

@@ -58,19 +58,25 @@ const Filters = ({ table, fields, values = {}, setFilters }) => {
         const current = values[field] || {};
         if (field === 'age' || field === "P_id__age" || field === 'score' || field === "score__w_points" || field === "score__l_points" || field === "years_of_experience" || field === "No_games_won" || field === "No_games_lost" || field === "running_average" || field === "effectiveness" || field === "w_points" || field === "l_points") {
             return (
-                <div>
-                    <label>Mínimo:</label>
-                    <input
-                        type="number"
-                        value={current.gte ?? ''}
-                        onChange={(e) => handleFilterChange(field, e.target.value, 'gte')}
-                    />
-                    <label>Máximo:</label>
-                    <input
-                        type="number"
-                        value={current.lte ?? ''}
-                        onChange={(e) => handleFilterChange(field, e.target.value, 'lte')}
-                    />
+                <div className="filter-minmax">
+                    <div className="filter-minmax__field">
+                        <span className="filter-minmax__tag">Mín</span>
+                        <input
+                            type="number"
+                            value={current.gte ?? ''}
+                            aria-label="Mínimo"
+                            onChange={(e) => handleFilterChange(field, e.target.value, 'gte')}
+                        />
+                    </div>
+                    <div className="filter-minmax__field">
+                        <span className="filter-minmax__tag">Máx</span>
+                        <input
+                            type="number"
+                            value={current.lte ?? ''}
+                            aria-label="Máximo"
+                            onChange={(e) => handleFilterChange(field, e.target.value, 'lte')}
+                        />
+                    </div>
                 </div>
             );
         }

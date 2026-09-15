@@ -28,18 +28,10 @@ const tableNameMap = {
     Team: 'Equipos',
     Game: 'Juegos',
     Series: 'Series',
-    Worker: 'Trabajadores',
-    DirectionTeam: 'Equipos de Dirección',
     BaseballPlayer: 'Jugadores de Baseball',
     Season: 'Temporadas',
     Pitcher: 'Pitchers',
-    TeamOnTheField: 'Equipo en Campo',
-    StarPlayer: 'Jugador Estrella',
     PlayerInPosition: 'Jugadores en Posición',
-    Score: 'Puntuaciones',
-    BPParticipation: 'Participación de los Jugadores',
-    PlayerSwap: 'Cambio de Jugador',
-    PlayerInLineUp: 'Jugadores en Alineación',
 };
 
 const numericFields = [
@@ -405,7 +397,12 @@ const Queries = ({ selectedTable, onRequireAuth }) => {
                         className={`qry__kpi${kpi.tone ? ` qry__kpi--${kpi.tone}` : ''}`}
                     >
                         <div className="qry__kpi-body">
-                            <div className="qry__kpi-label">{kpi.label}</div>
+                            <div className="qry__kpi-label-row">
+                                <div className="qry__kpi-icon" aria-hidden="true">
+                                    <span className="material-symbols-outlined">{kpi.icon}</span>
+                                </div>
+                                <div className="qry__kpi-label">{kpi.label}</div>
+                            </div>
                             <div className="qry__kpi-value-row">
                                 <span
                                     className={`qry__kpi-value${
@@ -416,9 +413,6 @@ const Queries = ({ selectedTable, onRequireAuth }) => {
                                 </span>
                                 <span className="qry__kpi-unit">{kpi.unit}</span>
                             </div>
-                        </div>
-                        <div className="qry__kpi-icon" aria-hidden="true">
-                            <span className="material-symbols-outlined">{kpi.icon}</span>
                         </div>
                     </div>
                 ))}
@@ -635,29 +629,6 @@ const Queries = ({ selectedTable, onRequireAuth }) => {
                     </div>
                 </div>
             </section>
-
-            {/* ═════════ NOTA REGLAMENTARIA ═════════ */}
-            <aside className="qry__notice">
-                <div className="qry__notice-inner">
-                    <div className="qry__notice-icon" aria-hidden="true">
-                        <span className="material-symbols-outlined">info</span>
-                    </div>
-                    <div>
-                        <h3>Nota Reglamentaria</h3>
-                        <p>
-                            Los datos publicados provienen del sistema oficial de gestión de
-                            la liga y se actualizan con cada resultado registrado. Cualquier
-                            discrepancia debe reportarse al departamento de estadística.{' '}
-                            <em>Actualización: en tiempo real.</em>
-                        </p>
-                    </div>
-                </div>
-            </aside>
-
-            <p className="qry__disclaimer">
-                Padrón de datos públicos · LNBP — los perfiles y estadísticas individuales
-                se verifican por serie y temporada vigente.
-            </p>
         </div>
     );
 };
