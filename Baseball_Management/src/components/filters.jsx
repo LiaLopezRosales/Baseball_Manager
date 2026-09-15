@@ -23,7 +23,7 @@ const generateYearOptions = () => {
     return years;
 };
 
-const Filters = ({ table, fields, setFilters }) => {
+const Filters = ({ table, fields, values = {}, setFilters }) => {
     const months = generateMonthOptions();
     const years = generateYearOptions();
 
@@ -55,17 +55,20 @@ const Filters = ({ table, fields, setFilters }) => {
     };
 
     const renderFilter = (field) => {
+        const current = values[field] || {};
         if (field === 'age' || field === "P_id__age" || field === 'score' || field === "score__w_points" || field === "score__l_points" || field === "years_of_experience" || field === "No_games_won" || field === "No_games_lost" || field === "running_average" || field === "effectiveness" || field === "w_points" || field === "l_points") {
             return (
                 <div>
                     <label>Mínimo:</label>
                     <input
                         type="number"
+                        value={current.gte ?? ''}
                         onChange={(e) => handleFilterChange(field, e.target.value, 'gte')}
                     />
                     <label>Máximo:</label>
                     <input
                         type="number"
+                        value={current.lte ?? ''}
                         onChange={(e) => handleFilterChange(field, e.target.value, 'lte')}
                     />
                 </div>
@@ -77,6 +80,7 @@ const Filters = ({ table, fields, setFilters }) => {
                     <div className="filter-group">
                         <label>Mes:</label>
                         <select
+                            value={current.month ?? ''}
                             onChange={(e) => handleFilterChange(field, e.target.value, 'month')}
                         >
                             <option value="">Seleccionar mes</option>
@@ -91,6 +95,7 @@ const Filters = ({ table, fields, setFilters }) => {
                     <div className="filter-group">
                         <label>Año:</label>
                         <select
+                            value={current.year ?? ''}
                             onChange={(e) => handleFilterChange(field, e.target.value, 'year')}
                         >
                             <option value="">Seleccionar año</option>
@@ -108,6 +113,7 @@ const Filters = ({ table, fields, setFilters }) => {
             return (
                 <input
                     type="text"
+                    value={current.icontains ?? ''}
                     onChange={(e) => handleFilterChange(field, e.target.value, 'icontains')}
                 />
             );

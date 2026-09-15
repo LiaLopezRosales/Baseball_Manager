@@ -67,7 +67,7 @@ export function ReportRoute() {
   );
 }
 
-export function QueryRoute() {
+export function QueryRoute({ onRequireAuth }) {
   const { tabla } = useParams();
-  return <Queries selectedTable={tabla} />;
+  return <Queries key={tabla} selectedTable={tabla} onRequireAuth={onRequireAuth} />;
 }

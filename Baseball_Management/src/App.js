@@ -7,6 +7,7 @@ import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import Landing from './components/Landing';
+import PublicDataLayout from './components/landing/PublicDataLayout';
 import RegisterBoard from './components/Register';
 import { TeamProfile, PlayerProfile } from './components/profilePages';
 import PlayerCompare from './components/PlayerCompare';
@@ -77,6 +78,12 @@ function AppRoutes({ role, team, isLogged, onModalOpen, onRegisterOpen, onLogout
     <Landing
       isLogged={isLogged}
       role={role}
+      onModalOpen={onModalOpen}
+      onRegisterOpen={onRegisterOpen}
+      onLogout={onLogout}
+    />
+  ) : !isLogged && location.pathname.startsWith('/consultas') ? (
+    <PublicDataLayout
       onModalOpen={onModalOpen}
       onRegisterOpen={onRegisterOpen}
       onLogout={onLogout}
