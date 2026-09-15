@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Download, RefreshCw, Printer } from 'lucide-react';
 import { API_URL } from '../api';
 import GradientSpinner from './ui/GradientSpinner';
+import { BoletínContext } from '../reportBoletinContext';
 import './report.css';
 
 const PAGE_SIZE = 10;
@@ -58,6 +60,47 @@ function ParamsSelector({ report_id, onTeamSelect, onPitcherSelect, onPitcherLNS
   const [selectedPitcherLn, setSelectedPitcherLn] = useState('');
   const [selectedSeason, setSelectedSeason] = useState('');
   const [selectedSeries, setSelectedSeries] = useState('');
+
+  /* Filtro default pre-cargado (una sola vez por reporte): el select abre con la
+     primera opción para que el cliente nunca vea la tabla vacía. */
+  const defaultsApplied = useRef(false);
+  const defaultForReport = useRef(null);
+
+  useEffect(() => {
+    if (defaultsApplied.current) return;
+    if (defaultForReport.current !== report_id) {
+      defaultForReport.current = report_id;
+      defaultsApplied.current = false;
+    }
+    let applied = false;
+    if ((report_id === 0 || report_id === 2) && seasons.length > 0 && !selectedSeason) {
+      setSelectedSeason(seasons[0].name);
+      onSeasonSelect(seasons[0].name);
+      applied = true;
+    }
+    if (report_id === 1 && series.length > 0 && !selectedSeries) {
+      setSelectedSeries(series[0].name);
+      onSeriesSelect(series[0].name);
+      applied = true;
+    }
+    if (report_id === 8 && teams.length > 0 && !selectedTeam) {
+      setSelectedTeam(teams[0].name);
+      onTeamSelect(teams[0].name);
+      applied = true;
+    }
+    if (applied) defaultsApplied.current = true;
+  }, [
+    report_id,
+    teams,
+    seasons,
+    series,
+    selectedSeason,
+    selectedSeries,
+    selectedTeam,
+    onSeasonSelect,
+    onSeriesSelect,
+    onTeamSelect,
+  ]);
 
   useEffect(() => {
     const load = (url, setter) =>
@@ -175,6 +218,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
+  const [printAll, setPrintAll] = useState(false);
 
   const [team_name, setSelectedTeam] = useState('');
   const [pitcher_name, setSelectedPitcher] = useState('');
@@ -187,6 +231,10 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
   const [search, setSearch] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
   const isLogged = !!localStorage.getItem('token');
+
+  const fetchSeq = useRef(0);
+
+  const setBoletín = useContext(BoletínContext);
 
   const buildParams = () => {
     switch (report_id) {
@@ -208,6 +256,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
     setLoading(true);
     setError(null);
     setPage(1);
+    const requestId = ++fetchSeq.current;
     fetch(`${API_URL}/api/queries/reports/?${buildParams().toString()}`)
       .then((response) => {
         if (!response.ok) {
@@ -216,10 +265,12 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
         return response.json();
       })
       .then((result) => {
+        if (requestId !== fetchSeq.current) return;
         setData(result);
         setLoading(false);
       })
       .catch((err) => {
+        if (requestId !== fetchSeq.current) return;
         setError(err);
         setLoading(false);
       });
@@ -229,17 +280,18 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
     window.open(`${API_URL}/api/queries/reports/?${buildParams().toString()}`, '_blank', 'noopener,noreferrer');
   };
 
-  const handleExport = async () => {
+  const handleExport = async (formatOverride) => {
     if (!isLogged) {
       setExportError('Debes iniciar sesión para exportar.');
       return;
     }
     setExportError('');
+    const format = typeof formatOverride === 'string' ? formatOverride : exportFormat;
     const exportData = {
       filename: report_name,
-      format: exportFormat,
+      format,
       data: {
-        '': Array.isArray(data) ? data : data || [],
+        [report_name]: Array.isArray(data) ? data : data || [],
       },
     };
 
@@ -261,13 +313,49 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${report_name}.${exportFormat}`;
+      a.download = `${report_name}.${format}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
     } catch (err) {
       console.error('Error exporting report:', err);
     }
+  };
+
+  /* Registro del "boletín técnico" para el footer de la layout (contexto mutado
+     en cada render para que el footer siempre use el handler vigente). */
+  const boletínRef = useRef(null);
+  if (!boletínRef.current) boletínRef.current = { title: report_name, onDownload: null };
+  boletínRef.current.title = report_name;
+  boletínRef.current.onDownload = () => handleExport('pdf');
+
+  useEffect(() => {
+    if (!setBoletín) return undefined;
+    setBoletín(boletínRef.current);
+    return () => setBoletín(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setBoletín]);
+
+  /* Imprimir la boleta completa (todas las filas del corte). */
+  useEffect(() => {
+    const before = () => setPrintAll(true);
+    const after = () => setPrintAll(false);
+    window.addEventListener('beforeprint', before);
+    window.addEventListener('afterprint', after);
+    return () => {
+      window.removeEventListener('beforeprint', before);
+      window.removeEventListener('afterprint', after);
+    };
+  }, []);
+
+  const handlePrint = () => {
+    flushSync(() => setPrintAll(true));
+    const printAndReset = () => {
+      window.print();
+      setPrintAll(false);
+    };
+    if (window.requestAnimationFrame) window.requestAnimationFrame(printAndReset);
+    else printAndReset();
   };
 
   useEffect(() => {
@@ -339,7 +427,9 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
   const total = enabledRows.length;
   const totalPages = total ? Math.max(1, Math.ceil(total / PAGE_SIZE)) : 1;
   const safePage = Math.min(Math.max(1, page), totalPages);
-  const visibleRows = total ? enabledRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE) : [];
+  const pageRows = total ? enabledRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE) : [];
+  const viewRows = printAll ? enabledRows : pageRows;
+  const rankBase = printAll ? 0 : (safePage - 1) * PAGE_SIZE;
   const cols = headers.length;
 
   let leaderLabel = headers[0] || 'Registros';
@@ -391,7 +481,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
     },
     {
       label: 'En Vista',
-      value: visibleRows.length.toLocaleString('es-MX'),
+      value: pageRows.length.toLocaleString('es-MX'),
       suffix: 'filas',
       chip: 'Página activa',
       chipTone: '',
@@ -527,10 +617,10 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
             </p>
           </div>
           <div className="rep__actions">
-            <button type="button" className="rep__btn rep__btn--ghost" onClick={handleExport}>
+            <button type="button" className="rep__btn rep__btn--ghost" onClick={() => handleExport()}>
               <Download size={16} /> Exportar Datos
             </button>
-            <button type="button" className="rep__btn rep__btn--solid" onClick={() => window.print()}>
+            <button type="button" className="rep__btn rep__btn--solid" onClick={handlePrint}>
               <Printer size={16} /> Imprimir Boleta
             </button>
           </div>
@@ -538,6 +628,11 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
 
         {!isLogged && <p className="rep__lock-note">🔒 Inicia sesión para exportar reportes</p>}
         {exportError && <p className="rep__lock-note">{exportError}</p>}
+      </div>
+
+      {/* Cabecera visible solo en impresión */}
+      <div className="rep__print-head">
+        LNB PRO · {report_short || report_name} — {new Date().toLocaleDateString('es-MX')} · Corte estadístico oficial
       </div>
 
       {/* ─── KPIs reales ─── */}
@@ -589,6 +684,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
       <div className="rep__filter">
         <div className="rep__filter-grid">
           <ParamsSelector
+            key={report_id}
             report_id={report_id}
             onTeamSelect={setSelectedTeam}
             onPitcherSelect={setSelectedPitcher}
@@ -669,7 +765,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
                 <strong>Tabla Oficial {report_short || report_name}</strong>
               </div>
               <div className="rep__table-sub-meta">
-                <span className="rep__count">({visibleRows.length} en vista)</span>
+                <span className="rep__count">({pageRows.length} en vista)</span>
                 <span className="rep__order">
                   <span className="rep__order-label">Orden:</span> tabla oficial LNB PRO
                 </span>
@@ -689,8 +785,8 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
                   </tr>
                 </thead>
                 <tbody>
-                  {visibleRows.map((item, index) => {
-                    const rank = (safePage - 1) * PAGE_SIZE + index + 1;
+                  {viewRows.map((item, index) => {
+                    const rank = rankBase + index + 1;
                     return (
                       <tr key={`${safePage}-${index}`}>
                         <td className="rep__td-rank">
@@ -794,35 +890,6 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
         ) : (
           <div className="rep__empty">No hay datos para este reporte.</div>
         )}
-      </div>
-
-      {/* ─── Banner regulatorio WBSC ─── */}
-      <div className="rep__wbsc">
-        <span className="rep__wbsc-bar" aria-hidden="true" />
-        <span className="rep__wbsc-icon" aria-hidden="true">
-          <span className="material-symbols-outlined">gavel</span>
-        </span>
-        <div className="rep__wbsc-body">
-          <div className="rep__wbsc-head">
-            <strong>Criterio Regulatorio WBSC (Estatuto Técnico Art. 84)</strong>
-            <span className="rep__wbsc-chip">Válido Ciclo 2024</span>
-          </div>
-          <p>
-            El corte estadístico publicado se rige por el reglamento de la World
-            Baseball Softball Confederation y es revisado por la Dirección de
-            Estadística antes de su difusión.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="rep__btn rep__btn--ghost rep__wbsc-btn"
-          title="Próximamente"
-        >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            menu_book
-          </span>
-          Descargar Boletín Técnico (PDF)
-        </button>
       </div>
     </div>
   );

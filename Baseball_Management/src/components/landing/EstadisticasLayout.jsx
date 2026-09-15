@@ -10,6 +10,7 @@ import LandingHeader from './LandingHeader';
 import { REPORT_ROUTES } from '../../routes';
 import { ReportRoute } from '../../viewRoutes';
 import { getInitialTheme } from '../../theme';
+import { BoletínContext } from '../../reportBoletinContext';
 import './EstadisticasLayout.css';
 
 // Chrome de páginas de estadísticas (/reporte/:slug) para TODOS los roles:
@@ -26,6 +27,7 @@ function EstadisticasLayout({
   onLogout,
 }) {
   const [theme, setTheme] = useState(() => getInitialTheme());
+  const [boletín, setBoletín] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -103,7 +105,7 @@ function EstadisticasLayout({
               <strong className="est-side-foot__title">Temporada Regular</strong>
               <span className="est-side-foot__chip">Activa</span>
             </div>
-            <span className="est-side-foot__ed">Edición Nacional 2024</span>
+            <span className="est-side-foot__ed">Edición Nacional {new Date().getFullYear()}</span>
             <p className="est-side-foot__live">
               <span className="est-side-foot__pulse" aria-hidden="true" />
               Actualizado en tiempo real
@@ -134,12 +136,47 @@ function EstadisticasLayout({
               </select>
             </div>
 
-            <Routes>
-              <Route path="/reporte/:slug" element={<ReportRoute />} />
-            </Routes>
+            <BoletínContext.Provider value={setBoletín}>
+              <Routes>
+                <Route path="/reporte/:slug" element={<ReportRoute />} />
+              </Routes>
+            </BoletínContext.Provider>
           </main>
 
           <footer className="data-layout__footer data-layout__footer--stats">
+            <div className="est-reg">
+              <span className="est-reg__bar" aria-hidden="true" />
+              <span className="est-reg__icon" aria-hidden="true">
+                <span className="material-symbols-outlined">gavel</span>
+              </span>
+              <div className="est-reg__body">
+                <div className="est-reg__head">
+                  <strong>Criterio Regulatorio WBSC (Estatuto Técnico Art. 84)</strong>
+                  <span className="est-reg__chip">Válido Ciclo 2024</span>
+                </div>
+                <p>
+                  El corte estadístico publicado se rige por el reglamento de la
+                  World Baseball Softball Confederation y es revisado por la
+                  Dirección de Estadística antes de su difusión.
+                </p>
+              </div>
+              <div className="est-reg__actions">
+                {!isLogged && (
+                  <p className="est-reg__lock">🔒 Inicia sesión para descargar el boletín</p>
+                )}
+                <button
+                  type="button"
+                  className="est-reg__btn"
+                  onClick={() => boletín && boletín.onDownload()}
+                  disabled={!isLogged || !boletín}
+                >
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    menu_book
+                  </span>
+                  Descargar Boletín Técnico (PDF)
+                </button>
+              </div>
+            </div>
             <div className="est-footer">
               <div className="est-footer__left">
                 <span className="material-symbols-outlined est-footer__verify" aria-hidden="true">

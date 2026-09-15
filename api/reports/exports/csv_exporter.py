@@ -5,7 +5,7 @@ from io import StringIO
 from .base_exporter import BaseExporter  # Asegúrate de importar tu clase base correctamente.
 
 class CSVExporter(BaseExporter):
-    def export(self, data):
+    def export(self, data, **kwargs):
         # Usamos StringIO para manejar el CSV en memoria
         buffer = StringIO()
         writer = csv.writer(buffer)

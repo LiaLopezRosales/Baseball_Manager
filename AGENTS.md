@@ -315,3 +315,33 @@ así que **todos los filtros usan `user_id`** (nunca `request.user` directo en l
   - `ollama show gemma4:12b` confirma capabilities `vision` (requiere Ollama ≥0.30.5).
   - El modelo no distingue bien light/dark según el nombre del archivo; pasa como contexto las
     capturas Light y Dark cuando el brief lo requiera.
+
+## Frontend: módulo de estadísticas — boletín, impresión y filtros default
+
+- **Bloque regulatorio WBSC como footer**: el panel "Criterio Regulatorio WBSC (Estatuto Técnico
+  Art. 84)" ya NO es un banner del reporte (`report.jsx`); vive en el footer de
+  `EstadisticasLayout.jsx` (clases `est-reg*`) con botón **Descargar Boletín Técnico (PDF)**.
+  El botón descarga el PDF con marca del reporte actual vía `BoletínContext`
+  (`src/reportBoletinContext.js`): el `ReportComponent` registra un objeto mutado por render
+  (`boletínRef.current`) que la layout consume SIN re-render; invitados ven candado + botón
+  deshabilitado (`disabled={!isLogged || !boletín}`).
+- **Filtro default precargado**: `ParamsSelector` en `report.jsx` preselecciona la primera opción
+  UNA vez por reporte (ref guard `defaultsApplied`): 0/2→primera temporada, 1→primera serie,
+  8→primer equipo. El reporte 8 (equipo) sin filtro devuelve 0 filas; con default nunca queda
+  vacío. `ParamsSelector` se monta con `key={report_id}` para resetear el default al cambiar de reporte.
+- **Imprimir Boleta imprime el corte completo**: `handlePrint` usa `flushSync(()=>setPrintAll(true))`
+  + `window.print()` (todos los registros, `viewRows = printAll ? enabledRows : pageRows`) y
+  listeners `beforeprint/afterprint`; el `@media print` de `report.css` + `EstadisticasLayout.css`
+  oculta sidebar/header/filtros/KPIs/auditoría/paginación y fuerza colores de imprenta claros
+  (cabecera nocturna `#0b1712`, filas alternadas, `print-color-adjust: exact`).
+- **PDF export con marca LNB**: `api/reports/exports/pdf_exporter.py` reescrito con reportlab
+  (banda nocturna + marca ámbar, título real, tabla crimson/clay con filas alternadas, pie
+  "Afiliado Oficial WBSC · Criterio Regulatorio (Estatuto Técnico Art. 84)" + nº página y fecha).
+  `ExportView` pasa `filename=` al exporter; **CSV** ahora acepta `**kwargs`. Logo con ruta
+  absoluta (`Path(__file__).parent/'logo.jpg'`).
+- **Gotchas**: `window.print()` en headless NO dispara `beforeprint/afterprint` (solo Chrome real);
+  `page.pdf()` de Playwright tampoco → la boleta imprimida via test sale con la página actual (10
+  filas), pero en navegador real sí imprime todo. `fetchReport` tiene guard de carrera
+  (`fetchSeq.current`) para descartar respuestas fuera de orden entre el fetch inicial y el del default.
+  El footer stats se ancla al viewport (`footerBottom == innerHeight`, `docScroll: 0`) incluso con el
+  bloque regulador añadido.

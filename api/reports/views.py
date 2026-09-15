@@ -144,7 +144,10 @@ class ExportView(APIView):
         kernel = ExporterKernel()
         kernel.load_plugins()
         exporter = kernel.get_exporter(serializer.validated_data.get("format"))
-        exported_data = exporter.export(serializer.validated_data.get('data'))
+        exported_data = exporter.export(
+            serializer.validated_data.get('data'),
+            filename=serializer.validated_data.get('filename', 'reporte'),
+        )
         
         response = HttpResponse(exported_data, content_type=exporter.get_content_type())
         response['Content-Disposition'] = f'attachment; filename="{serializer.validated_data.get("filename")}.{exporter.get_file_extension()}"'
