@@ -61,7 +61,7 @@ export function ReportRoute() {
   const { slug } = useParams();
   const cfg = REPORT_ROUTES[slug];
   return cfg ? (
-    <ReportComponent report_id={cfg.reportId} report_name={cfg.name} />
+    <ReportComponent report_id={cfg.reportId} report_name={cfg.name} report_short={cfg.short} report_icon={cfg.icon} />
   ) : (
     <div>Reporte no encontrado</div>
   );

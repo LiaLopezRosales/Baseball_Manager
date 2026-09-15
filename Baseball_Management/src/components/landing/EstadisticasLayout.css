@@ -1,0 +1,180 @@
+/* ============================================================
+   EstadisticasLayout — Variantes del app-shell compartido
+   (layout.css) para el módulo de estadísticas. El rail replica la
+   referencia LNB "Estadísticas": ítem activo como pill del color
+   primario (crimson dark / navy light) + glow, y foot card con
+   estado verde "ACTIVA".
+   ============================================================ */
+
+@import './layout.css';
+
+/* ─── Sidebar stats: encabezado de 2 líneas (label + "Registros LNB") ─── */
+.data-layout__side--stats .data-layout__side-title {
+  margin: 0 0 8px;
+  padding: 0 6px;
+  font-family: 'Oswald', 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--lnd-text);
+}
+
+/* ─── Rail stats: pill activo del color primario ─── */
+.data-layout__side--stats .data-layout__side-item--active {
+  background: var(--qry-primary);
+  border-left-color: transparent;
+  color: var(--qry-on-primary);
+  font-weight: 600;
+  box-shadow: var(--qry-primary-glow);
+}
+.data-layout__side--stats .data-layout__side-item--active .material-symbols-outlined {
+  color: var(--qry-on-primary);
+  opacity: 1;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+}
+.data-layout__side--stats .data-layout__side-item--active:hover {
+  background: var(--qry-primary-hover);
+  color: var(--qry-on-primary);
+}
+
+/* ─── Foot card: Temporada Regular / chip ACTIVA ─── */
+.est-side-foot {
+  margin-top: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--lnd-hairline);
+  border-radius: 8px;
+  background: var(--data-rail-foot);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.est-side-foot__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.est-side-foot__title {
+  font-family: 'Oswald', 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lnd-text-dim);
+}
+.est-side-foot__chip {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--data-verified) 45%, transparent);
+  background: color-mix(in srgb, var(--data-verified) 12%, transparent);
+  font-family: 'Oswald', 'Inter', system-ui, sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--data-verified);
+  white-space: nowrap;
+}
+.est-side-foot__ed {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lnd-text);
+}
+.est-side-foot__live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--lnd-text-dim);
+}
+.est-side-foot__pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--data-verified);
+  box-shadow: 0 0 6px var(--data-verified);
+  animation: est-pulse 2s ease-in-out infinite;
+}
+@keyframes est-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ─── Footer stats (fila fina estilo referencia WBSC) ─── */
+.data-layout__footer--stats {
+  padding: 12px clamp(1rem, 3vw, 2rem) 14px;
+  background: #070c17;
+}
+html[data-theme='light'] .data-layout__footer--stats {
+  background: #ffffff;
+}
+.est-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+@media (min-width: 720px) {
+  .est-footer { flex-direction: row; align-items: center; }
+}
+.est-footer__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+.est-footer__verify {
+  font-size: 18px;
+  color: var(--lnd-cta);
+  flex-shrink: 0;
+}
+.est-footer__affil {
+  font-family: 'Oswald', 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lnd-text);
+}
+.est-footer__sep {
+  color: var(--lnd-text-dim);
+  opacity: 0.6;
+}
+.est-footer__platform {
+  color: var(--lnd-text-dim);
+}
+.est-footer__right {
+  font-family: var(--qry-font-num);
+  font-size: 10.5px;
+  color: var(--lnd-text-dim);
+}
+
+/* ─── Bad-path link (en /reporte no se carga Queries.css) ─── */
+.data-layout__bad_path a {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: var(--qry-surface-3);
+  border: 1px solid var(--qry-border);
+  color: var(--qry-dim);
+  font-family: var(--qry-font-body);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.data-layout__bad_path a:hover {
+  background: var(--qry-primary);
+  color: var(--qry-on-primary);
+  border-color: var(--qry-primary);
+}

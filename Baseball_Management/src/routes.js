@@ -24,17 +24,17 @@ export const CRUD_ROUTES = {
   'direction-team': 'Direction Team',
 };
 
-// Reportes: slug -> { nombre, report_id }
+// Reportes: slug -> { nombre, report_id, icon (material-symbols) }
 export const REPORT_ROUTES = {
-  'equipos-ganadores': { name: 'Equipos ganadores y directores técnicos por temporadas', reportId: 0 },
-  'jugadores-estrellas': { name: 'Jugadores estrellas', reportId: 1 },
-  'primer-y-ultimo-lugar': { name: 'Primer y último lugar', reportId: 2 },
-  'series-mas-menos-juegos': { name: 'Series con más/menos juegos celebrados', reportId: 3 },
-  'carreras-limpias-juegos-ganados': { name: 'Carreras limpias/juegos ganados', reportId: 4 },
-  average: { name: 'Average', reportId: 5 },
-  'estadisticas-juegos-por-equipos': { name: 'Estadísticas de juegos por equipos', reportId: 6 },
-  'efectividad-por-posicion': { name: 'Efectividad por posición', reportId: 7 },
-  'jugadores-de-un-equipo': { name: 'Jugadores de un equipo', reportId: 8 },
+  'equipos-ganadores': { name: 'Equipos ganadores y directores técnicos por temporadas', short: 'Equipos Ganadores', reportId: 0, icon: 'emoji_events' },
+  'jugadores-estrellas': { name: 'Jugadores estrellas', short: 'Jugadores Estrellas', reportId: 1, icon: 'star' },
+  'primer-y-ultimo-lugar': { name: 'Primer y último lugar', short: 'Primer y Último Lugar', reportId: 2, icon: 'swap_vert' },
+  'series-mas-menos-juegos': { name: 'Series con más/menos juegos celebrados', short: 'Series por Juegos', reportId: 3, icon: 'timeline' },
+  'carreras-limpias-juegos-ganados': { name: 'Carreras limpias/juegos ganados', short: 'Carreras Limpias', reportId: 4, icon: 'monitoring' },
+  average: { name: 'Average', short: 'Average de Bateo', reportId: 5, icon: 'percent' },
+  'estadisticas-juegos-por-equipos': { name: 'Estadísticas de juegos por equipos', short: 'Juegos por Equipos', reportId: 6, icon: 'scoreboard' },
+  'efectividad-por-posicion': { name: 'Efectividad por posición', short: 'Efectividad', reportId: 7, icon: 'radar' },
+  'jugadores-de-un-equipo': { name: 'Jugadores de un equipo', short: 'Jugadores de Equipo', reportId: 8, icon: 'groups' },
 };
 
 // Consultas: tabla (value) -> ruta

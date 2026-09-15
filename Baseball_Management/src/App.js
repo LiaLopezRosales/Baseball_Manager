@@ -8,13 +8,14 @@ import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import Landing from './components/Landing';
 import ConsultasLayout from './components/landing/ConsultasLayout';
+import EstadisticasLayout from './components/landing/EstadisticasLayout';
 import RegisterBoard from './components/Register';
 import { TeamProfile, PlayerProfile } from './components/profilePages';
 import PlayerCompare from './components/PlayerCompare';
 import ProtectedRoute from './components/ProtectedRoute';
 import PlayerSwapForm from './components/PlayerSwapForm';
 import PlayerSwapTable from './components/PlayerSwapTable';
-import { CRUDRoute, ReportRoute } from './viewRoutes';
+import { CRUDRoute } from './viewRoutes';
 import {
   toCRUDPath,
   toReportPath,
@@ -91,6 +92,31 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
       onRegisterOpen={onRegisterOpen}
       onLogout={onLogout}
     />
+  ) : location.pathname.startsWith('/reporte') ? (
+    <EstadisticasLayout
+      isLogged={isLogged}
+      userName={userName}
+      role={role}
+      onModalOpen={onModalOpen}
+      onRegisterOpen={onRegisterOpen}
+      onLogout={onLogout}
+    />
+  ) : location.pathname.startsWith('/jugador') ? (
+    <Routes>
+      <Route
+        path="/jugador/:id"
+        element={
+          <PlayerProfile
+            isLogged={isLogged}
+            userName={userName}
+            role={role}
+            onModalOpen={onModalOpen}
+            onRegisterOpen={onRegisterOpen}
+            onLogout={onLogout}
+          />
+        }
+      />
+    </Routes>
   ) : (
     <>
       <header className="App-header">
@@ -113,11 +139,9 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
               <Route path="/" element={<Landing />} />
               <Route path="/registro" element={<RegisterRedirect onOpen={onRegisterOpen} />} />
               <Route path="/admin/:slug" element={<ProtectedRoute roles={['Admin']}><CRUDRoute /></ProtectedRoute>} />
-              <Route path="/reporte/:slug" element={<ReportRoute />} />
               <Route path="/dt/cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapForm teamId={team} /></ProtectedRoute>} />
               <Route path="/dt/listar-cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapTable teamId={team} /></ProtectedRoute>} />
               <Route path="/equipo/:id" element={<TeamProfile />} />
-              <Route path="/jugador/:id" element={<PlayerProfile />} />
               <Route path="/comparar" element={<ProtectedRoute roles={['Admin', 'Director Técnico', 'Usuario General']}><PlayerCompare /></ProtectedRoute>} />
               <Route path="*" element={<Landing />} />
             </Routes>
