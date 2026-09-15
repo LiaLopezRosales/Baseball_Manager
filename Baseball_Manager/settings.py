@@ -183,3 +183,7 @@ CORS_ALLOWED_ORIGINS = [
 STATIC_URL = 'static/'
 # Sirviendo React desde Django temporalmente para producción
 #STATICSFILES_DIRS = [BASE_DIR / "Baseball_Management" / "build" / "static"]
+
+# Media files (fotos de jugadores, etc.)
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'

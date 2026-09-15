@@ -10,6 +10,7 @@ import pytz
 import random
 from collections import defaultdict
 from datetime import datetime, timedelta
+from faker import Faker
 from factory.django import DjangoModelFactory
 from django.core.exceptions import ValidationError
 from db_structure.models import User, Rol, TechnicalDirector, Worker, DirectionTeam, Team, Person, Position, BaseballPlayer, Season, Series, Pitcher, BPParticipation, LineUp, LineUp, TeamOnTheField, StarPlayer, PlayerInPosition, Score, Game, PlayerSwap, PlayerInLineUp
@@ -34,9 +35,14 @@ class PersonFactory(DjangoModelFactory):
     
     
     CI = factory.Faker('random_int', min=10000000, max=99999999)
-    age = factory.Faker('random_int', min=18, max=70)
+    age = factory.Faker('random_int', min=18, max=45)
     name = factory.Faker('first_name')
     lastname = factory.Faker('last_name')
+    bio = factory.Faker('paragraph', nb_sentences=3)
+    birth_date = factory.Faker('date_of_birth', minimum_age=20, maximum_age=45)
+    height_cm = factory.Faker('random_int', min=165, max=198)
+    weight_kg = factory.Faker('random_int', min=75, max=110)
+    nationality = factory.Faker('random_element', elements=['Rep. Dominicana', 'Venezuela', 'Cuba', 'México', 'Puerto Rico', 'Panamá', 'Estados Unidos', 'Colombia'])
 
 # Worker Factory
 class WorkerFactory(DjangoModelFactory):
@@ -108,6 +114,8 @@ class BaseballPlayerFactory(DjangoModelFactory):
     obp = factory.Faker('pyfloat', positive=True, min_value=0.200, max_value=0.500, right_digits=3)
     slg = factory.Faker('pyfloat', positive=True, min_value=0.250, max_value=0.700, right_digits=3)
     war = factory.Faker('pyfloat', min_value=-1.0, max_value=8.0, right_digits=1)
+    bats = factory.Faker('random_element', elements=['R', 'L'])
+    throws = factory.Faker('random_element', elements=['R', 'L'])
     pitcher = None  # Can be set explicitly
 
 # Season Factory
@@ -572,9 +580,92 @@ def simulate_championship_with_participations(positions, team_player_mapping, se
     }
 
 
+def generate_player_portraits(players):
+    """
+    Genera retratos placeholder (gradiente + iniciales) con Pillow para cada jugador.
+    Solo se crea si la persona aún no tiene foto.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+    from django.conf import settings
+
+    media_players = os.path.join(settings.MEDIA_ROOT, 'players')
+    os.makedirs(media_players, exist_ok=True)
+
+    generated = 0
+    for bp in players:
+        person = bp.P_id
+        if person.photo:
+            continue
+        initials = f"{person.name[0]}{person.lastname[0]}".upper()
+        # Gradiente vertical entre dos tonos de la paleta
+        top = (15, 42, 43)      # turf oscuro
+        bottom = (181, 80, 47)  # clay
+        w, h = 320, 400
+        img = Image.new('RGB', (w, h))
+        draw = ImageDraw.Draw(img)
+        for y in range(h):
+            t = y / (h - 1)
+            draw.line(
+                [(0, y), (w, y)],
+                fill=tuple(int(top[i] + (bottom[i] - top[i]) * t) for i in range(3)),
+            )
+        # Iniciales centradas
+        try:
+            font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 96)
+        except OSError:
+            font = ImageFont.load_default()
+        bbox = draw.textbbox((0, 0), initials, font=font)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        draw.text(
+            ((w - tw) / 2 - bbox[0], (h - th) / 2 - bbox[1]),
+            initials,
+            font=font,
+            fill=(243, 239, 227, 255),
+        )
+        fname = f'person_{person.id}.png'
+        img.save(os.path.join(media_players, fname))
+        person.photo = f'players/{fname}'
+        person.save(update_fields=['photo'])
+        generated += 1
+
+    print(f"Retratos placeholder generados para {generated} jugadores.")
+    return generated
+
+
+def backfill_person_biometrics():
+    """
+    Backfill de los campos nuevos de Person/BaseballPlayer sobre una BD ya sembrada:
+    birth_date, height_cm, weight_kg, nationality, bats y throws a los registros sin valor.
+    """
+    from datetime import timedelta
+    faker = Faker()
+    NATIONALITIES = ['Rep. Dominicana', 'Venezuela', 'Cuba', 'México', 'Puerto Rico', 'Panamá', 'Estados Unidos', 'Colombia']
+
+    updated = 0
+    for person in Person.objects.filter(birth_date__isnull=True):
+        person.birth_date = faker.date_of_birth(minimum_age=20, maximum_age=45)
+        person.height_cm = faker.random_int(min=165, max=198)
+        person.weight_kg = faker.random_int(min=75, max=110)
+        person.nationality = faker.random_element(NATIONALITIES)
+        person.save(update_fields=['birth_date', 'height_cm', 'weight_kg', 'nationality'])
+        updated += 1
+
+    player_updated = 0
+    for bp in BaseballPlayer.objects.filter(bats__in=['', None]):
+        bp.bats = faker.random_element(['R', 'L'])
+        bp.throws = faker.random_element(['R', 'L'])
+        bp.save(update_fields=['bats', 'throws'])
+        player_updated += 1
+
+    print(f"Backfill biométrico: {updated} personas, {player_updated} jugadores.")
+    return updated + player_updated
+
+
 def simulate_full_championship():
     user_worker_data = populate_users_and_workers(team_numbers=6)
     player_position_data = populate_baseball_players_and_positions(user_worker_data["teams"])
+    generate_player_portraits(player_position_data["baseball_players"])
+    backfill_person_biometrics()
     championship_data = simulate_championship_with_participations(
         positions=player_position_data["positions"],
         team_player_mapping=player_position_data["team_player_mapping"],

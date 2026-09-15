@@ -4,15 +4,236 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
-from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition, PlayerSwap, Person, Rol, FavoriteTeam as FavoriteTeamModel, FavoritePlayer as FavoritePlayerModel, Notification as NotificationModel
+from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition, PlayerSwap, Person, Rol, BaseballPlayer, Pitcher, StarPlayer, FavoriteTeam as FavoriteTeamModel, FavoritePlayer as FavoritePlayerModel, Notification as NotificationModel
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 # from datetime import datetime
-from db_structure.serializers import PlayerSwapSerializer
+from db_structure.serializers import PlayerSwapSerializer, BaseballPlayerSerializer
 from db_structure.views import FavoriteTeamViewSet, FavoritePlayerViewSet, NotificationViewSet
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Q
+from django.utils import timezone
+from django.http import HttpResponse
+
+
+class PlayerProfileView(APIView):
+    """
+    Perfil público de jugador: agrega persona, posición, equipo, fielding,
+    pitcheo, logros, últimos juegos por serie e hitos de carrera.
+    """
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @staticmethod
+    def _rank_in(qs, field, player_id, desc=True):
+        order = ('-' if desc else '') + field
+        ids = list(qs.order_by(order).values_list('id', flat=True))
+        return (ids.index(player_id) + 1) if player_id in ids else None
+
+    def get(self, request, player_id):
+        try:
+            player = BaseballPlayer.objects.select_related('P_id').get(id=player_id)
+        except BaseballPlayer.DoesNotExist:
+            return Response({'error': 'Jugador no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        person = player.P_id
+        pip = player.playerinposition_bp.select_related('position').first()
+        position_name = pip.position.name if pip else None
+
+        # Equipo más reciente (por fecha de inicio de serie)
+        part = player.bp_participations.select_related('team_id', 'series__season').order_by('-series__init_date').first()
+        team = part.team_id if part else None
+
+        games_played = player.bp_participations.count()
+
+        # Rankings de liga por estadística (posiciones en queries ordenadas)
+        avg_rank = self._rank_in(BaseballPlayer.objects.all(), 'batting_average', player.id)
+        obp_rank = self._rank_in(BaseballPlayer.objects.all(), 'obp', player.id)
+        slg_rank = self._rank_in(BaseballPlayer.objects.all(), 'slg', player.id)
+        ops = round((player.obp or 0) + (player.slg or 0), 3)
+
+        ops_rank = None
+        dp_rank = None
+        if pip is not None:
+            same_position = PlayerInPosition.objects.filter(position_id=pip.position_id)
+            dp_ids = list(same_position.order_by('-double_plays').values_list('BP_id', flat=True))
+            if player.id in dp_ids:
+                dp_rank = dp_ids.index(player.id) + 1
+            ops_ids = list(BaseballPlayer.objects.order_by('-obp', '-slg').values_list('id', flat=True))
+            if player.id in ops_ids:
+                ops_rank = ops_ids.index(player.id) + 1
+
+        # Pitcher: unir por P_id de la persona (player.pitcher suele ser None)
+        pitcher_data = None
+        pitcher = Pitcher.objects.filter(P_id=player).first()
+        if pitcher:
+            pitcher_data = {
+                'dominant_hand': pitcher.dominant_hand,
+                'No_games_won': pitcher.No_games_won,
+                'No_games_lost': pitcher.No_games_lost,
+                'running_average': pitcher.running_average,
+                'strikeouts': pitcher.strikeouts,
+                'innings_pitched': pitcher.innings_pitched,
+                'saves': pitcher.saves,
+                'whip': pitcher.whip,
+            }
+
+        # Logros derivados
+        star_count = StarPlayer.objects.filter(BP_id=player).count()
+        badges = []
+        if star_count > 0:
+            badges.append({'icon': 'star', 'label': 'Jugador Estrella', 'count': star_count})
+        if player.home_runs >= 10:
+            badges.append({'icon': 'flame', 'label': 'Poder', 'detail': f'{player.home_runs} HR'})
+        if pip is not None and pip.fielding_pct >= 0.97:
+            badges.append({'icon': 'shield', 'label': 'Defensa élite', 'detail': f'{pip.fielding_pct:.3f}'})
+        if pip is not None and pip.bases_stolen >= 10:
+            badges.append({'icon': 'flash', 'label': 'Robador de bases', 'detail': f'{pip.bases_stolen} SB'})
+
+        # Estado (próximo compromiso)
+        live_status = None
+        if team is not None:
+            tof_ids = TeamOnTheField.objects.filter(lineup_id__team_id=team).values_list('id', flat=True)
+            upcoming = Game.objects.filter(
+                Q(local_id__in=tof_ids) | Q(rival_id__in=tof_ids),
+                score__isnull=True,
+                date__gte=timezone.now(),
+            ).select_related('local__lineup_id__team_id', 'rival__lineup_id__team_id', 'series').order_by('date').first()
+            if upcoming:
+                is_local = upcoming.local.lineup_id.team_id == team
+                rival = upcoming.rival.lineup_id.team_id if is_local else upcoming.local.lineup_id.team_id
+                live_status = {
+                    'date': upcoming.date.strftime('%d/%m/%Y'),
+                    'rival': rival.name,
+                    'rival_initials': rival.initials,
+                    'series': f"{upcoming.series.type} · {upcoming.series.season.name}",
+                }
+
+        # Últimas 5 series de participación (con récord de la serie para su equipo)
+        last_series = []
+        recent_parts = list(player.bp_participations.select_related('team_id', 'series__season').order_by('-series__init_date')[:5])
+        for p in recent_parts:
+            s = p.series
+            t = p.team_id
+            tof_ids = TeamOnTheField.objects.filter(lineup_id__team_id=t).values_list('id', flat=True)
+            games_qs = list(Game.objects.filter(series=s).filter(
+                Q(local_id__in=tof_ids) | Q(rival_id__in=tof_ids),
+                score__isnull=False,
+            ).select_related('score'))
+            wins = sum(1 for g in games_qs if g.score.winner_id == t.id)
+            losses = len(games_qs) - wins
+            last_series.append({
+                'series': s.name,
+                'type': s.type,
+                'season': s.season.name,
+                'team': t.name,
+                'team_initials': t.initials,
+                'games': len(games_qs),
+                'wins': wins,
+                'losses': losses,
+                'star': StarPlayer.objects.filter(series=s, BP_id=player).exists(),
+            })
+
+        person_data = {
+            'id': person.id,
+            'name': person.name,
+            'lastname': person.lastname,
+            'age': person.age,
+            'bio': person.bio,
+            'photo': request.build_absolute_uri(person.photo.url) if person.photo else None,
+            'birth_date': person.birth_date.strftime('%d/%m/%Y') if person.birth_date else None,
+            'height_cm': person.height_cm,
+            'weight_kg': person.weight_kg,
+            'nationality': person.nationality or None,
+        }
+
+        fielding = None
+        if pip is not None:
+            fielding = {
+                'effectiveness': round(pip.effectiveness, 3) if pip.effectiveness is not None else None,
+                'fielding_pct': pip.fielding_pct,
+                'double_plays': pip.double_plays,
+                'bases_stolen': pip.bases_stolen,
+                'assists_of': pip.assists_of,
+            }
+
+        player_data = BaseballPlayerSerializer(player, context={'request': request}).data
+
+        # Hito de carrera destacado (derivado de los mejores agregados reales)
+        latest_season = recent_parts[0].series.season.name if recent_parts else 'Temporada oficial LNB'
+        hito = {'icon': 'military_tech', 'headline': None, 'sub': None}
+        if player.rbi and player.rbi >= 60:
+            hito['headline'] = f'{player.rbi} Impulsadas en LNB'
+            hito['sub'] = f'Registro acumulado · {latest_season}'
+        elif player.home_runs and player.home_runs >= 15:
+            hito['headline'] = f'{player.home_runs} Jonrones en LNB'
+            hito['sub'] = f'Registro acumulado · {latest_season}'
+        elif player.batting_average and player.batting_average >= 0.330:
+            hito['headline'] = f'Promedio de {player.batting_average:.3f} en LNB'
+            hito['sub'] = f'Registro acumulado · {latest_season}'
+        elif player.batting_average:
+            hito['headline'] = f'Promedio de {player.batting_average:.3f} en LNB'
+            hito['sub'] = f'Registro acumulado · {latest_season}'
+        else:
+            hito['headline'] = f'{games_played} Series disputadas'
+            hito['sub'] = f'Participación acumulada · {latest_season}'
+
+        active_streak = sum(s['games'] for s in last_series)
+        is_starting = sum(1 for s in last_series if s['games'] > 0)
+
+        return Response({
+            'player': player_data,
+            'person': person_data,
+            'position': position_name,
+            'team': {
+                'name': team.name,
+                'initials': team.initials,
+                'color': team.color,
+            } if team else None,
+            'fielding': fielding,
+            'games_played': games_played,
+            'pitcher': pitcher_data,
+            'star_count': star_count,
+            'badges': badges,
+            'live_status': live_status,
+            'last_series': last_series,
+            'ops': ops,
+            'avg_rank': avg_rank,
+            'obp_rank': obp_rank,
+            'slg_rank': slg_rank,
+            'ops_rank': ops_rank,
+            'dp_rank': dp_rank,
+            'active_streak': active_streak,
+            'is_starting': is_starting,
+            'hito': {k: v for k, v in hito.items()},
+            'milestones': {
+                'games': games_played,
+                'hr': player.home_runs,
+                'rbi': player.rbi,
+                'avg': player.batting_average,
+                'war': player.war,
+                'obp': player.obp,
+                'slg': player.slg,
+                'experience': player.years_of_experience,
+                'age': person.age,
+            },
+        }, status=status.HTTP_200_OK)
+
+
+class PlayerFichaView(APIView):
+    """Descarga la ficha PDF registral de un jugador."""
+    permission_classes = [AllowAny]
+
+    def get(self, request, player_id):
+        from .reports.player_ficha import build_player_ficha
+        try:
+            pdf_bytes = build_player_ficha(player_id)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="ficha-jugador-{player_id}.pdf"'
+        return response
 
 
 class LoginView(APIView):

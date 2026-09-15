@@ -123,12 +123,20 @@ class Team(models.Model):
     def __str__(self):
         return f"Equipo {self.name} ({self.initials})"
     
+BATS_THROWS = [('R','Diestro'),('L','Zurdo')]
+
 class Person(models.Model):
     id = models.AutoField(primary_key=True)
     CI = models.IntegerField(unique=True)            
     age = models.IntegerField()                           
     name = models.CharField(max_length=100)               
     lastname = models.CharField(max_length=100)           
+    bio = models.TextField(blank=True, default='')        
+    photo = models.ImageField(upload_to='players/', null=True, blank=True)           
+    birth_date = models.DateField(null=True, blank=True)
+    height_cm = models.PositiveSmallIntegerField(null=True, blank=True)
+    weight_kg = models.PositiveSmallIntegerField(null=True, blank=True)
+    nationality = models.CharField(max_length=100, blank=True, default='')
 
     def __str__(self):
         return f"{self.name} {self.lastname} (CI: {self.CI})"
@@ -155,6 +163,8 @@ class BaseballPlayer(models.Model):
     obp = models.FloatField(default=0)
     slg = models.FloatField(default=0)
     war = models.FloatField(default=0)
+    bats = models.CharField(max_length=1, choices=BATS_THROWS, default='R')
+    throws = models.CharField(max_length=1, choices=BATS_THROWS, default='R')
     pitcher = models.OneToOneField(
         'Pitcher',
         on_delete=models.SET_NULL,
