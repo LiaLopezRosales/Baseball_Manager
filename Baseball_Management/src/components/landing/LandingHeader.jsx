@@ -4,10 +4,8 @@ import { applyTheme } from '../../theme';
 
 const NAV = [
   { to: '/', label: 'Inicio' },
-  { to: '/reporte/estadisticas-juegos-por-equipos', label: 'Posiciones' },
-  { to: '/reporte/average', label: 'Líderes & Stats' },
-  { to: '/consultas/Series', label: 'Series & Calendario' },
-  { to: '/reporte/equipos-ganadores', label: 'Reportes Oficiales' },
+  { to: '/reporte/equipos-ganadores', label: 'Estadísticas Oficiales' },
+  { to: '/consultas/Series', label: 'Consultas' },
   { to: '/comparar', label: 'Comparador', protect: true },
 ];
 
