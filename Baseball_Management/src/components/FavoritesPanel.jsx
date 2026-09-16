@@ -33,18 +33,14 @@ export function useFavorites() {
   const toggleFavorite = useCallback(
     async (type, id) => {
       if (!isLogged) return false;
-      try {
-        const endpoint =
-          type === 'team'
-            ? '/api/user/favorites/team/'
-            : '/api/user/favorites/player/';
-        const key = type === 'team' ? 'team_id' : 'player_id';
-        const res = await apiPost(endpoint, { [key]: id });
-        await fetchFavorites();
-        return res.favorited;
-      } catch {
-        return false;
-      }
+      const endpoint =
+        type === 'team'
+          ? '/api/user/favorites/team/'
+          : '/api/user/favorites/player/';
+      const key = type === 'team' ? 'team_id' : 'player_id';
+      const res = await apiPost(endpoint, { [key]: id });
+      await fetchFavorites();
+      return res.favorited;
     },
     [isLogged, fetchFavorites]
   );
@@ -63,31 +59,58 @@ export function useFavorites() {
 export function FavoriteButton({ type, id, size = 20 }) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const [active, setActive] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const isLogged = !!localStorage.getItem('token');
 
   useEffect(() => {
     setActive(isFavorite(type, id));
   }, [isFavorite, type, id]);
 
-  if (!isLogged) return null;
+  if (!isLogged && !msg) return null;
 
   const handleClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isLogged) return;
-    const favorited = await toggleFavorite(type, id);
-    if (favorited !== false) setActive(favorited);
+    try {
+      const favorited = await toggleFavorite(type, id);
+      setActive(!!favorited);
+      setMsg(null);
+      setSessionExpired(false);
+    } catch (err) {
+      if (err && err.status === 401) {
+        localStorage.removeItem('token');
+        setActive(false);
+        setSessionExpired(true);
+        setMsg('Tu sesión expiró. Inicia sesión para guardar favoritos.');
+      } else {
+        setSessionExpired(false);
+        setMsg('No se pudo actualizar el favorito.');
+      }
+    }
   };
 
   return (
-    <button
-      className={`favorite-btn${active ? ' favorite-btn--active' : ''}`}
-      onClick={handleClick}
-      aria-label={active ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-      title={!isLogged ? 'Inicia sesión para guardar favoritos' : active ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-    >
-      <Heart size={size} fill={active ? 'currentColor' : 'none'} />
-    </button>
+    <span className="favorite-btn__wrap">
+      <button
+        className={`favorite-btn${active ? ' favorite-btn--active' : ''}`}
+        onClick={handleClick}
+        disabled={!isLogged}
+        aria-label={active ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+        title={!isLogged ? 'Inicia sesión para guardar favoritos' : active ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+      >
+        <Heart size={size} strokeWidth={2.4} fill={active ? 'currentColor' : 'none'} />
+      </button>
+      {msg && (
+        <span
+          role="status"
+          className={`favorite-btn__msg${sessionExpired ? ' favorite-btn__msg--warn' : ''}`}
+        >
+          {msg}
+        </span>
+      )}
+    </span>
   );
 }
 

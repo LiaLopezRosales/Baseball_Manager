@@ -167,6 +167,11 @@ html[data-theme='light'] .rep__badge--hl { box-shadow: none; }
   color: var(--qry-muted);
 }
 
+.rep__lock-note--error {
+  color: var(--qry-danger, #b5502f);
+  font-style: normal;
+}
+
 /* ─── KPIs (formato referencia: chip arriba-derecha + valor + sufijo + sub) ─── */
 .rep__kpis {
   display: grid;

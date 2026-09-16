@@ -6,6 +6,16 @@ export const API_URL =
   process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
 
 /**
+ * Error con el status HTTP de la respuesta (para distinguir 401, 404, …).
+ */
+export class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.status = status;
+  }
+}
+
+/**
  * GET a un endpoint de la API. Devuelve el JSON parseado.
  * Lanza un error con un mensaje legible si la respuesta no es OK.
  */
@@ -15,7 +25,7 @@ export async function apiGet(path) {
   if (token) headers['Authorization'] = `Token ${token}`;
   const res = await fetch(`${API_URL}${path}`, { headers });
   if (!res.ok) {
-    throw new Error(`Error ${res.status} al consultar ${path}`);
+    throw new ApiError(`Error ${res.status} al consultar ${path}`, res.status);
   }
   return res.json();
 }
@@ -40,7 +50,7 @@ export async function apiPost(path, body = {}) {
     } catch {
       /* sin cuerpo JSON */
     }
-    throw new Error(message);
+    throw new ApiError(message, res.status);
   }
   return res.json();
 }

@@ -168,12 +168,14 @@ function EstadisticasLayout({
                   type="button"
                   className="est-reg__btn"
                   onClick={() => boletín && boletín.onDownload()}
-                  disabled={!isLogged || !boletín}
+                  disabled={!isLogged || !boletín || (boletín.exporting || false)}
                 >
                   <span className="material-symbols-outlined" aria-hidden="true">
                     menu_book
                   </span>
-                  Descargar Boletín Técnico (PDF)
+                  {boletín && boletín.exporting
+                    ? 'Generando…'
+                    : 'Descargar Boletín Técnico (PDF)'}
                 </button>
               </div>
             </div>

@@ -227,6 +227,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
   const [serie_name, setSelectedSeries] = useState('');
   const [exportFormat, setExportFormat] = useState('pdf');
   const [exportError, setExportError] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   const [search, setSearch] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
@@ -286,6 +287,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
       return;
     }
     setExportError('');
+    setExporting(true);
     const format = typeof formatOverride === 'string' ? formatOverride : exportFormat;
     const exportData = {
       filename: report_name,
@@ -305,8 +307,13 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
         body: JSON.stringify(exportData),
       });
 
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        setExportError('Tu sesión expiró. Inicia sesión de nuevo para exportar.');
+        return;
+      }
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`HTTP ${response.status}`);
       }
 
       const blob = await response.blob();
@@ -319,6 +326,9 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
       a.remove();
     } catch (err) {
       console.error('Error exporting report:', err);
+      setExportError('No se pudo generar el archivo. Verifica tu conexión e inténtalo de nuevo.');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -328,6 +338,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
   if (!boletínRef.current) boletínRef.current = { title: report_name, onDownload: null };
   boletínRef.current.title = report_name;
   boletínRef.current.onDownload = () => handleExport('pdf');
+  boletínRef.current.exporting = exporting;
 
   useEffect(() => {
     if (!setBoletín) return undefined;
@@ -617,8 +628,13 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
             </p>
           </div>
           <div className="rep__actions">
-            <button type="button" className="rep__btn rep__btn--ghost" onClick={() => handleExport()}>
-              <Download size={16} /> Exportar Datos
+            <button
+              type="button"
+              className="rep__btn rep__btn--ghost"
+              onClick={() => handleExport()}
+              disabled={exporting}
+            >
+              <Download size={16} /> {exporting ? 'Generando…' : 'Exportar Datos'}
             </button>
             <button type="button" className="rep__btn rep__btn--solid" onClick={handlePrint}>
               <Printer size={16} /> Imprimir Boleta
@@ -626,8 +642,10 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
           </div>
         </div>
 
-        {!isLogged && <p className="rep__lock-note">🔒 Inicia sesión para exportar reportes</p>}
-        {exportError && <p className="rep__lock-note">{exportError}</p>}
+        {!isLogged && (
+          <p className="rep__lock-note">🔒 Inicia sesión para exportar reportes</p>
+        )}
+        {exportError && <p className="rep__lock-note rep__lock-note--error">{exportError}</p>}
       </div>
 
       {/* Cabecera visible solo en impresión */}

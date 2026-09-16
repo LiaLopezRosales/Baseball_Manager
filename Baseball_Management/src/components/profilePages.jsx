@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Shield, Users, ArrowLeft } from 'lucide-react';
-import { apiGet } from '../api';
+import { apiGet, API_URL } from '../api';
 import PlayerRadar from './ui/PlayerRadar';
 import { FavoriteButton } from './FavoritesPanel';
 import LandingHeader from './landing/LandingHeader';
@@ -333,6 +333,28 @@ export function PlayerProfile({
   const handLabel = (h) =>
     h === 'izquierda' ? 'Zurdo' : h === 'derecha' ? 'Diestro' : 'Ambidiestro';
 
+  // Métricas numéricas (p. ej. "0.998") se muestran como ".998"; el resto tal cual.
+  const fmtMetric = (d) =>
+    d != null && /^\d+\.\d+$/.test(String(d)) ? fmt3(Number(d)) : d;
+
+  // Vértices del diamante de infield (mini-diagrama de sector defensivo).
+  const sectorVertex = (pos) => {
+    const VERTICES = {
+      Pitcher: { x: 16, y: 16 },
+      Catcher: { x: 16, y: 28.5 },
+      'First Base': { x: 28.5, y: 16 },
+      'Second Base': { x: 22.5, y: 9.75 },
+      Shortstop: { x: 9.5, y: 9.75 },
+      'Third Base': { x: 3.5, y: 16 },
+      'Left Field': { x: 9.5, y: 9.75 },
+      'Right Field': { x: 22.5, y: 9.75 },
+      'Center Field': { x: 16, y: 3.5 },
+      'Bateador Designado': { x: 16, y: 16 },
+    };
+    return VERTICES[pos] || { x: 16, y: 3.5 };
+  };
+  const sectorMark = sectorVertex(position);
+
   const totalWins = lastSeries.reduce((a, s) => a + (s.wins || 0), 0);
   const totalLosses = lastSeries.reduce((a, s) => a + (s.losses || 0), 0);
   const totalGames = lastSeries.reduce((a, s) => a + (s.games || 0), 0);
@@ -438,23 +460,34 @@ export function PlayerProfile({
 
               {badges.length > 0 && (
                 <div className="prf__badges">
-                  {badges.map((b) => (
-                    <span key={b.label} className="prf__badge">
-                      <span className="material-symbols-outlined prf__badge-icon" aria-hidden="true">
-                        {b.icon}
+                  <p className="prf__badges-title">Logros de la carrera · LNB Pro</p>
+                  <div className="prf__badges-row">
+                    {badges.map((b) => (
+                      <span
+                        key={b.label}
+                        className="prf__badge"
+                        title={`${b.label}${b.detail ? ` — ${b.detail}` : ''}${b.caption ? `. ${b.caption}` : ''}`}
+                      >
+                        <span className="prf__badge-label">
+                          <span className="material-symbols-outlined prf__badge-icon" aria-hidden="true">
+                            {b.icon}
+                          </span>
+                          {b.label}
+                        </span>
+                        <strong className="prf__badge-value">
+                          {b.count != null ? `×${b.count}` : fmtMetric(b.detail)}
+                        </strong>
+                        {b.caption && <small className="prf__badge-caption">{b.caption}</small>}
                       </span>
-                      {b.label}
-                      {b.count != null && <strong>×{b.count}</strong>}
-                      {b.detail && <small>{b.detail}</small>}
-                    </span>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
 
               <div className="prf__hero-actions">
                 <a
                   className="prf__btn prf__btn--primary"
-                  href={`/api/player-profile/${player.id}/pdf/`}
+                  href={`${API_URL}/api/player-profile/${player.id}/pdf/`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -555,7 +588,14 @@ export function PlayerProfile({
 
               <div className="prf__sector">
                 <span className="prf__sector-mark" aria-hidden="true">
-                  <i />
+                  <svg className="prf__sector-svg" viewBox="0 0 32 32">
+                    <polygon className="pf-s-field" points="16,3 29,16 16,29 3,16" />
+                    <circle className="pf-s-base" cx="16" cy="3.5" r="1.9" />
+                    <circle className="pf-s-base" cx="28.5" cy="16" r="1.9" />
+                    <circle className="pf-s-base" cx="16" cy="28.5" r="1.9" />
+                    <circle className="pf-s-base" cx="3.5" cy="16" r="1.9" />
+                    <circle className="pf-s-marker" cx={sectorMark.x} cy={sectorMark.y} r="3.2" />
+                  </svg>
                 </span>
                 <div className="prf__sector-text">
                   <strong>Sector: {position || 'Infielder'}</strong>

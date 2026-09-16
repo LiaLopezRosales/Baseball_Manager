@@ -638,50 +638,73 @@ html[data-theme='light'] .prf,
 
 .prf__badges {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
   gap: 8px;
   margin-bottom: 18px;
 }
 
+.prf__badges-title {
+  margin: 0;
+  font-family: var(--prf-font-display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--prf-dim);
+}
+
+.prf__badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
 @media (min-width: 840px) {
-  .prf__badges {
+  .prf__badges-row {
     justify-content: flex-start;
   }
 }
 
 .prf__badge {
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 11px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 12px;
   border: 1px solid var(--prf-hairline);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--prf-panel-2);
+}
+
+.prf__badge-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-family: var(--prf-font-display);
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--prf-text);
+  color: var(--prf-dim);
 }
 
 .prf__badge-icon {
-  font-size: 16px;
+  font-size: 15px;
   color: var(--prf-lights);
 }
 
-.prf__badge strong {
-  color: var(--prf-clay);
+.prf__badge-value {
+  font-family: var(--prf-font-num);
+  font-size: 0.95rem;
   font-weight: 700;
-  margin-left: 2px;
+  color: var(--prf-text);
 }
 
-.prf__badge small {
+.prf__badge-caption {
   font-family: var(--prf-font-body);
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: 0;
+  font-size: 0.68rem;
+  line-height: 1.3;
   color: var(--prf-dim);
 }
 
@@ -1068,7 +1091,6 @@ html[data-theme='light'] .prf,
 }
 
 .prf__sector-mark {
-  position: relative;
   width: 30px;
   height: 30px;
   display: flex;
@@ -1077,25 +1099,27 @@ html[data-theme='light'] .prf,
   flex-shrink: 0;
 }
 
-.prf__sector-mark i {
-  position: relative;
+.prf__sector-svg {
+  width: 30px;
+  height: 30px;
   display: block;
-  width: 19px;
-  height: 19px;
-  transform: rotate(45deg);
-  border: 1.5px solid var(--prf-dim);
+  overflow: visible;
 }
 
-.prf__sector-mark i::after {
-  content: '';
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--prf-clay);
-  box-shadow: 0 0 8px var(--prf-clay);
+.prf__sector-svg .pf-s-field {
+  fill: var(--prf-surface-2);
+  stroke: var(--prf-hairline);
+  stroke-width: 1;
+}
+
+.prf__sector-svg .pf-s-base {
+  fill: var(--prf-dim);
+}
+
+.prf__sector-svg .pf-s-marker {
+  fill: var(--prf-clay);
+  stroke: var(--prf-panel);
+  stroke-width: 1.5;
 }
 
 .prf__sector-text strong {

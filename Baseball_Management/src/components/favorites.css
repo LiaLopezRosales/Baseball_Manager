@@ -6,28 +6,73 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-full);
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-tertiary);
+  border: none;
+  background: transparent;
   color: var(--text-muted);
   cursor: pointer;
   flex-shrink: 0;
-  transition: color 0.2s, background-color 0.2s, border-color 0.2s, transform 0.15s;
+  transition: color 0.2s, background-color 0.2s, transform 0.15s;
 }
 
-.favorite-btn:hover {
-  background: var(--bg-elevated);
+.favorite-btn:hover:not(:disabled) {
   color: var(--accent);
-  border-color: var(--accent);
-  transform: scale(1.06);
+  background: var(--accent-soft);
+  transform: scale(1.08);
 }
 
 .favorite-btn--active {
   color: var(--accent);
-  border-color: var(--accent);
   background: var(--accent-soft);
+}
+
+.favorite-btn--active:hover:not(:disabled) {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.favorite-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.favorite-btn svg {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  display: block;
+}
+
+.favorite-btn__wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.favorite-btn__msg {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.45);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-align: center;
+  font-family: var(--font-body, inherit);
+}
+
+.favorite-btn__msg--warn {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ---------- Panel de favoritos ---------- */

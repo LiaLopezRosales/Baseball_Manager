@@ -83,13 +83,33 @@ class PlayerProfileView(APIView):
         star_count = StarPlayer.objects.filter(BP_id=player).count()
         badges = []
         if star_count > 0:
-            badges.append({'icon': 'star', 'label': 'Jugador Estrella', 'count': star_count})
+            badges.append({
+                'icon': 'star',
+                'label': 'Estrella de serie',
+                'count': star_count,
+                'caption': 'Elegido por labor destacada',
+            })
         if player.home_runs >= 10:
-            badges.append({'icon': 'flame', 'label': 'Poder', 'detail': f'{player.home_runs} HR'})
+            badges.append({
+                'icon': 'local_fire_department',
+                'label': 'Poder',
+                'detail': f'{player.home_runs} HR',
+                'caption': 'Cañonero de la liga',
+            })
         if pip is not None and pip.fielding_pct >= 0.97:
-            badges.append({'icon': 'shield', 'label': 'Defensa élite', 'detail': f'{pip.fielding_pct:.3f}'})
+            badges.append({
+                'icon': 'shield',
+                'label': 'Guante de Oro',
+                'detail': f'{pip.fielding_pct:.3f}',
+                'caption': 'Defensa de élite',
+            })
         if pip is not None and pip.bases_stolen >= 10:
-            badges.append({'icon': 'flash', 'label': 'Robador de bases', 'detail': f'{pip.bases_stolen} SB'})
+            badges.append({
+                'icon': 'bolt',
+                'label': 'Robador de bases',
+                'detail': f'{pip.bases_stolen} SB',
+                'caption': 'Peligro en las bases',
+            })
 
         # Estado (próximo compromiso)
         live_status = None
