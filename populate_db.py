@@ -61,6 +61,11 @@ class TeamFactory(DjangoModelFactory):
     color = factory.Faker('color_name')
     initials = factory.LazyAttribute(lambda o: ''.join([word[0] for word in o.name.split()]).upper())
     representative_entity = factory.Faker('company')
+    founded_year = factory.Faker('random_int', min=1960, max=2000)
+    stadium = factory.LazyAttribute(lambda o: f"Estadio {o.initials} Arena")
+    capacity = factory.Faker('random_int', min=10000, max=40000)
+    division = factory.Faker('random_element', elements=['Norte', 'Sur', 'Este', 'Oeste'])
+    slogan = factory.Faker('sentence', nb_words=9)
 
 # DirectionTeam Factory
 class DirectionTeamFactory(DjangoModelFactory):
@@ -661,11 +666,32 @@ def backfill_person_biometrics():
     return updated + player_updated
 
 
+def backfill_team_brand():
+    """
+    Backfill de los campos nuevos de Team (migración 0007) sobre una BD ya sembrada:
+    founded_year, stadium, capacity, division y slogan.
+    """
+    faker = Faker()
+    DIVISIONS = ['Norte', 'Sur', 'Este', 'Oeste']
+    updated = 0
+    for team in Team.objects.filter(founded_year__isnull=True):
+        team.founded_year = faker.random_int(min=1960, max=2000)
+        team.stadium = f"Estadio {team.initials} Arena"
+        team.capacity = faker.random_int(min=10000, max=40000)
+        team.division = faker.random_element(DIVISIONS)
+        team.slogan = faker.sentence(nb_words=9)
+        team.save(update_fields=['founded_year', 'stadium', 'capacity', 'division', 'slogan'])
+        updated += 1
+    print(f"Backfill de marca de equipos: {updated} equipos.")
+    return updated
+
+
 def simulate_full_championship():
     user_worker_data = populate_users_and_workers(team_numbers=6)
     player_position_data = populate_baseball_players_and_positions(user_worker_data["teams"])
     generate_player_portraits(player_position_data["baseball_players"])
     backfill_person_biometrics()
+    backfill_team_brand()
     championship_data = simulate_championship_with_participations(
         positions=player_position_data["positions"],
         team_player_mapping=player_position_data["team_player_mapping"],

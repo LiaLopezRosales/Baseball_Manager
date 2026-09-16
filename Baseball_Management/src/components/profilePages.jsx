@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Shield, Users, ArrowLeft } from 'lucide-react';
 import { apiGet, API_URL } from '../api';
 import PlayerRadar from './ui/PlayerRadar';
 import { FavoriteButton } from './FavoritesPanel';
@@ -8,130 +7,520 @@ import LandingHeader from './landing/LandingHeader';
 import { getInitialTheme } from '../theme';
 import './profilePages.css';
 
-export function TeamProfile() {
+/* ──────────────────────────────────────────────────────────────────────────
+   Perfil de equipo — LNB Pro (referencias stitch 17/18)
+   Estándar: sin navbar, perfil completo, sin módulo estadístico lateral.
+   ──────────────────────────────────────────────────────────────────────── */
+
+export function TeamProfile({
+  isLogged,
+  userName,
+  role,
+  onModalOpen,
+  onRegisterOpen,
+  onLogout,
+}) {
   const { id } = useParams();
-  const teamId = id;
-  const [team, setTeam] = useState(null);
-  const [players, setPlayers] = useState([]);
+  const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [theme, setTheme] = useState(() => getInitialTheme());
+
+  const rowRef = useRef(null);
+  const groupsCardRef = useRef(null);
+  const calendarCardRef = useRef(null);
+  const [seasonInSide, setSeasonInSide] = useState(false);
 
   useEffect(() => {
     let active = true;
-    Promise.all([
-      apiGet(`/teams/${teamId}/`),
-      apiGet('/baseball-players/'),
-      apiGet('/persons/'),
-      apiGet('/players-in-position/'),
-      apiGet('/positions/'),
-    ])
-      .then(
-        ([teamData, allPlayers, persons, posData, posList]) => {
-          if (!active) return;
-          return apiGet(
-            `/api/queries/reports/?report_id=8&team_name=${encodeURIComponent(
-              teamData.name
-            )}`
-          ).then((teamPlayers) => {
-            if (!active) return;
-            const personById = {};
-            (persons || []).forEach((p) => {
-              personById[p.id] = p;
-            });
-            const idByName = {};
-            (allPlayers || []).forEach((pl) => {
-              const per = personById[pl.P_id];
-              if (per)
-                idByName[`${per.name} ${per.lastname}`.toLowerCase()] = pl.id;
-            });
-            const posNameById = {};
-            (posList || []).forEach((p) => {
-              posNameById[p.id] = p.name;
-            });
-            const effByBp = {};
-            (posData || []).forEach((p) => {
-              effByBp[p.BP_id] = { pos: p.position, eff: p.effectiveness };
-            });
-
-            const rows = (teamPlayers || []).map((tp) => {
-              const bpId = idByName[`${tp.Nombre} ${tp.Apellido}`.toLowerCase()];
-              const eff = effByBp[bpId] || {};
-              return {
-                id: bpId,
-                name: `${tp.Nombre} ${tp.Apellido}`,
-                position: posNameById[eff.pos] || '—',
-                effectiveness: eff.eff,
-                seriesCount: (tp.Series || []).length,
-              };
-            });
-
-            setTeam(teamData);
-            setPlayers(rows);
-          });
-        }
-      )
+    apiGet(`/api/team-profile/${id}/`)
+      .then((d) => {
+        if (active) setData(d);
+      })
       .catch((err) => {
         if (active) setError(err);
       });
     return () => {
       active = false;
     };
-  }, [teamId]);
+  }, [id]);
+
+  useLayoutEffect(() => {
+    if (!data) return;
+    const measure = () => {
+      const row = rowRef.current;
+      const g = groupsCardRef.current;
+      const c = calendarCardRef.current;
+      if (!row || !g || !c) return;
+      if (window.innerWidth < 1000) { setSeasonInSide(false); return; }
+      const rowH = row.getBoundingClientRect().height;
+      const sideNatural = g.getBoundingClientRect().height + c.getBoundingClientRect().height + 18;
+      setSeasonInSide(rowH - sideNatural >= 150);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [data]);
+
+  const header = (
+    <LandingHeader
+      isLogged={isLogged}
+      userName={userName}
+      role={role}
+      onModalOpen={onModalOpen}
+      onRegisterOpen={onRegisterOpen}
+      onLogout={onLogout}
+      theme={theme}
+      onThemeChange={setTheme}
+      onNameChange={() => {}}
+    />
+  );
 
   if (error) {
     return (
-      <div className="profile">
-        <p className="profile__error">No se pudo cargar el equipo.</p>
-        <p className="muted">{error.message}</p>
+      <div className="landing prf tmt" data-theme={theme}>
+        {header}
+        <div className="prf__state">
+          <span className="material-symbols-outlined prf__state-icon">error</span>
+          <p>No se pudo cargar el equipo.</p>
+          <p className="prf__state-sub">{error.message}</p>
+        </div>
       </div>
     );
   }
 
-  if (!team) {
-    return <div className="profile profile--loading">Cargando equipo…</div>;
+  if (!data) {
+    return (
+      <div className="landing prf tmt" data-theme={theme}>
+        {header}
+        <div className="prf__state">
+          <span className="material-symbols-outlined prf__state-icon">shield</span>
+          <p>Cargando perfil del equipo…</p>
+        </div>
+      </div>
+    );
   }
 
+  const team = data;
+  const record = data.record || {};
+  const kpis = data.kpis || {};
+  const championships = data.championships || { count: 0 };
+  const roster = data.roster || [];
+  const groups = data.groups || {};
+  const upcoming = data.upcoming || [];
+  const season = data.season || {};
+
+  const teamColor = team.color || 'var(--prf-clay)';
+  const rankFoot = (rank) => (rank ? `#${rank} Liga` : 'Registro LNB');
+
+  const kpiCards = [
+    {
+      label: 'Récord (G-P)',
+      value: `${record.wins ?? 0}-${record.losses ?? 0}`,
+      lead: true,
+      footL: rankFoot(kpis.rank_record),
+      footR: kpis.rank_record && kpis.rank_record <= 3 ? 'TOP 3' : null,
+    },
+    {
+      label: 'AVG Colectivo',
+      value: fmt3(kpis.avg),
+      dot: true,
+      footL: rankFoot(kpis.rank_avg),
+      footR: kpis.obp != null ? `OBP ${fmt3(kpis.obp)}` : null,
+    },
+    {
+      label: 'ERA Colectiva',
+      value: kpis.era ?? '—',
+      footL: 'Rotor de lanzadores',
+      footR: kpis.era != null ? `${kpis.era} carreras/9` : null,
+    },
+    { label: 'HR', value: kpis.hr ?? 0, footL: 'Poder del lineup' },
+    {
+      label: 'RBI',
+      value: kpis.rbi ?? 0,
+      footL: 'Producción de carreras',
+    },
+    {
+      label: 'FLD% Colectivo',
+      value: fmt3(kpis.fld_pct),
+      footL: 'Precisión defensiva',
+    },
+    {
+      label: 'Diferencial',
+      value: (kpis.diff >= 0 ? '+' : '') + (kpis.diff ?? 0),
+      footL: `CA ${season.ca ?? 0} / CP ${season.cp ?? 0}`,
+    },
+  ];
+
+  const dtLabel = team.dt ? `DT · ${team.dt.name} ${team.dt.lastname}` : null;
+
+  const badges = [];
+  if (championships.count > 0) {
+    badges.push({
+      label: 'Campeonatos LNB Pro',
+      icon: 'military_tech',
+      count: championships.count,
+      detail: championships.last
+        ? `${championships.last.serie} · Temporada ${championships.last.season}`
+        : null,
+    });
+  }
+  if (kpis.rank_record != null) {
+    badges.push({ label: 'Récord Liga', icon: 'leaderboard', count: null, detail: `#${kpis.rank_record}` });
+  }
+  if (kpis.rank_avg != null) {
+    badges.push({ label: 'AVG Liga', icon: 'trending_up', count: null, detail: `#${kpis.rank_avg}` });
+  }
+
+  const handShort = (h) =>
+    h === 'L' || h === 'Zurdo' ? 'Z' : h === 'R' || h === 'Diestro' ? 'D' : '—';
+
+  const statusKey = (status) =>
+    status === 'ESTRELLA'
+      ? 'star'
+      : status === 'LANZADOR ACTIVO'
+      ? 'pitcher'
+      : status === 'TITULAR INDISCUTIDO'
+      ? 'titular'
+      : 'roster';
+
+  const groupChips = [
+    ['Lanzadores', groups.lanzadores],
+    ['Receptores', groups.receptores],
+    ['Cuadro', groups.cuadro],
+    ['Jardineros', groups.jardineros],
+    ['Otros', groups.otros],
+  ];
+
+  const seasonCells = [
+    ['Partidos', season.games ?? '—'],
+    ['Carreras a Favor (CA)', season.ca ?? '—'],
+    ['Carreras en Contra (CP)', season.cp ?? '—'],
+    ['Anotación / Partido', season.avg_for != null ? season.avg_for : '—'],
+    ['Recibidas / Partido', season.avg_against != null ? season.avg_against : '—'],
+    ['Home Runs (HR)', season.hr ?? '—'],
+    ['Bases Robadas (SB)', season.sb ?? '—'],
+    ['Ponches de Pitcheo (K)', season.k ?? '—'],
+  ];
+
+  const keyStat = (r) =>
+    r.pitching
+      ? {
+          big: `${r.pitching.era != null ? r.pitching.era : '—'} ERA`,
+          sub: `${r.pitching.w}-${r.pitching.l} · ${r.pitching.k} K · WHIP ${r.pitching.whip != null ? Number(r.pitching.whip).toFixed(2) : '—'}`,
+        }
+      : {
+          big: `${fmt3(r.batting.avg)} AVG`,
+          sub: `${r.batting.hr} HR · ${r.batting.rbi} RBI · OPS ${(Number(r.batting.obp) + Number(r.batting.slg)).toFixed(3).replace(/^0/, '')}`,
+        };
+
+  const seasonCard = (
+    <section className="prf__card prf__card--milestones tmt__card--season">
+      <div className="prf__card-head">
+        <div className="prf__card-head-title">
+          <span className="material-symbols-outlined prf__card-icon" aria-hidden="true">scoreboard</span>
+          <h2 className="prf__card-title">Estadísticas de Temporada</h2>
+        </div>
+        <span className="prf__chip prf__chip--accent">
+          {record.games != null ? `${record.wins}-${record.losses}` : 'Sin récord'}
+        </span>
+      </div>
+      <div className="tmt__season">
+        {seasonCells.map(([label, value]) => (
+          <div key={label} className="tmt__season-cell">
+            <span className="tmt__season-value">{value}</span>
+            <span className="tmt__season-label">{label}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+
   return (
-    <div className="profile">
-      <Link to="/" className="profile__back">
-        <ArrowLeft size={16} /> Volver al inicio
-      </Link>
+    <div className="landing prf tmt" data-theme={theme}>
+      {header}
 
-      <header className="profile__header">
-        <div className="profile__avatar" style={{ background: team.color || 'var(--accent)' }}>
-          <Shield size={34} />
+      <div className="prf__body">
+        {/* Breadcrumb */}
+        <div className="prf__crumb">
+          <Link to="/consultas/Team" className="prf__crumb-back">
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Volver a Equipos
+          </Link>
+          <div className="prf__crumb-right">
+            <span className="prf__crumb-pill">
+              <span className="prf__wbsc-dot" aria-hidden="true" />
+              Franquicia Afiliada LNB
+            </span>
+            <span className="prf__crumb-id">ID #{team.id}</span>
+          </div>
         </div>
-        <div>
-          <h1 className="profile__name">{team.name}</h1>
-          <p className="profile__meta">
-            {team.initials} · {team.representative_entity}
-          </p>
-        </div>
-        <FavoriteButton type="team" id={Number(teamId)} size={22} />
-      </header>
 
-      <section className="profile__section">
-        <h2 className="profile__section-title">
-          <Users size={18} /> Jugadores del equipo
-        </h2>
-        <p className="profile__hint">
-          Vista del equipo en la temporada actual. Enlaza al perfil de cada jugador.
-        </p>
-        <div className="profile__players">
-          {players.length ? (
-            players.map((p) => (
-              <Link key={p.id} to={`/jugador/${p.id}`} className="profile__player">
-                <span className="profile__player-name">{p.name}</span>
-                <span className="profile__player-pos">{p.position}</span>
-                <span className="profile__player-eff">
-                  {p.effectiveness != null ? Number(p.effectiveness).toFixed(3) : '—'}
+        {/* Hero */}
+        <section className="prf__hero">
+          <span className="prf__blob prf__blob--top" aria-hidden="true" />
+          <span className="prf__blob prf__blob--bottom" aria-hidden="true" />
+
+          <div className="prf__hero-inner">
+            <div className="prf__portrait-wrap">
+              <div className="tmt__crest" style={{ '--p-team': teamColor }}>
+                <span className="tmt__crest-initials">{team.initials}</span>
+              </div>
+
+              <div className="prf__hero-chip prf__hero-chip--num">
+                <span className="prf__hero-chip-label">No.</span>
+                <span className="prf__hero-chip-val">{team.id}</span>
+              </div>
+
+              <div className="prf__hero-chip prf__hero-chip--live">
+                <span className="prf__hero-chip-dot" aria-hidden="true" />
+                {record.games != null ? `${record.wins}-${record.losses} · ${record.games} J` : 'Sin juegos'}
+              </div>
+            </div>
+
+            <div className="prf__hero-info">
+              <div className="prf__hero-tags">
+                {team.division && (
+                  <span className="prf__tag">{team.division}</span>
+                )}
+                {team.stadium && (
+                  <>
+                    <span className="prf__tag-sep" aria-hidden="true">•</span>
+                    <span className="prf__tag">{team.stadium}</span>
+                  </>
+                )}
+                {team.capacity && (
+                  <>
+                    <span className="prf__tag-sep" aria-hidden="true">•</span>
+                    <span className="prf__tag">
+                      {Number(team.capacity).toLocaleString('es-CR').replace(/,/g, '.')} espectadores
+                    </span>
+                  </>
+                )}
+                <span className="prf__tag-sep" aria-hidden="true">•</span>
+                <span className="prf__tag prf__tag--pos">Fundado {team.founded_year || '—'}</span>
+              </div>
+
+              <h1 className="prf__hero-name">
+                {team.name} <span className="prf__hero-name-accent">{team.initials}</span>
+              </h1>
+
+              <p className="prf__hero-sub">
+                {team.representative_entity || team.name}
+                {dtLabel && (
+                  <span className="prf__live-pill">
+                    <span className="prf__live-dot" aria-hidden="true" />
+                    {dtLabel}
+                  </span>
+                )}
+              </p>
+
+              <p className="prf__hero-bio">
+                {team.slogan && team.slogan.trim()
+                  ? team.slogan
+                  : `Franquicia registrada en la Liga Nacional de Béisbol. Compite en la temporada oficial con marca ${team.color || 'LNB'} e identidad ${team.initials}.`}
+              </p>
+
+              {badges.length > 0 && (
+                <div className="prf__badges">
+                  <p className="prf__badges-title">Historia competitiva · LNB Pro</p>
+                  <div className="prf__badges-row">
+                    {badges.map((b) => (
+                      <span
+                        key={b.label}
+                        className="prf__badge"
+                        title={`${b.label}${b.detail ? ` — ${b.detail}` : ''}`}
+                      >
+                        <span className="prf__badge-label">
+                          <span className="material-symbols-outlined prf__badge-icon" aria-hidden="true">
+                            {b.icon}
+                          </span>
+                          {b.label}
+                        </span>
+                        <strong className="prf__badge-value">
+                          {b.count != null ? `×${b.count}` : b.detail}
+                        </strong>
+                        {b.detail && b.count != null && (
+                          <small className="prf__badge-caption">{b.detail}</small>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="prf__hero-actions">
+                <a
+                  className="prf__btn prf__btn--primary"
+                  href={`${API_URL}/api/team-profile/${team.id}/pdf/`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span className="material-symbols-outlined" aria-hidden="true">download</span>
+                  Descargar Roster PDF
+                </a>
+                <span className="prf__hero-fav">
+                  <FavoriteButton type="team" id={Number(team.id)} size={22} />
                 </span>
-              </Link>
-            ))
-          ) : (
-            <p className="muted">Cargando jugadores…</p>
-          )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* KPIs */}
+        <section className="prf__kpis" aria-label="Estadísticas colectivas del equipo">
+          {kpiCards.map((k) => (
+            <div key={k.label} className={`prf__kpi${k.lead ? ' prf__kpi--lead' : ''}`}>
+              <span className="prf__kpi-label">
+                {k.dot && <span className="prf__kpi-dot" aria-hidden="true" />}
+                {k.label}
+              </span>
+              <div className="prf__kpi-value">{k.value}</div>
+              <div className="prf__kpi-foot">
+                <span className="prf__kpi-foot-l">{k.footL}</span>
+                {k.footR && <span className="prf__kpi-foot-r">{k.footR}</span>}
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* Roster + side info */}
+        <div className="prf__split">
+          <section className="prf__card prf__card--radar tmt__card--roster" ref={rowRef}>
+            <div className="prf__card-head">
+              <div className="prf__card-head-title">
+                <span className="material-symbols-outlined prf__card-icon" aria-hidden="true">groups</span>
+                <div>
+                  <h2 className="prf__card-title">Plantilla / Roster Oficial</h2>
+                  <p className="prf__card-sub">
+                    {roster.length} jugadores en la temporada · Enlace al perfil individual
+                  </p>
+                </div>
+              </div>
+              <span className="prf__chip prf__chip--accent">
+                {data.age_avg != null ? `Edad prom. ${data.age_avg}` : 'Registro LNB'}
+              </span>
+            </div>
+
+            <div className="prf__table-wrap">
+              <table className="prf__table">
+                <thead>
+                  <tr>
+                    <th>Jugador</th>
+                    <th>Posición</th>
+                    <th>B/L</th>
+                    <th className="prf__table-num">Edad</th>
+                    <th>Estadística clave</th>
+                    <th>Estatus DT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {roster.length ? (
+                    roster.map((r) => {
+                      const ks = keyStat(r);
+                      return (
+                        <tr key={r.player_id}>
+                          <td className="prf__table-main">
+                            <Link to={`/jugador/${r.player_id}`} className="tmt__player-link">
+                              {r.name} {r.lastname}
+                              {r.is_star && <span className="prf__star" title="Jugador estrella">★</span>}
+                            </Link>
+                          </td>
+                          <td>{r.position}</td>
+                          <td>{handShort(r.bats)} / {handShort(r.throws)}</td>
+                          <td className="prf__table-num">{r.age != null ? r.age : '—'}</td>
+                          <td className="tmt__keystat">
+                            <span className="tmt__keystat-big">{ks.big}</span>
+                            <span className="tmt__keystat-sub">{ks.sub}</span>
+                          </td>
+                          <td>
+                            <span className={`tmt__status tmt__status--${statusKey(r.status)}`}>
+                              {r.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="prf__table-empty">
+                        Sin roster registrado para este equipo.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <div className="prf__side">
+            <section className="prf__card prf__card--telemetry tmt__card--groups" ref={groupsCardRef}>
+              <div className="prf__card-head">
+                <div className="prf__card-head-title">
+                  <span className="material-symbols-outlined prf__card-icon" aria-hidden="true">sports_baseball</span>
+                  <h3 className="prf__card-title">Distribución del Plantel</h3>
+                </div>
+                <span className="prf__chip">{groups.todos ?? 0} jugadores</span>
+              </div>
+
+              <div className="tmt__groups">
+                {groupChips.map(([label, count]) => (
+                  <div key={label} className="tmt__group-chip">
+                    <span className="tmt__group-label">{label}</span>
+                    <strong className="tmt__group-count">{count ?? 0}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div className="tmt__groups-note">
+                <span className="material-symbols-outlined" aria-hidden="true">supervisor_account</span>
+                Plantel basado en el roster de participación de {season.games ?? 0} juegos jugados.
+              </div>
+            </section>
+
+            <section className="prf__card prf__card--hito tmt__card--upcoming" ref={calendarCardRef}>
+              <div className="prf__card-head">
+                <div className="prf__card-head-title">
+                  <span className="material-symbols-outlined prf__card-icon" aria-hidden="true">event</span>
+                  <h3 className="prf__card-title">Calendario Inmediato</h3>
+                </div>
+                <span className="prf__chip">Próxima Serie</span>
+              </div>
+
+              {upcoming.length ? (
+                <div className="tmt__upcoming">
+                  {upcoming.map((u, i) => (
+                    <div key={`${u.date}-${u.rival}-${i}`} className="tmt__up-row">
+                      <div className="tmt__up-date">
+                        <strong>{u.date}</strong>
+                        <small>{u.time} h</small>
+                      </div>
+                      <div className="tmt__up-mid">
+                        <span className="tmt__up-cond">
+                          {u.home ? 'Local' : 'Visita'}
+                        </span>
+                        <span className="tmt__up-rival">
+                          <i className="tmt__up-dot" style={{ background: u.rival_color || 'var(--prf-clay)' }} />
+                          {u.rival}
+                        </span>
+                      </div>
+                      <div className="tmt__up-meta">
+                        <span>{u.series}</span>
+                        <small>{u.type} · {u.season}</small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="prf__hito-sub">Sin juegos programados en las próximas fechas.</p>
+              )}
+            </section>
+
+            {seasonInSide && seasonCard}
+          </div>
         </div>
-      </section>
+
+        {!seasonInSide && seasonCard}
+      </div>
     </div>
   );
 }

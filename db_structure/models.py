@@ -119,6 +119,11 @@ class Team(models.Model):
     color = models.CharField(max_length=50)               
     initials = models.CharField(max_length=10)            
     representative_entity = models.CharField(max_length=100)  
+    founded_year = models.PositiveSmallIntegerField(null=True, blank=True)
+    stadium = models.CharField(max_length=120, blank=True, default='')
+    capacity = models.PositiveIntegerField(null=True, blank=True)
+    division = models.CharField(max_length=60, blank=True, default='')
+    slogan = models.TextField(blank=True, default='')  
 
     def __str__(self):
         return f"Equipo {self.name} ({self.initials})"

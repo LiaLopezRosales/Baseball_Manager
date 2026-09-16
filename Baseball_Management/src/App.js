@@ -117,6 +117,22 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
         }
       />
     </Routes>
+  ) : location.pathname.startsWith('/equipo') ? (
+    <Routes>
+      <Route
+        path="/equipo/:id"
+        element={
+          <TeamProfile
+            isLogged={isLogged}
+            userName={userName}
+            role={role}
+            onModalOpen={onModalOpen}
+            onRegisterOpen={onRegisterOpen}
+            onLogout={onLogout}
+          />
+        }
+      />
+    </Routes>
   ) : location.pathname.startsWith('/comparar') ? (
     <ProtectedRoute roles={['Admin', 'Director Técnico', 'Usuario General']}>
       <PlayerCompare
@@ -152,7 +168,6 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
               <Route path="/admin/:slug" element={<ProtectedRoute roles={['Admin']}><CRUDRoute /></ProtectedRoute>} />
               <Route path="/dt/cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapForm teamId={team} /></ProtectedRoute>} />
               <Route path="/dt/listar-cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapTable teamId={team} /></ProtectedRoute>} />
-              <Route path="/equipo/:id" element={<TeamProfile />} />
               <Route path="*" element={<Landing />} />
             </Routes>
           </motion.div>

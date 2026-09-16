@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
-from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition, PlayerSwap, Person, Rol, BaseballPlayer, Pitcher, StarPlayer, FavoriteTeam as FavoriteTeamModel, FavoritePlayer as FavoritePlayerModel, Notification as NotificationModel
+from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition, PlayerSwap, Person, Rol, BaseballPlayer, Pitcher, StarPlayer, Score, Position, Series, FavoriteTeam as FavoriteTeamModel, FavoritePlayer as FavoritePlayerModel, Notification as NotificationModel
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 # from datetime import datetime
@@ -12,7 +12,7 @@ from db_structure.serializers import PlayerSwapSerializer, BaseballPlayerSeriali
 from db_structure.views import FavoriteTeamViewSet, FavoritePlayerViewSet, NotificationViewSet
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.db.models import Q
+from django.db.models import Q, Sum, Case, When, F
 from django.utils import timezone
 from django.http import HttpResponse
 
@@ -253,6 +253,289 @@ class PlayerFichaView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="ficha-jugador-{player_id}.pdf"'
+        return response
+
+
+class TeamProfileView(APIView):
+    """
+    Perfil público de equipo: agrega franquicia, DT, récord, KPIs colectivos,
+    campeonatos reales, roster con estadística clave, próximos juegos y
+    desglose de temporada. Estilo refs stitch 17/18 (sección stats sin sidebar).
+    """
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @staticmethod
+    def _group_of(position_name):
+        name = (position_name or '').lower()
+        if 'pitcher' in name:
+            return 'lanzadores'
+        if 'catcher' in name:
+            return 'receptores'
+        if 'base' in name or 'shortstop' in name:
+            return 'cuadro'
+        if 'field' in name or 'outfield' in name:
+            return 'jardineros'
+        return 'otros'
+
+    def _team_scores(self, team):
+        """Agregados ganador/perdedor + puntos a favor/en contra del equipo."""
+        base = Score.objects.filter(Q(winner=team) | Q(loser=team))
+        wins = Score.objects.filter(winner=team).count()
+        losses = Score.objects.filter(loser=team).count()
+        games = wins + losses
+        agg = base.aggregate(
+            scored=Sum(Case(When(winner=team, then=F('w_points')), default=F('l_points'))),
+            received=Sum(Case(When(winner=team, then=F('l_points')), default=F('w_points'))),
+        )
+        ca = agg['scored'] or 0
+        cp = agg['received'] or 0
+        pct = (wins / games) if games else None
+        return {
+            'wins': wins, 'losses': losses, 'games': games,
+            'pct': round(pct, 3) if pct is not None else None,
+            'ca': ca, 'cp': cp, 'diff': ca - cp,
+        }
+
+    def _team_rank(self, teams_agg, team_id, key, desc=True):
+        ordered = sorted(teams_agg, key=lambda t: (t[key] is None, t[key]), reverse=desc)
+        for i, t in enumerate(ordered):
+            if t['team_id'] == team_id:
+                return i + 1
+        return None
+
+    def get(self, request, team_id):
+        try:
+            team = Team.objects.get(id=team_id)
+        except Team.DoesNotExist:
+            return Response({'error': 'Equipo no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Director Técnico real: Team → DirectionTeam → TechnicalDirector → Worker → Person
+        dt = None
+        try:
+            td = team.directionteam.technicaldirector
+            person = td.W_id.P_id if (td and td.W_id and td.W_id.P_id) else None
+            if person:
+                dt = {'name': person.name, 'lastname': person.lastname}
+        except Exception:
+            dt = None
+
+        # Personas (ids) del roster vía BPParticipation
+        bp_person_ids = list(
+            BPParticipation.objects.filter(team_id=team)
+            .values_list('BP_id', flat=True).distinct()
+        )
+        roster_bps = list(
+            BaseballPlayer.objects.filter(P_id__in=bp_person_ids)
+            .select_related('P_id').prefetch_related('playerinposition_bp__position')
+        )
+
+        pip_by_bp = {}
+        for bp in roster_bps:
+            pip = bp.playerinposition_bp.select_related('position').first()
+            pip_by_bp[bp.id] = pip
+
+        pitcher_by_bp = {}
+        pitcher_rows = list(
+            Pitcher.objects.filter(P_id__in=[bp.P_id_id for bp in roster_bps])
+        )
+        for p in pitcher_rows:
+            pitcher_by_bp[p.P_id_id] = p
+
+        star_bp_ids = set(
+            StarPlayer.objects.filter(BP_id__in=[bp.id for bp in roster_bps])
+            .values_list('BP_id_id', flat=True)
+        )
+
+        roster = []
+        groups = {'todos': 0, 'lanzadores': 0, 'receptores': 0, 'cuadro': 0, 'jardineros': 0, 'otros': 0}
+        ages = []
+        for bp in roster_bps:
+            person = bp.P_id
+            pip = pip_by_bp.get(bp.id)
+            position_name = pip.position.name if (pip and pip.position) else 'Sin posición'
+            group = self._group_of(position_name)
+            pitcher_o = pitcher_by_bp.get(bp.P_id_id)
+            is_star = bp.id in star_bp_ids
+            if pitcher_o is not None:
+                status_label = 'ESTRELLA' if is_star else 'LANZADOR ACTIVO'
+            else:
+                eff = pip.effectiveness if pip and pip.effectiveness is not None else 0
+                status_label = ('ESTRELLA' if is_star
+                                else 'TITULAR INDISCUTIDO' if eff >= 0.9
+                                else 'EN ROSTER')
+            groups['todos'] += 1
+            groups[group] += 1
+            ages.append(person.age or 0)
+            roster.append({
+                'player_id': bp.id,
+                'name': person.name,
+                'lastname': person.lastname,
+                'initials': f"{(person.name or '?')[0]}{(person.lastname or '?')[0]}".upper(),
+                'position': position_name,
+                'group': group,
+                'bats': bp.get_bats_display() or bp.bats,
+                'throws': bp.get_throws_display() or bp.throws,
+                'age': person.age,
+                'years': bp.years_of_experience,
+                'effectiveness': round(pip.effectiveness, 3) if (pip and pip.effectiveness is not None) else None,
+                'fielding_pct': pip.fielding_pct if pip else None,
+                'is_star': is_star,
+                'status': status_label,
+                'batting': {
+                    'avg': bp.batting_average, 'hr': bp.home_runs or 0, 'rbi': bp.rbi or 0,
+                    'obp': bp.obp or 0, 'slg': bp.slg or 0, 'war': bp.war or 0,
+                },
+                'pitching': (
+                    {
+                        'w': pitcher_o.No_games_won or 0, 'l': pitcher_o.No_games_lost or 0,
+                        'era': pitcher_o.running_average, 'k': pitcher_o.strikeouts or 0,
+                        'whip': pitcher_o.whip, 'sv': pitcher_o.saves or 0,
+                        'ip': pitcher_o.innings_pitched or 0, 'hand': pitcher_o.get_dominant_hand_display(),
+                    } if pitcher_o else None
+                ),
+            })
+
+        age_avg = round(sum(ages) / len(ages), 1) if ages else None
+        pitchers = [p for p in pitcher_by_bp.values()]
+
+        # KPIs colectivos
+        avg_col = None
+        if roster_bps:
+            vals = [b.batting_average for b in roster_bps if b.batting_average is not None]
+            avg_col = round(sum(vals) / len(vals), 3) if vals else None
+            obp_vals = [b.obp for b in roster_bps if b.obp is not None]
+            obp_col = round(sum(obp_vals) / len(obp_vals), 3) if obp_vals else None
+        else:
+            obp_col = None
+        era_col = None
+        if pitchers:
+            eras = [p.running_average for p in pitchers if p.running_average is not None]
+            era_col = round(sum(eras) / len(eras), 2) if eras else None
+        hr_total = sum((b.home_runs or 0) for b in roster_bps)
+        rbi_total = sum((b.rbi or 0) for b in roster_bps)
+        fld_vals = [p.fielding_pct for p in pip_by_bp.values() if p and p.fielding_pct is not None]
+        fld_col = round(sum(fld_vals) / len(fld_vals), 3) if fld_vals else None
+        sb_total = sum((p.bases_stolen or 0) for p in pip_by_bp.values() if p)
+        k_total = sum((p.strikeouts or 0) for p in pitchers)
+
+        record = self._team_scores(team)
+
+        # Split local / visitante
+        tof_ids = list(TeamOnTheField.objects.filter(lineup_id__team_id=team).values_list('id', flat=True))
+        local_games = list(Game.objects.filter(local_id__in=tof_ids, score__isnull=False).select_related('score'))
+        visitor_games = list(Game.objects.filter(rival_id__in=tof_ids, score__isnull=False).select_related('score'))
+        local_w = sum(1 for g in local_games if g.score.winner_id == team.id)
+        visitor_w = sum(1 for g in visitor_games if g.score.winner_id == team.id)
+
+        # Rankings de liga (por récord y agresivos)
+        all_teams = list(Team.objects.all())
+        teams_agg = []
+        for t in all_teams:
+            t_rec = self._team_scores(t)
+            t_bps = list(BaseballPlayer.objects.filter(
+                P_id__in=BPParticipation.objects.filter(team_id=t).values_list('BP_id', flat=True)
+            ))
+            v = [b.batting_average for b in t_bps if b.batting_average is not None]
+            teams_agg.append({
+                'team_id': t.id,
+                'wins': t_rec['wins'],
+                'games': t_rec['games'],
+                'pct': t_rec['pct'],
+                'avg': round(sum(v) / len(v), 3) if v else None,
+            })
+        record_rank = self._team_rank(teams_agg, team.id, 'pct')
+        avg_rank = self._team_rank(teams_agg, team.id, 'avg')
+
+        # Campeonatos (campeón por victorias puntuadas en la serie)
+        championships = []
+        series_qs = Series.objects.select_related('season').prefetch_related('game_series__score').order_by('season_id')
+        for s in series_qs:
+            wins_count = {}
+            for g in s.game_series.all():
+                if g.score:
+                    wid = g.score.winner_id
+                    wins_count[wid] = wins_count.get(wid, 0) + 1
+            if not wins_count:
+                continue
+            champ_id = max(wins_count, key=wins_count.get)
+            if champ_id == team.id:
+                championships.append({
+                    'season': s.season.name,
+                    'serie': s.name,
+                    'wins': wins_count[champ_id],
+                })
+        champ_count = len(championships)
+        last_title = championships[-1] if championships else None
+
+        # Próximos juegos
+        upcoming = list(Game.objects.filter(
+            Q(local_id__in=tof_ids) | Q(rival_id__in=tof_ids),
+            date__gte=timezone.now(),
+        ).select_related(
+            'local__lineup_id__team_id', 'rival__lineup_id__team_id', 'series__season',
+        ).order_by('date')[:4])
+        upcoming_data = []
+        for g in upcoming:
+            is_local = g.local.lineup_id.team_id == team
+            rival = g.rival.lineup_id.team_id if is_local else g.local.lineup_id.team_id
+            upcoming_data.append({
+                'date': g.date.strftime('%d/%m/%Y'),
+                'time': g.date.strftime('%H:%M'),
+                'home': is_local,
+                'rival': rival.name,
+                'rival_initials': rival.initials,
+                'rival_color': rival.color,
+                'series': g.series.name,
+                'type': g.series.type,
+                'season': g.series.season.name,
+            })
+
+        return Response({
+            'id': team.id,
+            'name': team.name,
+            'initials': team.initials,
+            'color': team.color,
+            'representative_entity': team.representative_entity,
+            'division': team.division or None,
+            'stadium': team.stadium or None,
+            'capacity': team.capacity,
+            'founded_year': team.founded_year,
+            'slogan': team.slogan or None,
+            'dt': dt,
+            'record': {**record, 'local': {'w': local_w, 'l': len(local_games) - local_w},
+                       'visit': {'w': visitor_w, 'l': len(visitor_games) - visitor_w}},
+            'kpis': {
+                'avg': avg_col, 'era': era_col, 'hr': hr_total, 'rbi': rbi_total,
+                'obp': obp_col, 'fld_pct': fld_col, 'diff': record['diff'],
+                'rank_record': record_rank, 'rank_avg': avg_rank,
+            },
+            'championships': {'count': champ_count, 'last': last_title, 'titles': championships[:3]},
+            'roster': roster,
+            'groups': groups,
+            'age_avg': age_avg,
+            'upcoming': upcoming_data,
+            'season': {
+                'games': record['games'], 'ca': record['ca'], 'cp': record['cp'],
+                'avg_for': round(record['ca'] / record['games'], 2) if record['games'] else None,
+                'avg_against': round(record['cp'] / record['games'], 2) if record['games'] else None,
+                'hr': hr_total, 'sb': sb_total, 'k': k_total, 'obp': obp_col,
+            },
+        }, status=status.HTTP_200_OK)
+
+
+class TeamFichaView(APIView):
+    """Descarga el roster oficial de un equipo en PDF (estilo LNB PRO)."""
+    permission_classes = [AllowAny]
+
+    def get(self, request, team_id):
+        from .reports.team_ficha import build_team_ficha
+        try:
+            pdf_bytes = build_team_ficha(team_id)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="roster-{team_id}.pdf"'
         return response
 
 

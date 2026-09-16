@@ -1,192 +1,10 @@
 /* ============================================================
    Perfiles de equipo y jugador
-   .profile__* → equipo (shell legacy)
-   .prf__*  → jugador (landing LNB Pro, referencia stitch 15/16)
+   .prf__* → jugador y equipo (landing LNB Pro, references 15/18)
+   .tmt__* → secciones específicas del perfil de equipo (17/18)
    Tipografías: Oswald (display), Inter (body), JetBrains Mono (números)
    Material Symbols Outlined (iconos)
    ============================================================ */
-
-/* ── TeamProfile (legacy, intacto) ─────────────────────────────────────── */
-
-.profile {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 32px 24px 64px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.profile--loading {
-  color: var(--text-muted);
-  align-items: flex-start;
-}
-
-.profile__error {
-  color: #ef5350;
-  font-weight: 600;
-}
-
-.profile__back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  text-decoration: none;
-  width: fit-content;
-}
-
-.profile__back:hover {
-  color: var(--accent);
-}
-
-.profile__header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--bg-secondary);
-  padding: 28px;
-}
-
-.profile__header .favorite-btn {
-  margin-left: auto;
-}
-
-.profile__avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: var(--radius-md);
-  color: #1a1a1a;
-  flex-shrink: 0;
-}
-
-.profile__avatar--player {
-  background: var(--accent);
-  color: #1a1a1a;
-}
-
-.profile__name {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.profile__meta {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin: 4px 0 0;
-}
-
-.profile__section {
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--bg-secondary);
-  padding: 28px;
-}
-
-.radar-chart__title {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 12px;
-}
-
-.profile__section-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 6px;
-}
-
-.profile__hint {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  margin: 0 0 20px;
-}
-
-.profile__players {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px;
-}
-
-.profile__player {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-tertiary);
-  text-decoration: none;
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.profile__player:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-}
-
-.profile__player-name {
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 0.92rem;
-}
-
-.profile__player-pos {
-  color: var(--text-muted);
-  font-size: 0.78rem;
-}
-
-.profile__player-eff {
-  font-family: var(--font-mono);
-  color: var(--accent);
-  font-size: 0.85rem;
-}
-
-.profile__stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px;
-  margin-top: 6px;
-}
-
-.profile__stat {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-tertiary);
-}
-
-.profile__stat-label {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-}
-
-.profile__stat-value {
-  font-family: var(--font-mono);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--accent);
-}
 
 /* ════════════════════════════════════════════════════════════════════════
    PERFIL DE JUGADOR — LNB Pro (referencia stitch 15/16)
@@ -1403,4 +1221,321 @@ html[data-theme='light'] .prf,
   text-transform: uppercase;
   letter-spacing: 0.09em;
   color: var(--prf-dim);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   PERFIL DE EQUIPO — LNB Pro (referencias stitch 17/18)
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── escudo (crest) en el hero ─────────────────────────────────────────── */
+.tmt__crest {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--p-team, var(--prf-clay));
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.14), transparent 58%),
+    radial-gradient(circle at 72% 78%, var(--prf-clay), transparent 62%),
+    var(--prf-surface-2);
+  box-shadow:
+    0 0 0 5px var(--prf-panel),
+    0 0 0 6px var(--prf-hairline),
+    0 18px 40px -18px rgba(2, 8, 15, 0.55);
+  transition: transform 0.25s ease;
+}
+
+.tmt__crest:hover {
+  transform: translateY(-3px);
+}
+
+.tmt__crest-initials {
+  font-family: var(--prf-font-display);
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--prf-text);
+  text-shadow: 0 2px 12px var(--prf-clay);
+}
+
+@media (min-width: 720px) {
+  .tmt__crest {
+    width: 150px;
+    height: 150px;
+  }
+
+  .tmt__crest-initials {
+    font-size: 3rem;
+  }
+}
+
+/* ── roster ────────────────────────────────────────────────────────────── */
+.tmt__card--roster {
+  flex: 1;
+  min-width: 0;
+}
+
+.tmt__card--roster .prf__table {
+  min-width: 0;
+}
+
+.tmt__player-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--prf-text);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.tmt__player-link:hover {
+  color: var(--prf-lights);
+  border-color: var(--prf-lights);
+}
+
+.tmt__keystat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+}
+
+.tmt__keystat-big {
+  font-family: var(--prf-font-num);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--prf-clay);
+}
+
+.tmt__keystat-sub {
+  font-size: 0.7rem;
+  color: var(--prf-dim);
+}
+
+.tmt__status {
+  display: inline-block;
+  font-family: var(--prf-font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--prf-hairline);
+  background: var(--prf-surface-2);
+  color: var(--prf-dim);
+  white-space: nowrap;
+}
+
+.tmt__status--star {
+  color: var(--prf-clay);
+  border-color: var(--prf-clay);
+  background: color-mix(in srgb, var(--prf-clay) 12%, transparent);
+}
+
+.tmt__status--pitcher {
+  color: var(--prf-lights);
+  border-color: var(--prf-lights);
+  background: color-mix(in srgb, var(--prf-lights) 12%, transparent);
+}
+
+.tmt__status--titular {
+  color: var(--prf-green);
+  border-color: var(--prf-green);
+  background: color-mix(in srgb, var(--prf-green) 12%, transparent);
+}
+
+/* ── distribución del plantel ──────────────────────────────────────────── */
+.tmt__groups {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.tmt__group-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--prf-hairline);
+  background: var(--prf-surface-2);
+}
+
+.tmt__group-label {
+  font-family: var(--prf-font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--prf-dim);
+}
+
+.tmt__group-count {
+  font-family: var(--prf-font-num);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--prf-text);
+}
+
+.tmt__groups-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 0.74rem;
+  color: var(--prf-dim);
+}
+
+.tmt__groups-note .material-symbols-outlined {
+  font-size: 16px;
+  color: var(--prf-lights);
+}
+
+/* ── calendario inmediato ─────────────────────────────────────────────── */
+.tmt__upcoming {
+  display: flex;
+  flex-direction: column;
+}
+
+.tmt__up-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--prf-hairline);
+}
+
+.tmt__up-row:last-child {
+  border-bottom: none;
+}
+
+.tmt__up-date {
+  display: flex;
+  flex-direction: column;
+  min-width: 62px;
+}
+
+.tmt__up-date strong {
+  font-family: var(--prf-font-num);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--prf-text);
+}
+
+.tmt__up-date small {
+  font-size: 0.66rem;
+  color: var(--prf-dim);
+}
+
+.tmt__up-mid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tmt__up-cond {
+  font-family: var(--prf-font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--prf-lights);
+}
+
+.tmt__up-rival {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--prf-text);
+}
+
+.tmt__up-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tmt__up-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 0.72rem;
+  color: var(--prf-text);
+  font-weight: 600;
+}
+
+.tmt__up-meta small {
+  font-size: 0.64rem;
+  color: var(--prf-dim);
+}
+
+/* ── estadísticas de temporada ─────────────────────────────────────────── */
+.tmt__season {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.tmt__season-cell {
+  background: var(--prf-surface-2);
+  border: 1px solid var(--prf-hairline);
+  border-radius: 10px;
+  padding: 14px 10px 10px;
+  text-align: center;
+}
+
+.tmt__season-value {
+  display: block;
+  font-family: var(--prf-font-num);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--prf-lights);
+}
+
+.tmt__season-label {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--prf-font-display);
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--prf-dim);
+}
+
+.tmt__card--season {
+  flex: 1;
+}
+
+.prf__side .tmt__card--season .tmt__season {
+  height: 100%;
+  align-content: space-evenly;
+}
+
+/* ── responsive: el roster y sus columnas en móvil ─────────────────────── */
+@media (max-width: 640px) {
+  .tmt__groups {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tmt__up-row {
+    grid-template-columns: auto 1fr;
+  }
+
+  .tmt__up-meta {
+    grid-column: 2;
+    align-items: flex-start;
+    padding-left: 0;
+  }
 }

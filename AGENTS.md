@@ -221,6 +221,41 @@ así que **todos los filtros usan `user_id`** (nunca `request.user` directo en l
   requieren cuenta. `UserDashboard` ("Tu panel") también se condiciona a `localStorage.getItem('token')`.
 - `UserDashboard.jsx` tiene un warning de eslint preexistente (`teamStars` sin usar) — no relacionado con cambios recientes.
 
+## Frontend/Backend: Perfil de equipo LNB Pro (referencias stitch 17/18)
+
+### Rutas y views
+- `GET /api/team-profile/<team_id>/` (`TeamProfileView`, `api/views.py`, `AllowAny` + `authentication_classes=[]`):
+  agrega franquicia (migración 0007: `founded_year`, `stadium`, `capacity`, `division`, `slogan`), DT real
+  (`team.directionteam.technicaldirector.W_id.P_id`), récord ganados/perdidos con split local/visitante,
+  KPIs colectivos (AVG/ERA/FLD% redondeados a 3, HR, RBI, DIF), rankings de liga (por PCT y por AVG),
+  campeonatos reales por serie (campeón = equipo con más victorias puntuadas), roster enriquecido, grupos
+  posicionales (Lanzadores/Receptores/Cuadro/Jardineros/Otros), próximos juegos y desglose de temporada.
+- `GET /api/team-profile/<team_id>/pdf/` (`TeamFichaView` → `api/reports/team_ficha.py`): roster oficial PDF
+  reportlab con la misma identidad que la ficha de jugador (`player_ficha._cell/_make_table/_section_title`
+  reutilizados; `theme.NumberedCanvas` da el pie WBSC con paginación). Rutas en `api/urls.py`.
+
+### Frontend
+- `/equipo/:id` es **standalone** (rama en `App.js` igual que `/jugador`: `LandingHeader` con login/account,
+  SIN Sidebar de la app ni "módulo estadístico" lateral de las referencias). Crumb → `/consultas/Team`.
+- `TeamProfile` en `profilePages.jsx` reutiliza las primitivas `prf__*` (crumb, hero, blobs, KPIs, cards,
+  table) y añade `tmt__*` (escudo/crest circular con aro `--p-team`, chips de estatus DT coloreados, distribución
+  del plantel, calendario inmediato, grid de temporada) en `profilePages.css`.
+- El bloque legacy `.profile__*` fue **eliminado** (CSS y template); el escudo usa `--prf-text` para sus iniciales
+  (no el color del equipo, que podría ser claro y romper AA en tema claro; el color del equipo queda en el aro/glow).
+
+### Gotchas de este perfil
+- **Joins**: `PlayerInPosition.BP_id` == `BaseballPlayer.id`; `BPParticipation.BP_id` == `BaseballPlayer.P_id`
+  (persona); `Pitcher.P_id` == `BaseballPlayer.P_id`. Unir pitcheo por persona, no por el FK `BaseballPlayer.pitcher`
+  (suele ser `None`). `StarPlayer.BP_id` == `BaseballPlayer.id`.
+- `Pitcher.running_average` es `PositiveIntegerField` → la ERA sale entera (1.5 por promedio de varios enteros).
+- El backend envía `bats/throws` como **display** ('Diestro'/'Zurdo'); el frontend los reduci a D/Z ("Z"/"D").
+- `start time` de upcoming es `HH:MM` local; `rival_color` puede ser light (así en el seed) → el dot del calendario
+  se renderiza con ese color, es decorativo.
+- Verificación: `CI=false npx react-scripts build`, `python manage.py test db_structure` (96), smoke Playwright en
+  `/equipo/1` dark y light (contraste de textos principales ≥4.5 en light; en dark los acentos clay en texto pequeño
+  quedan ~3.4 como en el perfil de jugador — large text OK >3:1). Migración 0007 aplicada + reseed (`flush` +
+  `populate_db.py`; el `TeamFactory` ya llena la marca; `backfill_team_brand()` cubre BDs viejas).
+
 ## Frontend: Fase 0 — Fundamentos "Diamond Plate" (paleta de estadio)
 
 ### Tokens CSS (`src/index.css`)
