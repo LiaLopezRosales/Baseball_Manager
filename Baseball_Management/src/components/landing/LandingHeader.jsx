@@ -64,14 +64,14 @@ function LandingHeader({
 
         <nav className="landing__nav-links" aria-label="Navegación principal">
           {NAV.map((l) => (
-            <a
+            <Link
               key={l.to}
-              href={l.to}
+              to={l.to}
               onClick={(e) => handleNavClick(e, l)}
               className="landing__nav-link"
             >
               {l.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -171,9 +171,9 @@ function LandingHeader({
       {menuOpen && (
         <nav className="landing__nav-mobile" aria-label="Menú móvil">
           {NAV.map((l) => (
-            <a
+            <Link
               key={l.to}
-              href={l.to}
+              to={l.to}
               className="landing__nav-link"
               onClick={(e) => handleNavClick(e, l)}
             >
@@ -181,7 +181,7 @@ function LandingHeader({
                 arrow_forward_ios
               </span>
               {l.label}
-            </a>
+            </Link>
           ))}
           {!isLogged && (
             <button

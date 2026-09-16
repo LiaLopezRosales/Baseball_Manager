@@ -404,6 +404,8 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
         obp,
         slg,
         ops: obp + slg,
+        playerId: bp ? bp.id : null,
+        teamId: team ? team.id : null,
         teamName: team ? team.name : '',
         position: pos ? pos.name : '',
       };
@@ -444,6 +446,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
       return {
         fullName: person ? `${person.name} ${person.lastname}` : '?',
         team: team ? team.name : '?',
+        teamId: team ? team.id : null,
         war: bp ? bp.war : 0,
         effectiveness: pip.effectiveness,
         bp,
@@ -615,7 +618,21 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
                     return (
                       <div key={i} className="landing__bento-chip">
                         <span className="landing__bento-chip-text">
-                          {wTeam?.initials || '—'} {sc.w_points} - {sc.l_points} {lTeam?.initials || '—'}
+                          {wTeam?.id ? (
+                            <Link to={`/equipo/${wTeam.id}`} className="landing__bento-link">
+                              {wTeam.initials || '—'}
+                            </Link>
+                          ) : (
+                            wTeam?.initials || '—'
+                          )}{' '}
+                          {sc.w_points} - {sc.l_points}{' '}
+                          {lTeam?.id ? (
+                            <Link to={`/equipo/${lTeam.id}`} className="landing__bento-link">
+                              {lTeam.initials || '—'}
+                            </Link>
+                          ) : (
+                            lTeam?.initials || '—'
+                          )}
                         </span>
                       </div>
                     );
@@ -713,7 +730,13 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
                         <td className="landing__table-pos">{String(i + 1).padStart(2, '0')}</td>
                         <td className="landing__table-team">
                           <span className="landing__table-dot" style={{ background: row.color || '#888' }} />
-                          {row.name}
+                          {row.id ? (
+                            <Link to={`/equipo/${row.id}`} className="landing__table-team-link">
+                              {row.name}
+                            </Link>
+                          ) : (
+                            row.name
+                          )}
                         </td>
                         <td>{(row.w || 0) + (row.l || 0)}</td>
                         <td className="landing__table-bold">{row.w || 0}</td>
@@ -736,17 +759,9 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
                   <span className="landing__table-footer-dot" />
                   LOS 4 PRIMEROS CLASIFICAN DIRECTO AL ROUND ROBIN SEMIFINAL
                 </span>
-                <a
-                  className="landing__table-footer-link"
-                  href="#reglamento"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const el = document.getElementById('reglamento');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
+                <Link to="/reglamento" className="landing__table-footer-link">
                   REGLAMENTO SERIE 2026
-                </a>
+                </Link>
               </div>
             </div>
             {/* Diferencial */}
@@ -804,12 +819,24 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
                         <div className="landing__recent-mid">
                           <span className="landing__recent-team">
                             <span className="landing__recent-dot" style={{ background: g.localTeam.color || '#888' }} />
-                            {g.localTeam.name}
+                            {g.localTeam.id ? (
+                              <Link to={`/equipo/${g.localTeam.id}`} className="landing__recent-link">
+                                {g.localTeam.name}
+                              </Link>
+                            ) : (
+                              g.localTeam.name
+                            )}
                           </span>
                           <span className="landing__recent-vs">vs</span>
                           <span className="landing__recent-team">
                             <span className="landing__recent-dot" style={{ background: g.rivalTeam.color || '#888' }} />
-                            {g.rivalTeam.name}
+                            {g.rivalTeam.id ? (
+                              <Link to={`/equipo/${g.rivalTeam.id}`} className="landing__recent-link">
+                                {g.rivalTeam.name}
+                              </Link>
+                            ) : (
+                              g.rivalTeam.name
+                            )}
                           </span>
                         </div>
                         <div className="landing__recent-date">
@@ -855,10 +882,24 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
                         <span className="landing__podium-leader-badge">★ Líder de Bateo Activo</span>
                       )}
                       <h3 className={`landing__podium-name landing__podium-name--${medal}`}>
-                        {player.name}
+                        {player.playerId ? (
+                          <Link to={`/jugador/${player.playerId}`} className="landing__podium-link">
+                            {player.name}
+                          </Link>
+                        ) : (
+                          player.name
+                        )}
                       </h3>
                       <span className="landing__podium-meta">
-                        {player.teamName} • {player.position}
+                        {player.teamId ? (
+                          <Link to={`/equipo/${player.teamId}`} className="landing__podium-link">
+                            {player.teamName}
+                          </Link>
+                        ) : (
+                          player.teamName
+                        )}
+                        {' • '}
+                        {player.position}
                       </span>
                       <div className={`landing__podium-hero-stat landing__podium-hero-stat--${medal}`}>
                         <span className={`landing__podium-hero-label landing__podium-hero-label--${medal}`}>
@@ -921,8 +962,24 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
                     <span className="landing__star-position">{star.label}</span>
                     <span className="landing__star-war">+{Number(star.war).toFixed(1)} WAR</span>
                   </div>
-                  <h4 className="landing__star-name">{star.fullName}</h4>
-                  <p className="landing__star-team">{star.team}</p>
+                  <h4 className="landing__star-name">
+                    {star.bp?.id ? (
+                      <Link to={`/jugador/${star.bp.id}`} className="landing__star-link">
+                        {star.fullName}
+                      </Link>
+                    ) : (
+                      star.fullName
+                    )}
+                  </h4>
+                  <p className="landing__star-team">
+                    {star.teamId ? (
+                      <Link to={`/equipo/${star.teamId}`} className="landing__star-link">
+                        {star.team}
+                      </Link>
+                    ) : (
+                      star.team
+                    )}
+                  </p>
                   <div className="landing__star-stats">
                     {starStatRows(star).map((row, j) => (
                       <div className="landing__star-stat" key={j}>
@@ -1024,12 +1081,21 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
                 </div>
               </div>
               <div className="landing__callout-actions">
-                <Link to="/dt/cambios" className="landing__callout-btn ghost">
-                  <span className="material-symbols-outlined" aria-hidden="true">
-                    badge
-                  </span>
-                  Portal de Cambios
-                </Link>
+                {isLogged && role === 'Director Técnico' ? (
+                  <Link to="/dt/cambios" className="landing__callout-btn ghost">
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      badge
+                    </span>
+                    Portal de Cambios
+                  </Link>
+                ) : (
+                  <button type="button" onClick={onModalOpen} className="landing__callout-btn ghost">
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      badge
+                    </span>
+                    Portal de Cambios
+                  </button>
+                )}
                 {isLogged && role === 'Admin' ? (
                   <Link to="/admin/posiciones" className="landing__callout-btn solid">
                     <span className="material-symbols-outlined" aria-hidden="true">

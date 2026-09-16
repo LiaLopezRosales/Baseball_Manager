@@ -663,6 +663,34 @@ html[data-theme='light'] .landing__hero-card-name,
 .landing[data-theme='light'] .landing__hero-card-name {
   color: #0f172a;
 }
+
+.landing__table-team-link,
+.landing__recent-link,
+.landing__star-link,
+.landing__podium-link,
+.landing__bento-link,
+.landing__hero-card-name-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.landing__table-team-link:hover,
+.landing__table-team-link:focus-visible,
+.landing__recent-link:hover,
+.landing__recent-link:focus-visible,
+.landing__star-link:hover,
+.landing__star-link:focus-visible,
+.landing__podium-link:hover,
+.landing__podium-link:focus-visible,
+.landing__bento-link:hover,
+.landing__bento-link:focus-visible,
+.landing__hero-card-name-link:hover,
+.landing__hero-card-name-link:focus-visible {
+  color: var(--lnd-lights);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .landing__hero-card-dt {
   font-size: 0.8rem;
   color: var(--lnd-dim);
