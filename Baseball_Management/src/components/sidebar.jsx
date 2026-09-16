@@ -4,7 +4,6 @@ import {
   Home,
   Database,
   BarChart3,
-  GitCompare,
   ChevronDown,
   ChevronRight,
   PanelLeftClose,
@@ -156,17 +155,6 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
             <Home size={20} className="sidebar__icon" />
             {!collapsed && <span className="sidebar__label">Inicio</span>}
           </li>
-
-          {role && role !== 'Guest' && (
-            <li
-              className={`sidebar__item${isActive('/comparar') ? ' sidebar__item--active' : ''}`}
-              onClick={() => onOptionSelect('Comparar Jugadores')}
-              title="Comparar jugadores"
-            >
-              <GitCompare size={20} className="sidebar__icon" />
-              {!collapsed && <span className="sidebar__label">Comparar jugadores</span>}
-            </li>
-          )}
 
           {/* Consultas */}
           <li

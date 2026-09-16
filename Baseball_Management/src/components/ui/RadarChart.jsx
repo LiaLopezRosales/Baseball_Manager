@@ -15,7 +15,7 @@ const readVar = (names, fallback) => {
  * Radar con dos series opcionales: la principal (stats) y una línea de
  * comparación (baseline, p. ej. "Media LNB").
  */
-export default function RadarChart({ stats, baseline, title, compact }) {
+export default function RadarChart({ stats, baseline, title, compact, accent: accentProp }) {
   const indicators = stats.map((s) => ({
     name: s.label,
     max: s.max || 1,
@@ -23,7 +23,7 @@ export default function RadarChart({ stats, baseline, title, compact }) {
 
   const values = stats.map((s) => s.value);
   const h = compact ? 160 : 300;
-  const accent = readVar(['--prf-lights', '--accent'], '#f59e0b');
+  const accent = accentProp || readVar(['--prf-lights', '--accent'], '#f59e0b');
   const baselineColor = readVar(['--prf-clay', '--text-muted'], '#64748b');
 
   const series = [
