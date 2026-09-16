@@ -107,7 +107,7 @@ class BaseballPlayerFactory(DjangoModelFactory):
         model = BaseballPlayer
 
     P_id = factory.SubFactory(PersonFactory)  # Assume PersonFactory exists
-    batting_average = factory.Faker('pyfloat', positive=True, max_value=1, right_digits=3)
+    batting_average = factory.Faker('pyfloat', positive=True, min_value=0.150, max_value=0.400, right_digits=3)
     years_of_experience = factory.Faker('random_int', min=1, max=20)
     home_runs = factory.Faker('random_int', min=0, max=40)
     rbi = factory.Faker('random_int', min=0, max=120)

@@ -407,7 +407,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
   const serieKey = headers.find((k) => norm(k) === 'serie' || norm(k) === 'series' || norm(k).startsWith('serie'));
   const metricKey = headers.find(
     (k) =>
-      ['efectividad', 'promedio', 'average', 'avg', 'porcentaje', 'porcent', 'factor'].some((t) =>
+      ['efectividad', 'rendimiento', 'promedio', 'average', 'avg', 'porcentaje', 'porcent', 'factor'].some((t) =>
         norm(k).includes(t)
       ) && isNumericCol(k)
   );
@@ -814,7 +814,7 @@ const ReportComponent = ({ report_id, report_name, report_short, report_icon }) 
                                     {initials}
                                   </span>
                                   <span className="rep__player-info">
-                                    <strong>{String(firstV ?? '').toUpperCase()}</strong>
+                                    <strong>{String(full || firstV || '').toUpperCase()}</strong>
                                     {subline && <em>{subline}</em>}
                                   </span>
                                 </div>

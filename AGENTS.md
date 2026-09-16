@@ -155,10 +155,10 @@ se resuelve por píxeles, no por coordenadas del elemento.
 - `ui/RadarChart.jsx` — Radar chart ECharts (perfil de jugador)
 
 ### Datos de la landing
-- Reporte 0 (sin params): campeones por temporada (Equipo, Director Técnico, Temporada, Serie)
-- Reporte 1 (sin params): jugadores estrella por serie (Nombre, Apellido, Posición, Efectividad)
-- Reporte 5 (sin params): top promedio de bateo (Nombre, Apellido, Average)
-- Reporte 6 (sin params): estadísticas por equipo (Total de juegos, puntos ganados/perdidos)
+- Reporte 0: campeones por temporada (Equipo, Director Técnico, Temporada, Serie) — **el campeón de cada serie es el equipo con más victorias puntuadas** (no el ganador del último juego)
+- Reporte 1: jugadores estrella por serie (Nombre, Apellido, Posición, **Rendimiento**)
+- Reporte 5: top promedio de bateo (Nombre, Apellido, Average)
+- Reporte 6: estadísticas por equipo (**Equipo, Partidos Jugados, Victorias, Derrotas, Puntos Anotados, Puntos Recibidos** — una fila por equipo, ganados+perdidos)
 - Reporte 8 (team_name param): jugadores de un equipo con series
 - `/teams/`, `/persons/`, `/baseball-players/`, `/players-in-position/`, `/positions/` — datos base
 
@@ -251,6 +251,15 @@ así que **todos los filtros usan `user_id`** (nunca `request.user` directo en l
 - Overlay de modales (`.modal-overlay`): `--overlay` + `blur(4px)` + `z-index:1100`; el banner NO debe sangrar sobre el modal.
 - Verificación: `CI=false npx react-scripts build` + `python manage.py test db_structure` (96 tests) + smoke Playwright
   (login, sidebar activo, radar 4 ejes, guards invitado/admin, decimales en reportes).
+
+## Gotchas de reportes estadísticos (sept-2026)
+
+- **Reporte 1 JOIN corregido**: el SQL original comparaba `bp."P_id_id"` (persona) con `pip."BP_id_id"` (baseballplayer) → cruzaba nombres de un jugador con la efectividad de otro. Fix: `sp."BP_id_id" = bp."id"`. La columna se renombró a `Rendimiento`.
+- **Reporte 4 typo corregido**: `P_id__P_id__lastnam__startswith` → `P_id__P_id__lastname__startswith`. Sin este fix, el filtro con nombre+apellido lanzaba FieldError 500.
+- **Reporte 6 reescrito**: agrupaba SOLO por `winner` → mostraba solo partidos ganados y etiquetas engañosas. Versión actual usa `winner_id OR loser_id` con COUNT condicional → datos completos (partidos, victorias, derrotas, puntos anotados, puntos recibidos) por equipo.
+- **Reporte 0 determina campeón por victorias**: el SQL original tomaba el ganador del último juego por fecha (fragil: si ese juego no tenía score, la serie desaparecía). Versión actual usa CTE de victorias por equipo en la serie → campeón = equipo con más victorias.
+- **Seed `batting_average`** rango realista `0.150–0.400` (`populate_db.py`). Versiones anteriores usaban `max_value=1` → promedios ~0.97 (imatematicamente imposibles como AVG real de béisbol).
+- **`player_ficha.py`** aún usa la etiqueta `Efectividad` para la ficha PDF de perfil de jugador (fuera del scope de reportes).
 
 ## Herramienta: agente `redesign-expert` (global) + 7 skills
 

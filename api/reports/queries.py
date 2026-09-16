@@ -44,41 +44,50 @@ def get_final_winner_teams_and_coaches_(season_name, season_type='National'):
 
 def get_final_winner_teams_and_coaches(season_name, season_type='National'):
     query = """
-    WITH final_games AS (
+    WITH series_wins AS (
         SELECT
-            g."id" AS game_id,
-            g."series_id",
-            g."date",
-            s."winner_id",
-            s."loser_id",
-            s."w_points",
-            s."l_points",
-            ROW_NUMBER() OVER (PARTITION BY g."series_id" ORDER BY g."date" DESC) AS rn
+            s."id" AS series_id,
+            s."name" AS serie_name,
+            sea."name" AS season_name,
+            sc."winner_id",
+            COUNT(*) AS victories
         FROM
-            "db_structure_game" g
+            "db_structure_series" s
         JOIN
-            "db_structure_score" s ON g."score_id" = s."id"
+            "db_structure_season" sea ON s."season_id" = sea."id"
+        JOIN
+            "db_structure_game" g ON s."id" = g."series_id"
+        JOIN
+            "db_structure_score" sc ON g."score_id" = sc."id"
         WHERE
-            g."series_id" IN (
-                SELECT se."id"
-                FROM "db_structure_series" se
-                WHERE se."type" = %s
-                  AND (%s IS NULL OR se."season_id" = (
-                      SELECT sea."id"
-                      FROM "db_structure_season" sea
-                      WHERE sea."name" = %s
-                  ))
-            )
+            s."type" = %s
+            AND (%s IS NULL OR sea."name" = %s)
+        GROUP BY
+            s."id", s."name", sea."name", sc."winner_id"
+    ),
+    ranked AS (
+        SELECT
+            series_id,
+            serie_name,
+            season_name,
+            winner_id,
+            victories,
+            ROW_NUMBER() OVER (
+                PARTITION BY series_id
+                ORDER BY victories DESC, winner_id ASC
+            ) AS rk
+        FROM
+            series_wins
     )
     SELECT
-        t."name" AS "Equipo",
-        CONCAT(p."name", ' ', p."lastname") AS "Director Técnico",
-        sea."name" AS "Temporada",
-        ser."name" AS "Serie"
+        t."name",
+        CONCAT(p."name", ' ', p."lastname"),
+        r."season_name",
+        r."serie_name"
     FROM
-        final_games fg
+        ranked r
     JOIN
-        "db_structure_team" t ON fg."winner_id" = t."id"
+        "db_structure_team" t ON r."winner_id" = t."id"
     JOIN
         "db_structure_directionteam" dt ON t."id" = dt."Team_id_id"
     LEFT JOIN
@@ -87,23 +96,18 @@ def get_final_winner_teams_and_coaches(season_name, season_type='National'):
         "db_structure_worker" w ON td."W_id_id" = w."id"
     LEFT JOIN
         "db_structure_person" p ON w."P_id_id" = p."id"
-    JOIN
-        "db_structure_series" ser ON fg."series_id" = ser."id"
-    JOIN
-        "db_structure_season" sea ON ser."season_id" = sea."id"
     WHERE
-        fg.rn = 1;
+        r."rk" = 1
+    ORDER BY
+        r."serie_name";
     """
-    
-    # Parámetros para la consulta
+
     params = (season_type, season_name, season_name)
 
-    # Ejecutar la consulta
     with connection.cursor() as cursor:
         cursor.execute(query, params)
         results = cursor.fetchall()
 
-    # Convertir los resultados en una lista de diccionarios
     result_list = []
     for row in results:
         result_list.append({
@@ -152,18 +156,18 @@ def get_star_players_for_series(series_name):
         p."name" AS "Nombre",
         p."lastname" AS "Apellido",
         pos."name" AS "Posición",
-        ROUND(pip."effectiveness"::numeric, 3) AS "Efectividad",
+        ROUND(pip."effectiveness"::numeric, 3) AS "Rendimiento",
         s."name" AS "Serie"
     FROM 
         "db_structure_starplayer" sp
     JOIN 
-        "db_structure_baseballplayer" bp ON sp."BP_id_id" = bp."P_id_id"
+        "db_structure_baseballplayer" bp ON sp."BP_id_id" = bp."id"
     JOIN 
         "db_structure_person" p ON bp."P_id_id" = p."id"
     JOIN 
         "db_structure_position" pos ON sp."position_id" = pos."id"
     JOIN 
-        "db_structure_playerinposition" pip ON bp."P_id_id" = pip."BP_id_id" AND sp."position_id" = pip."position_id"
+        "db_structure_playerinposition" pip ON bp."id" = pip."BP_id_id" AND sp."position_id" = pip."position_id"
     JOIN 
         "db_structure_series" s ON sp."series_id" = s."id"
     """
@@ -187,7 +191,7 @@ def get_star_players_for_series(series_name):
             "Nombre": row[0],
             "Apellido": row[1],
             "Posición": row[2],
-            "Efectividad": row[3],
+            "Rendimiento": row[3],
             "Serie": row[4]
         })
 
@@ -396,7 +400,7 @@ def get_pitcher_losses(pitcher_id=None, player_id=None):
 # Obtener el promedio de carreras limpias permitidas por un lanzador
 def get_pitcher_wins_and_running_average(pitcher_name=None, pitcher_lastname=None):
     if pitcher_name and pitcher_lastname:
-        list = db.Pitcher.objects.filter(P_id__P_id__name__startswith=pitcher_name, P_id__P_id__lastnam__startswith=pitcher_lastname)
+        list = db.Pitcher.objects.filter(P_id__P_id__name__startswith=pitcher_name, P_id__P_id__lastname__startswith=pitcher_lastname)
     elif pitcher_name:
         list = db.Pitcher.objects.filter(P_id__P_id__name__startswith=pitcher_name)
     elif pitcher_lastname:
@@ -416,7 +420,7 @@ def get_pitcher_wins_and_running_average(pitcher_name=None, pitcher_lastname=Non
         data.append({
             "Nombre": pitcher_prop[2],
             "Apellido": pitcher_prop[3],
-            "Juegos Ganados": wins,
+            "Victorias del equipo": wins,
             "Promedio de Carreras Limpias": running_average
         })
         
@@ -478,31 +482,35 @@ def get_team_score_statistics_():
 def get_team_score_statistics():
     query = """
     SELECT
-        t."name" AS "winner__name",
-        COUNT(s."id") AS "games_played",
-        SUM(s."w_points") AS "total_points_won",
-        SUM(s."l_points") AS "total_points_lost"
+        t."name" AS "equipo",
+        COUNT(s."id") AS "partidos_jugados",
+        COUNT(CASE WHEN s."winner_id" = t."id" THEN 1 END) AS "victorias",
+        COUNT(CASE WHEN s."loser_id" = t."id" THEN 1 END) AS "derrotas",
+        COALESCE(SUM(CASE WHEN s."winner_id" = t."id" THEN s."w_points" ELSE s."l_points" END), 0) AS "puntos_anotados",
+        COALESCE(SUM(CASE WHEN s."winner_id" = t."id" THEN s."l_points" ELSE s."w_points" END), 0) AS "puntos_recibidos"
     FROM
-        "db_structure_score" s
+        "db_structure_team" t
     JOIN
-        "db_structure_team" t ON s."winner_id" = t."id"
+        "db_structure_score" s ON s."winner_id" = t."id" OR s."loser_id" = t."id"
     GROUP BY
-        t."name";
+        t."name"
+    ORDER BY
+        "victorias" DESC, "derrotas" ASC;
     """
-    
-    # Ejecutar la consulta
+
     with connection.cursor() as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
 
-    # Convertir los resultados en una lista de diccionarios
     result_list = []
     for row in results:
         result_list.append({
             "Equipo": row[0],
-            "Total de juegos": row[1],
-            "Total de puntos en juegos ganados": row[2],
-            "Total de puntos en juegos perdidos": row[3],
+            "Partidos Jugados": row[1],
+            "Victorias": row[2],
+            "Derrotas": row[3],
+            "Puntos Anotados": row[4],
+            "Puntos Recibidos": row[5],
         })
 
     return result_list
@@ -515,7 +523,7 @@ def get_player_effectiveness_by_position():
             "Posición": player.position.name,
             "Nombre": player.BP_id.P_id.name,
             "Apellido": player.BP_id.P_id.lastname,
-            "Efectividad": round(player.effectiveness, 3),
+            "Rendimiento": round(player.effectiveness, 3),
         }
         for player in players
     ]
