@@ -16,14 +16,17 @@ import AdminLayout from './components/admin/AdminLayout';
 import InfoPage from './components/infoPages/InfoPage';
 import AltasBajasPage from './components/infoPages/AltasBajasPage';
 import { INFO_PAGES } from './components/infoPages/infoContent';
+import { AuthModalContext } from './authModal';
+import { clearSession } from './session';
 
-// El registro ya no es una página: navegar a /registro abre el modal y vuelve al inicio
-function RegisterRedirect({ onOpen }) {
+// El registro ya no es una página: navegar a /registro abre el modal y vuelve al inicio.
+// Con sesión activa no tiene sentido abrir el registro: solo redirige al inicio.
+function RegisterRedirect({ onOpen, isLogged }) {
   const navigate = useNavigate();
   useEffect(() => {
-    onOpen?.();
+    if (!isLogged) onOpen?.();
     navigate('/', { replace: true });
-  }, [onOpen, navigate]);
+  }, [onOpen, navigate, isLogged]);
   return null;
 }
 
@@ -36,6 +39,7 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
   return isStandalone ? (
     <Landing
       isLogged={isLogged}
+      userName={userName}
       role={role}
       onModalOpen={onModalOpen}
       onRegisterOpen={onRegisterOpen}
@@ -176,7 +180,7 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
     />
   ) : (
     <Routes>
-      <Route path="/registro" element={<RegisterRedirect onOpen={onRegisterOpen} />} />
+      <Route path="/registro" element={<RegisterRedirect onOpen={onRegisterOpen} isLogged={isLogged} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -184,7 +188,7 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
 
 function App() {
   const [isLogged, setLogin] = useState(() => localStorage.getItem('isLogged') === 'true');
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState(() => localStorage.getItem('userName') || '');
   const [modalMode, setModalMode] = useState(null); // 'login' | 'register' | null
   const [role, setRole] = useState(() => localStorage.getItem('role') || '');
   const [team, setTeam] = useState(() => {
@@ -212,7 +216,7 @@ function App() {
   const handleModalClose = () => setModalMode(null);
 
   const handleLogout = () => {
-    localStorage.clear();
+    clearSession();
     setLogin(false);
     setRole('');
     setTeam(null);
@@ -234,39 +238,41 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <AppRoutes
-          role={role}
-          team={team}
-          isLogged={isLogged}
-          userName={userName}
-          onModalOpen={handleModalOpen}
-          onRegisterOpen={handleRegisterOpen}
-          onLogout={handleLogout}
-        />
+        <AuthModalContext.Provider value={{ openLogin: handleModalOpen, openRegister: handleRegisterOpen }}>
+          <AppRoutes
+            role={role}
+            team={team}
+            isLogged={isLogged}
+            userName={userName}
+            onModalOpen={handleModalOpen}
+            onRegisterOpen={handleRegisterOpen}
+            onLogout={handleLogout}
+          />
 
-        <Modal isOpen={modalMode !== null} onClose={handleModalClose}>
-          {modalMode === 'register' ? (
-            <RegisterBoard
-              setLogin={setLogin}
-              updateRole={updateRole}
-              updateTeam={updateTeam}
-              NameOnChange={handleNameChange}
-              onClose={handleModalClose}
-              onSwitchToLogin={handleModalOpen}
-            />
-          ) : (
-            <LoginBoard
-              name={userName}
-              isLogged={isLogged}
-              setLogin={setLogin}
-              onButtonClick={handleClick}
-              NameOnChange={handleNameChange}
-              updateRole={updateRole}
-              updateTeam={updateTeam}
-              onSwitchToRegister={handleRegisterOpen}
-            />
-          )}
-        </Modal>
+          <Modal isOpen={modalMode !== null} onClose={handleModalClose}>
+            {modalMode === 'register' ? (
+              <RegisterBoard
+                setLogin={setLogin}
+                updateRole={updateRole}
+                updateTeam={updateTeam}
+                NameOnChange={handleNameChange}
+                onClose={handleModalClose}
+                onSwitchToLogin={handleModalOpen}
+              />
+            ) : (
+              <LoginBoard
+                name={userName}
+                isLogged={isLogged}
+                setLogin={setLogin}
+                onButtonClick={handleClick}
+                NameOnChange={handleNameChange}
+                updateRole={updateRole}
+                updateTeam={updateTeam}
+                onSwitchToRegister={handleRegisterOpen}
+              />
+            )}
+          </Modal>
+        </AuthModalContext.Provider>
       </div>
     </Router>
   );

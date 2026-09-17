@@ -511,3 +511,8 @@ qa-landing-*.png
 landing-dark-full.png
 landing-light-full.png
 landing-hero-*-new.png
+
+# snapshots QA sueltos en la raíz (accesibilidad/capturas de auditoría)
+/admin-personas-*.png
+/admin-personas-*.yml
+/audit-*.png

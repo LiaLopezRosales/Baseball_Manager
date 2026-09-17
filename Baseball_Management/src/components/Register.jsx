@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../api';
+import { REDIRECT_AFTER_LOGIN_KEY } from '../authModal';
 import './login.css';
 
 function RegisterBoard({ setLogin, updateRole, updateTeam, NameOnChange, onClose, onSwitchToLogin }) {
@@ -13,6 +15,7 @@ function RegisterBoard({ setLogin, updateRole, updateTeam, NameOnChange, onClose
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     setErrorMessage('');
@@ -52,18 +55,24 @@ function RegisterBoard({ setLogin, updateRole, updateTeam, NameOnChange, onClose
       }
 
       const { token, role_name, user } = data;
+      const displayName = `${name.trim().split(' ')[0]} ${lastname.trim().split(' ')[0]}`.trim();
 
       localStorage.setItem('token', token);
       localStorage.setItem('role_name', role_name);
       localStorage.setItem('permissions', JSON.stringify(user.permissions));
       localStorage.setItem('isLogged', 'true');
       localStorage.setItem('role', role_name);
+      localStorage.setItem('userName', displayName);
 
       updateRole(role_name);
       updateTeam(null);
-      NameOnChange(email.trim());
+      NameOnChange(displayName);
       setLogin(true);
       onClose?.();
+
+      const redirect = localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY);
+      localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY);
+      if (redirect) navigate(redirect);
     } catch (error) {
       setErrorMessage(error.message);
     } finally {

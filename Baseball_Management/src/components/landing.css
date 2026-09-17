@@ -255,6 +255,12 @@ html[data-theme='light'] .landing__btn--solid {
   font-size: 0.855rem;
   cursor: pointer;
 }
+.landing__userchip > span:last-child {
+  max-width: 14ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .landing__dropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -1256,6 +1262,17 @@ button.landing__callout-btn {
   color: #fff;
 }
 .landing__callout-btn.solid:hover { transform: translateY(-1px); }
+.landing__callout-btn--locked,
+.landing__callout-btn--locked:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  filter: saturate(0.6);
+}
+.landing__callout-btn--locked:focus-visible {
+  outline: 2px solid var(--lnd-lights);
+  outline-offset: 2px;
+}
 html[data-theme='light'] .landing__callout-btn.solid,
 .landing[data-theme='light'] .landing__callout-btn.solid {
   background: #0284c7;

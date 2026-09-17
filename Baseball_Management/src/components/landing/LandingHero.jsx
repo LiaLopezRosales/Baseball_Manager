@@ -11,7 +11,7 @@ const fade = (delay = 0) => ({
 const fmtAvg = (v) =>
   v !== undefined && v !== null ? v.toFixed(3).slice(1) : '.000';
 
-function LandingHero({ label, leader, totalPlayed, metrics, theme = 'dark', onRegisterOpen }) {
+function LandingHero({ label, leader, totalPlayed, metrics, theme = 'dark', isLogged = false, onRegisterOpen }) {
   const chip = typeof totalPlayed === 'number' ? `J-${totalPlayed}` : 'J-0';
   const topB = metrics?.topBateo?.promedio;
   const liga = metrics?.promedioLiga;
@@ -82,12 +82,21 @@ function LandingHero({ label, leader, totalPlayed, metrics, theme = 'dark', onRe
           </motion.p>
 
           <motion.div {...fade(0.18)} className="landing__hero-cta">
-            <button type="button" onClick={onRegisterOpen} className="landing__btn landing__btn--solid">
-              <span className="material-symbols-outlined" aria-hidden="true">
-                how_to_reg
-              </span>
-              Registrarse Gratis
-            </button>
+            {isLogged ? (
+              <a href="#mi-panel" className="landing__btn landing__btn--solid">
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  dashboard
+                </span>
+                Mi Panel
+              </a>
+            ) : (
+              <button type="button" onClick={onRegisterOpen} className="landing__btn landing__btn--solid">
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  how_to_reg
+                </span>
+                Registrarse Gratis
+              </button>
+            )}
             <Link
               to="/reporte/equipos-ganadores"
               className="landing__btn landing__btn--ghost"

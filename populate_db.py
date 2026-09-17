@@ -763,6 +763,50 @@ def backfill_team_brand():
     return updated
 
 
+def seed_favorites_and_notifications(teams=None):
+    """
+    Siembra favoritos para los usuarios de prueba y registra un resultado
+    nuevo para que el signal post_save de Score genere notificaciones.
+    Idempotente: no duplica favoritos ni recrea el resultado si el usuario
+    ya tiene notificaciones.
+    """
+    from db_structure.models import FavoriteTeam, FavoritePlayer, Notification
+
+    general = User.objects.filter(email='general@test.com').first()
+    admin = User.objects.filter(email='lialopez@gmail.com').first()
+    team_list = list(teams or Team.objects.all()[:4])
+
+    if not team_list:
+        print("Sin equipos: no se sembraron favoritos.")
+        return
+
+    targets = [(general, team_list[:2]), (admin, team_list[:1])]
+    for user, fav_teams in targets:
+        if not user:
+            continue
+        for team in fav_teams:
+            FavoriteTeam.objects.get_or_create(user=user, team=team)
+
+    if general:
+        bp = BaseballPlayer.objects.first()
+        if bp:
+            FavoritePlayer.objects.get_or_create(user=general, player=bp)
+
+    if (
+        general
+        and len(team_list) >= 2
+        and team_list[0].id != team_list[1].id
+        and not Notification.objects.filter(user=general).exists()
+    ):
+        Score.objects.create(
+            winner=team_list[0],
+            loser=team_list[1],
+            w_points=7,
+            l_points=3,
+        )
+        print("Resultado sembrado: notificaciones generadas vía signal.")
+
+
 def simulate_full_championship():
     user_worker_data = populate_users_and_workers(team_numbers=6)
     player_position_data = populate_baseball_players_and_positions(user_worker_data["teams"])
@@ -779,7 +823,9 @@ def simulate_full_championship():
         # pitcher.No_games_won = get_pitcher_wins(pitcher.id)
         # pitcher.No_games_lost = get_pitcher_losses(pitcher.id)
         pitcher.save()
-    
+
+    seed_favorites_and_notifications(user_worker_data["teams"])
+
     print("Simulación completa del campeonato.")
     return {**user_worker_data, **player_position_data, **championship_data}
 

@@ -5,7 +5,11 @@ import { apiGet } from '../api';
 import RadarChart from './ui/RadarChart';
 import './userDashboard.css';
 
-function UserDashboard({ standings, stars, teamIdByName }) {
+/**
+ * "Tu panel": resumen personalizado del usuario autenticado.
+ * Consume GET /api/user/dashboard/ (favorito, últimos juegos, jugador favorito).
+ */
+function UserDashboard({ standings = [], stars = [] }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -26,78 +30,68 @@ function UserDashboard({ standings, stars, teamIdByName }) {
   if (error) return null;
   if (!data) {
     return (
-      <section className="dashboard-card dashboard-card--loading">
-        Cargando tu dashboard…
+      <section id="mi-panel" className="landing__section udb">
+        <p className="udb__loading">Cargando tu panel…</p>
       </section>
     );
   }
 
   const team = data.favorite_team;
-
-  let position = null;
-  if (team && standings.length) {
-    const sorted = [...standings].sort(
-      (a, b) => (b['Total de puntos en juegos ganados'] || 0) - (a['Total de puntos en juegos ganados'] || 0)
-    );
-    position = sorted.findIndex((r) => r.Equipo === team.name);
-    if (position >= 0) position += 1;
-  }
-
-  const teamStars = team
-    ? (stars || []).filter((s) => teamIdByName[team.name] !== undefined) 
-    : [];
-
+  const index = team ? standings.findIndex((r) => r.name === team.name) : -1;
+  const position = index >= 0 ? index + 1 : null;
+  const teamStar = team ? stars.find((s) => s.teamId === team.id) : null;
   const favPlayer = data.favorite_players && data.favorite_players[0];
+  const unread = data.unread_notifications || 0;
 
   return (
-    <section className="dashboard-card">
-      <div className="dashboard-card__head">
-        <Heart size={20} className="dashboard-card__icon" />
+    <section id="mi-panel" className="landing__section udb">
+      <div className="landing__section-head">
+        <span className="landing__section-icon" aria-hidden="true">
+          <Heart size={20} />
+        </span>
         <div>
-          <h2 className="dashboard-card__title">Tu panel</h2>
-          <p className="dashboard-card__sub">
+          <h2 className="landing__section-title">Tu panel</h2>
+          <p className="landing__section-sub">
             {team ? `Siguiendo a ${team.name}` : 'Elige tu equipo favorito con el corazón ♥'}
           </p>
         </div>
-        {data.unread_notifications > 0 && (
-          <span className="dashboard-card__badge">
-            {data.unread_notifications}{' '}
-            {data.unread_notifications === 1 ? 'notificación' : 'notificaciones'}
+        {unread > 0 && (
+          <span className="udb__badge">
+            {unread} {unread === 1 ? 'notificación' : 'notificaciones'}
           </span>
         )}
       </div>
 
       {team ? (
-        <div className="dashboard-card__grid">
+        <div className="udb__grid">
           {/* Posición en standings */}
-          <div className="dashboard-card__tile">
-            <Trophy size={18} className="dashboard-card__tile-icon" />
-            <span className="dashboard-card__tile-label">Posición actual</span>
-            <span className="dashboard-card__tile-value">
-              {position ? `${position}°` : '—'}
-            </span>
+          <div className="udb__tile">
+            <Trophy size={18} className="udb__tile-icon" aria-hidden="true" />
+            <span className="udb__tile-label">Posición actual</span>
+            <span className="udb__tile-value">{position ? `${position}°` : '—'}</span>
+            <Link to={`/equipo/${team.id}`} className="udb__link">
+              Ver perfil de equipo
+            </Link>
           </div>
 
           {/* Últimos partidos */}
-          <div className="dashboard-card__tile dashboard-card__tile--wide">
-            <CalendarDays size={18} className="dashboard-card__tile-icon" />
-            <span className="dashboard-card__tile-label">Últimos juegos</span>
+          <div className="udb__tile udb__tile--wide">
+            <CalendarDays size={18} className="udb__tile-icon" aria-hidden="true" />
+            <span className="udb__tile-label">Últimos juegos</span>
             {data.recent_games && data.recent_games.length > 0 ? (
-              <ul className="dashboard-card__games">
+              <ul className="udb__games">
                 {data.recent_games.slice(0, 4).map((g) => (
-                  <li key={g.game_id} className="dashboard-card__game">
-                    <span className="dashboard-card__game-date">{g.date}</span>
-                    <span className="dashboard-card__game-rival">
-                      vs {g.rival_initials}
-                    </span>
-                    <span className="dashboard-card__game-score">
+                  <li key={g.game_id} className="udb__game">
+                    <span className="udb__game-date">{g.date}</span>
+                    <span className="udb__game-rival">vs {g.rival_initials}</span>
+                    <span className="udb__game-score">
                       {g.is_local ? (
                         <>
-                          <strong>{g.local_score}</strong> – {g.rival_score}
+                          <strong>{g.local_score ?? '—'}</strong> – {g.rival_score ?? '—'}
                         </>
                       ) : (
                         <>
-                          {g.local_score} – <strong>{g.rival_score}</strong>
+                          {g.local_score ?? '—'} – <strong>{g.rival_score ?? '—'}</strong>
                         </>
                       )}
                     </span>
@@ -105,33 +99,52 @@ function UserDashboard({ standings, stars, teamIdByName }) {
                 ))}
               </ul>
             ) : (
-              <span className="dashboard-card__tile-muted">Sin juegos aún</span>
+              <span className="udb__tile-muted">Sin juegos aún</span>
             )}
           </div>
 
+          {/* Estrella del equipo favorito */}
+          {teamStar && (
+            <div className="udb__tile">
+              <Star size={18} className="udb__tile-icon" aria-hidden="true" />
+              <span className="udb__tile-label">Estrella del equipo</span>
+              <span className="udb__tile-value udb__tile-value--sm">
+                {teamStar.bp && teamStar.bp.id ? (
+                  <Link to={`/jugador/${teamStar.bp.id}`} className="udb__link">
+                    {teamStar.fullName}
+                  </Link>
+                ) : (
+                  teamStar.fullName
+                )}
+              </span>
+              <span className="udb__tile-muted">Posición: {teamStar.label}</span>
+            </div>
+          )}
+
           {/* Jugador favorito con radar */}
           {favPlayer && (
-            <div className="dashboard-card__tile dashboard-card__tile--chart">
-              <Star size={18} className="dashboard-card__tile-icon" />
-              <span className="dashboard-card__tile-label">
-                <Link to={`/jugador/${favPlayer.id}`} className="dashboard-card__link">
+            <div className="udb__tile udb__tile--chart">
+              <Star size={18} className="udb__tile-icon" aria-hidden="true" />
+              <span className="udb__tile-label">
+                <Link to={`/jugador/${favPlayer.id}`} className="udb__link">
                   {favPlayer.name}
                 </Link>
               </span>
               <RadarChart
                 compact
                 stats={[
-                  { label: 'Bateo', value: favPlayer.batting_average, max: 1 },
-                  { label: 'Exp.', value: Math.min(favPlayer.experience / 20, 1), max: 1 },
+                  { label: 'Bateo', value: Number(favPlayer.batting_average) || 0, max: 1 },
+                  { label: 'Exp.', value: Math.min((Number(favPlayer.experience) || 0) / 20, 1), max: 1 },
                 ]}
               />
             </div>
           )}
         </div>
       ) : (
-        <p className="dashboard-card__empty">
-          Visita la <em>Tabla de posiciones</em> o los perfiles de equipo/jugador y
-          toca el <strong>♥</strong> para seguirlos.
+        <p className="udb__empty">
+          Visita el perfil de un <em>equipo</em> o <em>jugador</em> y toca el{' '}
+          <strong>♥</strong> para seguirlo. Aquí verás su posición, últimos juegos y
+          estadísticas.
         </p>
       )}
     </section>

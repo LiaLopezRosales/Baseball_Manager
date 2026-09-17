@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { apiGet } from '../api';
 import FavoritesPanel from './FavoritesPanel';
+import UserDashboard from './UserDashboard';
 import LandingHeader from './landing/LandingHeader';
 import LandingHero from './landing/LandingHero';
 import LandingFooter from './landing/LandingFooter';
@@ -127,9 +128,44 @@ function lastSeasonNameFn(seasons) {
   return seasons[seasons.length - 1]?.name || '—';
 }
 
+/* Acción del callout: invitado abre login; rol correcto navega; rol
+   insuficiente queda bloqueada con aviso (no reabre el modal de login). */
+function CalloutAction({ isLogged, role, requiredRole, to, icon, lockedIcon, variant, label, onModalOpen }) {
+  if (isLogged && role === requiredRole) {
+    return (
+      <Link to={to} className={`landing__callout-btn ${variant}`}>
+        <span className="material-symbols-outlined" aria-hidden="true">{icon}</span>
+        {label}
+      </Link>
+    );
+  }
+  if (isLogged) {
+    const hint = `Disponible para ${requiredRole}. Tu rol actual es ${role || 'sin rol'}.`;
+    return (
+      <button
+        type="button"
+        aria-disabled="true"
+        aria-label={`${label}. ${hint}`}
+        title={hint}
+        onClick={(e) => e.preventDefault()}
+        className={`landing__callout-btn ${variant} landing__callout-btn--locked`}
+      >
+        <span className="material-symbols-outlined" aria-hidden="true">{lockedIcon}</span>
+        {label}
+      </button>
+    );
+  }
+  return (
+    <button type="button" onClick={onModalOpen} className={`landing__callout-btn ${variant}`}>
+      <span className="material-symbols-outlined" aria-hidden="true">{icon}</span>
+      {label}
+    </button>
+  );
+}
+
 /* ─── Componente ───────────────────────────────────────────────────────────── */
 
-function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onLogout }) {
+function Landing({ isLogged = false, userName = '', role = '', onModalOpen, onRegisterOpen, onLogout }) {
   const [standingsReport, setStandingsReport] = useState([]);
   const [batters, setBatters] = useState([]);
   const [champions, setChampions] = useState([]);
@@ -572,11 +608,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
       <LandingHeader
         isLogged={isLogged}
         role={role}
-        userName={
-          typeof localStorage !== 'undefined'
-            ? localStorage.getItem('userName') || ''
-            : ''
-        }
+        userName={userName || (typeof localStorage !== 'undefined' ? localStorage.getItem('userName') || '' : '')}
         theme={theme}
         onThemeChange={toggleTheme}
         onModalOpen={onModalOpen}
@@ -591,8 +623,14 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
         totalPlayed={totalPlayed}
         metrics={heroMetrics}
         theme={theme}
+        isLogged={isLogged}
         onRegisterOpen={onRegisterOpen}
       />
+
+      {/* PANEL DEL USUARIO (solo con sesión) */}
+      {isLogged && (
+        <UserDashboard standings={standings} stars={starsData} />
+      )}
 
       {/* S3: RESUMEN EJECUTIVO DE CIRCUITO */}
       <section className="landing__bento">
@@ -683,10 +721,17 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
               <div className="landing__bento-big-text">Sigue a tu Franquicia</div>
               <p className="landing__bento-sub">Recibe boxscores oficiales, outs decisivos y jonrones vía alerta Push instantánea.</p>
               <div className="landing__bento-cta-wrap">
-                <button type="button" onClick={onRegisterOpen} className="landing__bento-cta">
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>send</span>
-                  Activar Alertas
-                </button>
+                {isLogged ? (
+                  <a href="#mi-panel" className="landing__bento-cta">
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>notifications_active</span>
+                    Ver mis Alertas
+                  </a>
+                ) : (
+                  <button type="button" onClick={onRegisterOpen} className="landing__bento-cta">
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>send</span>
+                    Activar Alertas
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -1082,36 +1127,28 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
                 </div>
               </div>
               <div className="landing__callout-actions">
-                {isLogged && role === 'Director Técnico' ? (
-                  <Link to="/dt/cambios" className="landing__callout-btn ghost">
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                      badge
-                    </span>
-                    Portal de Cambios
-                  </Link>
-                ) : (
-                  <button type="button" onClick={onModalOpen} className="landing__callout-btn ghost">
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                      badge
-                    </span>
-                    Portal de Cambios
-                  </button>
-                )}
-                {isLogged && role === 'Admin' ? (
-                  <Link to="/admin/posiciones" className="landing__callout-btn solid">
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                      admin_panel_settings
-                    </span>
-                    Gestión de Liga (Admin)
-                  </Link>
-                ) : (
-                  <button type="button" onClick={onModalOpen} className="landing__callout-btn solid">
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                      admin_panel_settings
-                    </span>
-                    Gestión de Liga (Admin)
-                  </button>
-                )}
+                <CalloutAction
+                  isLogged={isLogged}
+                  role={role}
+                  requiredRole="Director Técnico"
+                  to="/dt/cambios"
+                  icon="badge"
+                  lockedIcon="lock"
+                  variant="ghost"
+                  label="Portal de Cambios"
+                  onModalOpen={onModalOpen}
+                />
+                <CalloutAction
+                  isLogged={isLogged}
+                  role={role}
+                  requiredRole="Admin"
+                  to="/admin/posiciones"
+                  icon="admin_panel_settings"
+                  lockedIcon="lock"
+                  variant="solid"
+                  label="Gestión de Liga (Admin)"
+                  onModalOpen={onModalOpen}
+                />
               </div>
             </div>
           </div>

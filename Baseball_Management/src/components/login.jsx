@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../api';
+import { REDIRECT_AFTER_LOGIN_KEY } from '../authModal';
+import { clearSession } from '../session';
 import './login.css';
 
 function LoginBoard({
@@ -59,11 +61,16 @@ function LoginBoard({
 
       updateTeam(team_id);
       updateRole(role_name);
-      NameOnChange(email);
+      const displayName = email.split('@')[0];
+      NameOnChange(displayName);
+      localStorage.setItem('userName', displayName);
       localStorage.setItem('isLogged', 'true');
       setLogin(true);
 
-      if (role_name === 'Director Técnico') navigate('/dt/cambios');
+      const redirect = localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY);
+      localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY);
+      if (redirect) navigate(redirect);
+      else if (role_name === 'Director Técnico') navigate('/dt/cambios');
       else navigate('/');
     } catch (error) {
       console.error('Error capturado:', error.message);
@@ -72,7 +79,7 @@ function LoginBoard({
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    clearSession();
     onButtonClick();
     updateRole('Guest');
     NameOnChange('');

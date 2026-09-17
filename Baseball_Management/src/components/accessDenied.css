@@ -1,0 +1,73 @@
+/* ============================================================
+   Acceso restringido — visible para usuarios con rol insuficiente
+   ============================================================ */
+
+.landing.access-denied {
+  display: grid;
+  place-items: center;
+  padding: 48px 24px;
+  background: var(--lnd-bg, #071322);
+  color: var(--lnd-text, #f3efe3);
+}
+
+.access-denied__card {
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 32px;
+  border-radius: var(--lnd-radius, 18px);
+  border: 1px solid var(--lnd-hairline, rgba(225, 229, 234, 0.12));
+  background: var(--lnd-surface, #132842);
+  box-shadow: var(--shadow-card, 0 22px 50px -24px rgba(0, 0, 0, 0.55));
+}
+
+.access-denied__icon {
+  font-size: 44px;
+  color: var(--lnd-clay, #e11d48);
+}
+
+.access-denied__title {
+  margin: 0;
+  font-family: var(--lnd-font-display, 'Oswald', system-ui, sans-serif);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.access-denied__text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--lnd-dim, #94a3b8);
+}
+
+.access-denied__cta {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--lnd-text, #f3efe3);
+  background: color-mix(in oklch, var(--lnd-lights, #f8af3c) 20%, transparent);
+  border: 1px solid color-mix(in oklch, var(--lnd-lights, #f8af3c) 45%, transparent);
+}
+
+.access-denied__cta:hover {
+  background: color-mix(in oklch, var(--lnd-lights, #f8af3c) 30%, transparent);
+}
+
+.access-denied__cta:focus-visible {
+  outline: 2px solid var(--lnd-lights, #f8af3c);
+  outline-offset: 3px;
+}
+
+.access-denied__cta .material-symbols-outlined {
+  font-size: 18px;
+}

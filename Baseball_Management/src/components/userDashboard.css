@@ -1,157 +1,146 @@
 /* ============================================================
-   Dashboard Personalizado — Diamond Plate
+   "Tu panel" — resumen personalizado (estilo landing Diamond Plate)
+   Usa tokens --lnd-* para integrarse con la landing pública.
    ============================================================ */
 
-.dashboard-card {
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  background: linear-gradient(160deg, var(--bg-elevated), var(--bg-secondary) 60%);
-  padding: 24px 28px;
-  margin-bottom: 32px;
+.udb {
+  scroll-margin-top: 92px;
 }
 
-.dashboard-card--loading {
-  text-align: center;
-  color: var(--text-muted);
+.udb__loading {
+  color: var(--lnd-dim);
   font-style: italic;
-  padding: 20px;
-}
-
-.dashboard-card__head {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.dashboard-card__icon {
-  color: var(--accent);
-  flex-shrink: 0;
-}
-
-.dashboard-card__title {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text-primary);
   margin: 0;
 }
 
-.dashboard-card__sub {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.dashboard-card__badge {
+.udb__badge {
   margin-left: auto;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--text-inverse);
-  background: var(--danger);
-  border-radius: var(--radius-full);
-  padding: 4px 12px;
+  color: var(--lnd-text);
+  background: color-mix(in oklch, var(--lnd-clay) 22%, transparent);
+  border: 1px solid color-mix(in oklch, var(--lnd-clay) 45%, transparent);
+  border-radius: 999px;
+  padding: 5px 12px;
+  white-space: nowrap;
 }
 
-.dashboard-card__grid {
+.udb__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
 }
 
-.dashboard-card__tile {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-tertiary);
-  padding: 16px;
+.udb__tile {
+  border-radius: 14px;
+  border: 1px solid var(--lnd-hairline);
+  background: var(--lnd-surface);
+  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.dashboard-card__tile--wide {
+.udb__tile--wide {
   grid-column: span 2;
 }
 
-.dashboard-card__tile--chart {
-  max-width: 300px;
+.udb__tile--chart {
+  max-width: 320px;
 }
 
-.dashboard-card__tile-icon {
-  color: var(--accent);
+@media (max-width: 640px) {
+  .udb__tile--wide {
+    grid-column: auto;
+  }
+}
+
+.udb__tile-icon {
+  color: var(--lnd-lights);
   flex-shrink: 0;
 }
 
-.dashboard-card__tile-label {
-  font-size: 0.82rem;
+.udb__tile-label {
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--lnd-dim);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
-.dashboard-card__tile-value {
+.udb__tile-value {
+  font-family: var(--lnd-font-num);
   font-size: 2rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--lnd-text);
+  line-height: 1.1;
 }
 
-.dashboard-card__tile-muted {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+.udb__tile-value--sm {
+  font-size: 1.05rem;
+}
+
+.udb__tile-muted {
+  font-size: 0.82rem;
+  color: var(--lnd-dim);
   font-style: italic;
 }
 
-.dashboard-card__link {
-  color: var(--accent);
+.udb__link {
+  color: var(--lnd-lights);
   text-decoration: none;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
 }
 
-.dashboard-card__link:hover {
+.udb__link:hover {
   text-decoration: underline;
 }
 
-.dashboard-card__games {
+.udb__games {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.dashboard-card__game {
+.udb__game {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 0.85rem;
-  color: var(--text-secondary);
-  padding: 5px 0;
-  border-bottom: 1px solid var(--border-subtle);
+  color: var(--lnd-text);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--lnd-hairline);
 }
 
-.dashboard-card__game:last-child {
+.udb__game:last-child {
   border-bottom: none;
 }
 
-.dashboard-card__game-date {
-  font-size: 0.78rem;
-  color: var(--text-muted);
+.udb__game-date {
+  font-family: var(--lnd-font-num);
+  font-size: 0.76rem;
+  color: var(--lnd-dim);
   white-space: nowrap;
-  min-width: 80px;
+  min-width: 84px;
 }
 
-.dashboard-card__game-rival {
+.udb__game-rival {
   font-weight: 600;
-  color: var(--text-primary);
 }
 
-.dashboard-card__game-score {
+.udb__game-score {
   margin-left: auto;
+  font-family: var(--lnd-font-num);
 }
 
-.dashboard-card__empty {
-  font-size: 0.88rem;
-  color: var(--text-muted);
+.udb__empty {
+  font-size: 0.9rem;
+  color: var(--lnd-dim);
   line-height: 1.6;
   margin: 0;
+  border: 1px dashed var(--lnd-hairline);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
 }

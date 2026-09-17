@@ -26,11 +26,17 @@ function NotificationBell() {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  /* Refresco periódico del badge + al recuperar el foco de la ventana */
   useEffect(() => {
-    if (!isLogged || !open) return;
-    const id = setInterval(fetchNotifications, 20000);
-    return () => clearInterval(id);
-  }, [isLogged, open, fetchNotifications]);
+    if (!isLogged) return undefined;
+    const id = setInterval(fetchNotifications, 30000);
+    const onFocus = () => fetchNotifications();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [isLogged, fetchNotifications]);
 
   useEffect(() => {
     const onClick = (e) => {
@@ -40,19 +46,36 @@ function NotificationBell() {
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
+  const markRead = async (id) => {
+    const target = notifications.find((n) => n.id === id);
+    if (!target || target.is_read) return;
+    setNotifications((list) =>
+      list.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+    );
+    setUnread((u) => Math.max(0, u - 1));
+    try {
+      await apiPost(`/api/notifications/${id}/read/`);
+    } catch {
+      fetchNotifications();
+    }
+  };
+
   const markAllRead = async () => {
+    setNotifications((list) => list.map((n) => ({ ...n, is_read: true })));
+    setUnread(0);
     try {
       await apiPost('/api/notifications/read-all/');
-      fetchNotifications();
     } catch {
       /* silencioso */
+    } finally {
+      fetchNotifications();
     }
   };
 
   if (!isLogged) return null;
 
   return (
-    <div className="notification-bell" ref={ref}>
+    <div className="notification-bell" ref={ref} data-open={open ? 'true' : 'false'}>
       <button
         className="notification-bell__btn"
         onClick={() => setOpen((o) => !o)}
@@ -84,11 +107,24 @@ function NotificationBell() {
                   className={`notification-bell__item${n.is_read ? '' : ' notification-bell__item--unread'}`}
                 >
                   {n.link ? (
-                    <Link to={n.link} className="notification-bell__message">
+                    <Link
+                      to={n.link}
+                      className="notification-bell__message"
+                      onClick={() => {
+                        markRead(n.id);
+                        setOpen(false);
+                      }}
+                    >
                       {n.message}
                     </Link>
                   ) : (
-                    <span className="notification-bell__message">{n.message}</span>
+                    <button
+                      type="button"
+                      className="notification-bell__message notification-bell__message--btn"
+                      onClick={() => markRead(n.id)}
+                    >
+                      {n.message}
+                    </button>
                   )}
                   <span className="notification-bell__date">
                     {new Date(n.created_at).toLocaleDateString('es-ES')}
