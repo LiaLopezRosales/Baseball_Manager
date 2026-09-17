@@ -219,7 +219,38 @@ así que **todos los filtros usan `user_id`** (nunca `request.user` directo en l
   `<ProtectedRoute roles={['Admin','Director Técnico','Usuario General']}>` y el item del sidebar se oculta para invitados.
 - `FavoriteButton` (corazones) y `FavoritesPanel` no se renderizan para invitados (`token` ausente) — los favoritos
   requieren cuenta. `UserDashboard` ("Tu panel") también se condiciona a `localStorage.getItem('token')`.
-- `UserDashboard.jsx` tiene un warning de eslint preexistente (`teamStars` sin usar) — no relacionado con cambios recientes.
+
+### Bloque 3 — auth con modal, notificaciones y "Tu panel" (re-enganche)
+
+Tras la limpieza del shell y la landing standalone (commits `805fed6`/`35147a0`) se re-engancharon
+las funciones de Usuario General que habían quedado huérfanas:
+
+- **Modal de acceso como única puerta**: `src/authModal.js` (`AuthModalContext`, `useAuthModal`,
+  `REDIRECT_AFTER_LOGIN_KEY='redirectAfterLogin'`). `ProtectedRoute` de invitado guarda el destino,
+  abre el modal y navega a `/`; `App.handleModalOpen/handleRegisterOpen` **solo abren si `!isLogged`**.
+  `login.jsx` cierra el modal al entrar (`onClose`); el panel "Sesión Activa" del modal se eliminó
+  (redundante con el dropdown de cuenta) y con él la rama legacy de logout (`onButtonClick`/`handleClick`).
+- **Rol insuficiente = `AccessDenied`** (`components/AccessDenied.jsx` + css, tokens `--lnd-*`), no redirect.
+- **`/registro`**: abre el modal de registro y vuelve a `/`; con sesión activa **no** lo abre
+  (`RegisterRedirect isLogged`). Los enlaces "Términos"/"Privacidad" del registro apuntan a `/terminos`
+  y `/privacidad` (antes `href="#"` muertos) y cierran el modal (`e.stopPropagation()` evita togglear el checkbox).
+- **Callout DT/Admin** (`Landing.CalloutAction`): invitado → login; rol correcto → link; rol insuficiente →
+  botón bloqueado con `aria-disabled` (focusable, `:focus-visible`) y `aria-label`/`title` explicativos.
+- **Logout**: `src/session.js` (`SESSION_KEYS`, `clearSession()`) limpia token/rol/team/userName/isLogged
+  pero **preserva `theme`**; se usa en el dropdown de `LandingHeader`.
+- **`UserDashboard` ("Tu panel")** re-integrado y refactorizado (`.udb__*`, tokens `--lnd-*`): posición, últimos
+  juegos, estrella del equipo y radar del jugador favorito. `.udb__link` en tema claro usa `#0369a1` (5.93:1)
+  porque el acento `--lnd-lights` claro (#0284c7) solo da 4.10:1 en texto normal.
+- **`NotificationBell`**: marca leída por ítem (`POST /api/notifications/<id>/read/`), polling cada 30 s y
+  refresco al recuperar foco; la campana vive solo en `LandingHeader` (Admin/DT la heredan).
+- **`DashboardView`** filtra `Game` a `score__isnull=False` → "Últimos juegos" muestra resultados reales
+  (los juegos futuros sin score salían como `— – —`).
+- **Seed**: `populate_db.seed_favorites_and_notifications()` (idempotente) crea `FavoriteTeam`/`FavoritePlayer`
+  y notificaciones de ejemplo reutilizando `create_result_notifications()` con un `Score` **sin guardar**
+  (antes persistía un `Score` sintético que contaminaba el Reporte 6). Se invoca al final de
+  `simulate_full_championship()`.
+- Verificación: build `CI=false npx react-scripts build` (0 warnings), `npm test` (2), `python manage.py test db_structure` (96),
+  smoke Playwright por rol (invitado/General/DT/Admin) y contraste AA medido por computed styles en `.udb__link`.
 
 ## Frontend/Backend: Perfil de equipo LNB Pro (referencias stitch 17/18)
 

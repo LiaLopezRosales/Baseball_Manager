@@ -201,18 +201,16 @@ function App() {
     setRole(localStorage.getItem('role') || '');
   }, []);
 
-  const handleClick = () => {
-    setLogin((l) => {
-      const next = !l;
-      localStorage.setItem('isLogged', next);
-      return next;
-    });
-  };
-
   const handleNameChange = (newName) => setUserName(newName);
 
-  const handleModalOpen = () => setModalMode('login');
-  const handleRegisterOpen = () => setModalMode('register');
+  const handleModalOpen = () => {
+    if (isLogged) return;
+    setModalMode('login');
+  };
+  const handleRegisterOpen = () => {
+    if (isLogged) return;
+    setModalMode('register');
+  };
   const handleModalClose = () => setModalMode(null);
 
   const handleLogout = () => {
@@ -261,13 +259,11 @@ function App() {
               />
             ) : (
               <LoginBoard
-                name={userName}
-                isLogged={isLogged}
                 setLogin={setLogin}
-                onButtonClick={handleClick}
                 NameOnChange={handleNameChange}
                 updateRole={updateRole}
                 updateTeam={updateTeam}
+                onClose={handleModalClose}
                 onSwitchToRegister={handleRegisterOpen}
               />
             )}

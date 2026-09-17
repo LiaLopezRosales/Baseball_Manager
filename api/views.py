@@ -914,7 +914,8 @@ class DashboardView(APIView):
                 ).values_list('id', flat=True)
                 games = Game.objects.filter(
                     Q(local_id__in=team_on_field_ids) |
-                    Q(rival_id__in=team_on_field_ids)
+                    Q(rival_id__in=team_on_field_ids),
+                    score__isnull=False,
                 ).order_by('-date')[:10]
 
                 data['recent_games'] = []

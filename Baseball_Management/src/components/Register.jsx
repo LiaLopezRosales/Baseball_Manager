@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { API_URL } from '../api';
 import { REDIRECT_AFTER_LOGIN_KEY } from '../authModal';
 import './login.css';
@@ -210,7 +210,15 @@ function RegisterBoard({ setLogin, updateRole, updateTeam, NameOnChange, onClose
             <span className="material-symbols-outlined">check</span>
           </span>
           <span className="auth-terms__text">
-            Acepto los <a href="#" onClick={(e) => e.preventDefault()}>Términos de Uso</a> y las <a href="#" onClick={(e) => e.preventDefault()}>Políticas de Privacidad</a> de la LNB Pro.
+            Acepto los{' '}
+            <Link to="/terminos" onClick={(e) => { e.stopPropagation(); onClose?.(); }}>
+              Términos de Uso
+            </Link>{' '}
+            y las{' '}
+            <Link to="/privacidad" onClick={(e) => { e.stopPropagation(); onClose?.(); }}>
+              Políticas de Privacidad
+            </Link>{' '}
+            de la LNB Pro.
           </span>
         </label>
 

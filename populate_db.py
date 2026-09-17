@@ -798,13 +798,18 @@ def seed_favorites_and_notifications(teams=None):
         and team_list[0].id != team_list[1].id
         and not Notification.objects.filter(user=general).exists()
     ):
-        Score.objects.create(
+        from db_structure.signals import create_result_notifications
+
+        # Resultado de muestra SIN persistir: reutiliza la misma lógica del signal
+        # para redactar las notificaciones, pero no contamina Score/reportes.
+        sample = Score(
             winner=team_list[0],
             loser=team_list[1],
             w_points=7,
             l_points=3,
         )
-        print("Resultado sembrado: notificaciones generadas vía signal.")
+        created = create_result_notifications(sample)
+        print(f"Notificaciones de ejemplo sembradas: {len(created)} (sin resultado sintético).")
 
 
 def simulate_full_championship():

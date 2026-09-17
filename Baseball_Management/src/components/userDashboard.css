@@ -93,6 +93,13 @@
   font-size: 0.86rem;
 }
 
+/* En tema claro el acento #0284c7 no alcanza AA (4.1) en texto normal:
+   se oscurece a #0369a1 (5.9). */
+.landing[data-theme='light'] .udb__link,
+html[data-theme='light'] .udb__link {
+  color: #0369a1;
+}
+
 .udb__link:hover {
   text-decoration: underline;
 }
