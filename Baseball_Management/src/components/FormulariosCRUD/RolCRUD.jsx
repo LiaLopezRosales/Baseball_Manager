@@ -2,6 +2,8 @@
 
 import React from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Key, ShieldCheck, Lock, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const RolCRUD = () => {
     const fields = [
@@ -13,12 +15,24 @@ const RolCRUD = () => {
         id : "",
         type: "",
     };
+
+    const kpis = [
+        makeCountKpi("Total Roles", Key, { sub: 'roles definidos', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Seguridad", Lock, 'HTTPS', { sub: 'control de acceso activo', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Roles del sistema: Administrador, Director Técnico y Usuario General.";
+
     return (
         <BaseCRUD
           apiUrl={apiUrl}
           fields={fields}
           title="Roles"
           initialFormValues={initialFormValues}
+          kpis={kpis}
+          subtitle={subtitle}
         />
     );
 };

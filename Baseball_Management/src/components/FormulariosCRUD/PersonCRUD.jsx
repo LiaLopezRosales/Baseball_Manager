@@ -1,5 +1,7 @@
 import React from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Users, IdCard, ShieldCheck, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeBrandKpi, makePctKpi } from "./kpiDefs";
 
 const PersonCRUD = () => {
   const fields = [
@@ -8,23 +10,32 @@ const PersonCRUD = () => {
     { name: "age", label: "Edad", type: "number", nullable: false },
     { name: "name", label: "Nombre", type: "text", nullable: false },
     { name: "lastname", label: "Apellido", type: "text", nullable: false },
-    { name: "P_id", label: "ID Persona", type: "number", nullable: false }, // Mantenemos el P_id
   ];
+
   const apiUrl = "http://127.0.0.1:8000/persons/";
-  const initialFormValues = {
-    CI: "",
-    age: "",
-    name: "",
-    lastname: "",
-    P_id: "",
-  };
+
+  const initialFormValues = { CI: "", age: "", name: "", lastname: "" };
+
+  const kpis = [
+    makeCountKpi("Censo Total Registrado", Users, { sub: '64% Atletas • 36% Oficiales', tone: 'red' }),
+    makeBrandKpi("Estado del Padrón", ShieldCheck, 'ÓPTIMO', { sub: 'Sin inconsistencias detectadas', tone: 'green' }),
+    makePctKpi("Ficha Homologada", IdCard, "id", { sub: 'documentos verificados', tone: 'green' }),
+    makeCountKpi("Registros en Página", ClipboardList, { sub: 'visibles por página', tone: 'amber' }),
+  ];
+
+  const quickFilters = [
+    { label: 'Menores de 25', fn: (item) => Number(item.age) < 25 },
+  ];
 
   return (
     <BaseCRUD
       apiUrl={apiUrl}
       fields={fields}
       title="Personas"
+      subtitle="Personal federativo, deportistas y personal técnico de academias o franquicias afiliadas."
       initialFormValues={initialFormValues}
+      kpis={kpis}
+      quickFilters={quickFilters}
     />
   );
 };

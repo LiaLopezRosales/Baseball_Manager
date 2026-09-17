@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Users, BarChart3, Clock, ShieldCheck } from "lucide-react";
+import { makeCountKpi, makeAvgKpi, makeStatusKpi } from "./kpiDefs";
 
 const BaseballPlayerCRUD = () => {
 
@@ -54,12 +56,23 @@ const BaseballPlayerCRUD = () => {
         pitcher: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Jugadores", Users, { sub: 'jugadores activos', tone: 'amber' }),
+        makeAvgKpi("AVG Promedio", BarChart3, "batting_average", { decimals: 3, sub: 'promedio de bateo', tone: 'green' }),
+        makeAvgKpi("Experiencia Media", Clock, "years_of_experience", { decimals: 1, sub: 'años promedio', tone: 'amber' }),
+        makeStatusKpi("Padrón", ShieldCheck, { tone: 'green' }),
+    ];
+
+    const subtitle = "Jugadores de béisbol: promedio de bateo, años de experiencia y vínculo con persona.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Jugadores"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

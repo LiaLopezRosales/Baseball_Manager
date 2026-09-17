@@ -1,100 +1,131 @@
-// Baseball_Management/src/components/FormulariosCRUD/BaseCRUD/useCRUD.jsx
+/* Baseball_Management/src/components/FormulariosCRUD/BaseCRUD/useCRUD.jsx */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
-const useCRUD = (apiUrl, fields, initialFormValues) => {
-  const [data, setData] = useState([]);
+const useCRUD = (apiUrl, fields, initialFormValues, pageSizeDefault = 10) => {
+  const [rawData, setRawData] = useState([]);
   const [filters, setFilters] = useState({});
+  const [globalSearch, setGlobalSearch] = useState("");
+  const [quickFilter, setQuickFilter] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" });
+  const [pageSize, setPageSize] = useState(pageSizeDefault);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  // Variables para manejar formulario y estados de edición/creación
   const [formValues, setFormValues] = useState(initialFormValues);
   const [formErrors, setFormErrors] = useState({});
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
+  const fieldsVisible = useMemo(
+    () => fields.filter((f) => !f.hidden && f.type !== "password"),
+    [fields]
+  );
+
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(apiUrl);
       if (response.ok) {
-        let rawData = await response.json();
-
-        // Lógica de ordenamiento
-        if (sortConfig.key) {
-          rawData = rawData.sort((a, b) => {
-            if (a[sortConfig.key] < b[sortConfig.key]) {
-              return sortConfig.direction === "ascending" ? -1 : 1;
-            }
-            if (a[sortConfig.key] > b[sortConfig.key]) {
-              return sortConfig.direction === "ascending" ? 1 : -1;
-            }
-            return 0;
-          });
-        }
-
-        // Lógica de filtrado local
-        rawData = rawData.filter((item) =>
-          Object.entries(filters).every(([key, filter]) => {
-            const fieldValue = item[key];
-            const field = fields.find(f => f.name === key);
-
-            if (!field) return true; // Campo no encontrado, no filtrar
-
-            // Filtrado para campos numéricos
-            if (field.type === "number") {
-              const minValid = filter.min ? fieldValue >= parseFloat(filter.min) : true;
-              const maxValid = filter.max ? fieldValue <= parseFloat(filter.max) : true;
-              return minValid && maxValid;
-            }
-
-            // Filtrado para campos de fecha
-            if (field.type === "date") {
-              const dateValue = new Date(fieldValue);
-              const startValid = filter.start ? dateValue >= new Date(filter.start) : true;
-              const endValid = filter.end ? dateValue <= new Date(filter.end) : true;
-              return startValid && endValid;
-            }
-
-            // Filtrado para campos de texto
-            if (field.type === "text") {
-              return filter.search
-                ? fieldValue.toLowerCase().startsWith(filter.search.toLowerCase())
-                : true;
-            }
-
-            // Filtrado para campos de email
-            if (field.type === "email") {
-              return filter.search
-                ? fieldValue.toLowerCase().startsWith(filter.search.toLowerCase())
-                : true;
-            }
-
-            return true; // Si el tipo de campo no coincide, no filtrar
-          })
-        );
-
-        setData(rawData);
-        setTotalPages(Math.ceil(rawData.length / 10));
-        setCurrentPage(1); // Reiniciar a la primera página al filtrar
+        const rawData = await response.json();
+        setRawData(Array.isArray(rawData) ? rawData : []);
       } else {
-        console.error("Error fetching data");
+        console.error(`Error fetching data (${apiUrl}): HTTP ${response.status}`);
       }
-      setLoading(false);
     } catch (error) {
       console.error("Error:", error);
+    } finally {
       setLoading(false);
     }
-  }, [apiUrl, sortConfig, filters, fields]);
+  }, [apiUrl]);
 
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
 
+  // ── Filtrado + orden --------------------------------
+  const filteredData = useMemo(() => {
+    let rows = rawData;
+
+    rows = rows.filter((item) =>
+      Object.entries(filters).every(([key, filter]) => {
+        if (!filter) return true;
+        const field = fields.find((f) => f.name === key);
+        if (!field) return true;
+        const fieldValue = item[key];
+
+        if (field.type === "number") {
+          const minValid = filter.min ? Number(fieldValue) >= parseFloat(filter.min) : true;
+          const maxValid = filter.max ? Number(fieldValue) <= parseFloat(filter.max) : true;
+          return minValid && maxValid;
+        }
+
+        if (field.type === "date") {
+          const dateValue = new Date(fieldValue);
+          const startValid = filter.start ? dateValue >= new Date(filter.start) : true;
+          const endValid = filter.end ? dateValue <= new Date(filter.end) : true;
+          return startValid && endValid;
+        }
+
+        if (filter.search) {
+          const display =
+            field.type === "select" && field.options
+              ? (field.options.find((o) => String(o.id) === String(fieldValue))?.name ??
+                String(fieldValue ?? ""))
+              : String(fieldValue ?? "");
+          return display.toLowerCase().includes(filter.search.toLowerCase());
+        }
+
+        return true;
+      })
+    );
+
+    if (globalSearch.trim()) {
+      const q = globalSearch.toLowerCase();
+      rows = rows.filter((item) =>
+        fieldsVisible.some((field) => {
+          const raw = item[field.name];
+          if (raw === null || raw === undefined) return false;
+          if (field.type === "select" && field.options) {
+            return (field.options.find((o) => String(o.id) === String(raw))?.name ?? "")
+              .toLowerCase()
+              .includes(q);
+          }
+          return String(raw).toLowerCase().includes(q);
+        })
+      );
+    }
+
+    if (quickFilter && quickFilter.fn) {
+      rows = rows.filter(quickFilter.fn);
+    }
+
+    if (sortConfig.key) {
+      rows = [...rows].sort((a, b) => {
+        const va = a[sortConfig.key];
+        const vb = b[sortConfig.key];
+        if (va < vb) return sortConfig.direction === "ascending" ? -1 : 1;
+        if (va > vb) return sortConfig.direction === "ascending" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return rows;
+  }, [rawData, fields, fieldsVisible, filters, globalSearch, quickFilter, sortConfig]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(1);
+  }, [totalPages, currentPage]);
+
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // ── Formulario --------------------------------------
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
@@ -110,7 +141,7 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
     const updatedFormValues = {};
     fields.forEach((field) => {
       updatedFormValues[field.name] =
-        item[field.name] !== null
+        item[field.name] !== null && item[field.name] !== undefined
           ? item[field.name]
           : field.nullable
           ? ""
@@ -147,22 +178,12 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
         setCurrentItem(null);
         setFormErrors({});
       } else {
-        // 🔹 Capturar errores específicos de los campos
-        if (responseData.errors) {
-            setFormErrors(responseData.errors);
-        }
-
-        // 🔹 Capturar errores generales y mostrar alerta
-        if (responseData.detail) {
-
-            setFormErrors({ detail: responseData.detail });
-        }
-
-        // 🔹 Mensaje de error genérico si no hay detalles específicos
+        if (responseData.errors) setFormErrors(responseData.errors);
+        if (responseData.detail) setFormErrors({ detail: responseData.detail });
         if (!responseData.errors && !responseData.detail) {
-            alert("Ocurrió un error inesperado.");
+          alert("Ocurrió un error inesperado.");
         }
-    }
+      }
     } catch (error) {
       console.error("Error:", error);
     }
@@ -183,6 +204,35 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
     }
   };
 
+  const handleBulkDelete = async (ids) => {
+    const list = Array.from(ids || []);
+    if (list.length === 0) return false;
+    if (
+      !window.confirm(
+        `¿Eliminar ${list.length} registro(s) seleccionado(s)? Esta acción no se puede deshacer.`
+      )
+    ) {
+      return false;
+    }
+    const results = await Promise.all(
+      list.map(async (id) => {
+        try {
+          const response = await fetch(`${apiUrl}${id}/`, { method: "DELETE" });
+          return response.ok;
+        } catch (error) {
+          console.error("Error deleting item", id, error);
+          return false;
+        }
+      })
+    );
+    const failed = results.filter((ok) => !ok).length;
+    fetchItems(); // Refrescar datos
+    if (failed > 0) {
+      alert(`No se pudieron eliminar ${failed} de ${list.length} registro(s).`);
+    }
+    return true;
+  };
+
   const handleCancel = () => {
     setIsEditing(false);
     setIsCreating(false);
@@ -190,16 +240,41 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
     setFormErrors({});
   };
 
+  // ── Filtros ------------------------------------------
   const handleSort = (key) => {
     let direction = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
       direction = "descending";
     }
     setSortConfig({ key, direction });
+    setCurrentPage(1);
   };
 
   const handleFilter = (newFilters) => {
     setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  const handleGlobalSearch = (query) => {
+    setGlobalSearch(query);
+    setCurrentPage(1);
+  };
+
+  const handleQuickFilter = (qs) => {
+    setQuickFilter(qs ? { label: qs.label, fn: qs.fn } : null);
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setFilters({});
+    setGlobalSearch("");
+    setQuickFilter(null);
+    setCurrentPage(1);
+  };
+
+  const setPage = (size) => {
+    setPageSize(size);
+    setCurrentPage(1);
   };
 
   const goToPage = (page) => {
@@ -208,10 +283,18 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
     }
   };
 
-  const paginatedData = data.slice((currentPage - 1) * 10, currentPage * 10);
-
   return {
-    data,
+    data: rawData,
+    filteredData,
+    paginatedData,
+    totalPages,
+    currentPage,
+    pageSize,
+    loading,
+    fieldsVisible,
+    filters,
+    globalSearch,
+    quickFilter,
     sortConfig,
     form: { values: formValues, errors: formErrors, isEditing, isCreating },
     actions: {
@@ -220,16 +303,17 @@ const useCRUD = (apiUrl, fields, initialFormValues) => {
       handleEdit,
       handleSave,
       handleDelete,
+      handleBulkDelete,
       handleCancel,
       handleInputChange,
       handleSort,
       handleFilter,
+      handleGlobalSearch,
+      handleQuickFilter,
+      clearFilters,
+      setPage,
       goToPage,
     },
-    paginatedData,
-    totalPages,
-    currentPage,
-    loading,
   };
 };
 

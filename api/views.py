@@ -598,35 +598,41 @@ class PlayerSwapByDTView(APIView):
 
             # Obtener juegos relacionados
             team_on_field_ids = TeamOnTheField.objects.filter(lineup_id=lineup).values_list('id', flat=True)
-            
-            # Juegos donde el equipo es local
-            local_games = Game.objects.filter(local_id__in=team_on_field_ids)
-            local_game_data = [
-                {
-                    "game_id": game.local.id,
-                    "date": game.date.strftime("%Y-%m-%d"),
-                    "rival_team": f"{game.rival.lineup_id.team_id.name} ({game.rival.lineup_id.team_id.initials})",
-                    "series_name": f"{game.series.type} - {game.series.season.name}",
-                    "series_id": game.series.id,
-                }
-                for game in local_games
-            ]
+            now = timezone.now()
 
-            # Juegos donde el equipo es rival
-            rival_games = Game.objects.filter(rival_id__in=team_on_field_ids)
-            rival_game_data = [
-                {
-                    "game_id": game.rival.id,
-                    "date": game.date.strftime("%Y-%m-%d"),
-                    "rival_team": f"{game.local.lineup_id.team_id.name} ({game.local.lineup_id.team_id.initials})",
-                    "series_name": f"{game.series.type} - {game.series.season.name}",
-                    "series_id": game.series.id,
-                }
-                for game in rival_games
-            ]
+            def _game_card(game, is_local):
+                """Devuelve el card de un juego solo si todavía no ha sucedido."""
+                if game.date < now:
+                    return None
+                if is_local:
+                    rival_team = f"{game.rival.lineup_id.team_id.name} ({game.rival.lineup_id.team_id.initials})"
+                    return {
+                        "game_id": game.local.id,
+                        "date": game.date.strftime("%Y-%m-%d"),
+                        "rival_team": rival_team,
+                        "series_name": f"{game.series.type} - {game.series.season.name}",
+                        "series_id": game.series.id,
+                    }
+                else:
+                    rival_team = f"{game.local.lineup_id.team_id.name} ({game.local.lineup_id.team_id.initials})"
+                    return {
+                        "game_id": game.rival.id,
+                        "date": game.date.strftime("%Y-%m-%d"),
+                        "rival_team": rival_team,
+                        "series_name": f"{game.series.type} - {game.series.season.name}",
+                        "series_id": game.series.id,
+                    }
 
-            # Combinar juegos en una sola lista
-            game_data = local_game_data + rival_game_data
+            # Juegos donde el equipo es local (solo pendientes, próximos primero)
+            local_games = Game.objects.filter(local_id__in=team_on_field_ids).order_by('date')
+            local_game_data = [card for g in local_games if (card := _game_card(g, True)) is not None]
+
+            # Juegos donde el equipo es rival (solo pendientes, próximos primero)
+            rival_games = Game.objects.filter(rival_id__in=team_on_field_ids).order_by('date')
+            rival_game_data = [card for g in rival_games if (card := _game_card(g, False)) is not None]
+
+            # Combinar juegos en una sola lista y ordenar por fecha ascendente
+            game_data = sorted(local_game_data + rival_game_data, key=lambda c: c["date"])
 
 
             return Response({
@@ -656,6 +662,19 @@ class PlayerSwapByDTView(APIView):
             missing_fields = [field for field in ["game_team", "old_player", "new_player", "position", "date"] if not data.get(field)]
             if missing_fields:
                 return Response({"error": f"Faltan campos requeridos: {', '.join(missing_fields)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Validar que el juego aún no haya sucedido (solo se editan alineaciones de juegos pendientes)
+            game_team_obj = TeamOnTheField.objects.filter(id=game_team).first()
+            if not game_team_obj:
+                return Response({"error": "No se encontró el juego."}, status=status.HTTP_400_BAD_REQUEST)
+            game = Game.objects.filter(Q(local_id=game_team) | Q(rival_id=game_team)).first()
+            if not game:
+                return Response({"error": "No se encontró el juego asociado."}, status=status.HTTP_400_BAD_REQUEST)
+            if game.date < timezone.now():
+                return Response(
+                    {"error": "No es posible registrar cambios para un juego ya disputado."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             serialized_data = {
                 "game_team": game_team,

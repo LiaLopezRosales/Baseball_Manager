@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { HardHat, ShieldCheck, Link, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const WorkerCRUD = () => {
 
@@ -35,10 +37,10 @@ const WorkerCRUD = () => {
                             const personResponse = await fetch(`http://127.0.0.1:8000/persons/${worker.P_id}/`);
                             if (personResponse.ok) {
                                 const person = await personResponse.json();
-                                return { id: td.id, name: `${person.name} ${person.lastname}` };
+                                return { id: td.direction_team, name: `${person.name} ${person.lastname}` };
                             }
                         }
-                        return { id: td.id, name: "Desconocido" };
+                        return { id: td.direction_team, name: "Desconocido" };
                     })
                 );
                 setTechnicalDirectors(directorsWithNames);
@@ -62,7 +64,7 @@ const WorkerCRUD = () => {
             options: persons.map((person) => ({id: person.id, name: `${person.name} ${person.lastname}`})),
         },
         {
-            name: "TD_id",
+            name: "DT_id",
             label: "Director Técnico",
             type: "select",
             options: technicalDirectors,
@@ -76,12 +78,23 @@ const WorkerCRUD = () => {
         DT_id: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Trabajadores", HardHat, { sub: 'personal activo', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Afiliación", Link, 'VERIFICADA', { sub: 'registro activo', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Personal técnico y administrativo vinculado a los equipos del campeonato.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Trabajadores"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

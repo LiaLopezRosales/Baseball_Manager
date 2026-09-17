@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Users, ShieldCheck, Fingerprint, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const UserCRUD = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -92,12 +94,23 @@ const UserCRUD = () => {
         password: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Usuarios", Users, { sub: 'cuentas activas', tone: 'amber' }),
+        makeStatusKpi("Estado Cuentas", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Sesión Verificada", Fingerprint, 'AUTENTICADA', { sub: 'seguridad de acceso', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Gestión de cuentas de usuario del sistema: administradores, directores técnicos y usuarios generales.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Usuarios"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

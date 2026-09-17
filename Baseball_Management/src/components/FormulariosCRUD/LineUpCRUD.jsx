@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { LayoutList, ShieldCheck, Shield, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const LineUpCRUD = () => {
 
@@ -40,12 +42,23 @@ const LineUpCRUD = () => {
         team_id: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Alineaciones", LayoutList, { sub: 'alineaciones definidas', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("WBSC", Shield, 'CONFORME', { sub: 'reglamento vigente', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Alineaciones titulares de cada equipo para los juegos del campeonato.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Alineaciones"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

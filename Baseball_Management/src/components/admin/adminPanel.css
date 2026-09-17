@@ -1,0 +1,451 @@
+/* ============================================================
+   adminPanel.css — Panel de Administración (LNB Pro)
+   Sidebar "Formularios & CRUD" + shell de la página /admin/:slug.
+
+   Dark  (ref 27):  surface #051424, container-low #0d1c2d,
+                    primary crimson #dc2626, tertiary amber #ffb95f
+   Light (ref 28):  Federación Editorial — surface #f8f9ff,
+                    containers #eff4ff→#d5e3fd, primary navy #022448
+   ============================================================ */
+
+/* ═══════════════════ TOKENS (dark default) ═══════════════════ */
+.apn {
+  --apn-bg: #051424;
+  --apn-surface: #0d1c2d;
+  --apn-surface-low: #0d1c2d;
+  --apn-surface-lowest: #010f1f;
+  --apn-container: #122131;
+  --apn-container-high: #1c2b3c;
+  --apn-container-highest: #273647;
+  --apn-text: #d4e4fa;
+  --apn-dim: #c3c6d2;
+  --apn-muted: #8a93a6;
+  --apn-primary: #dc2626;
+  --apn-primary-soft: rgba(220, 38, 38, 0.14);
+  --apn-primary-hover: color-mix(in srgb, #dc2626 85%, #fff);
+  --apn-danger: #dc2626;
+  --apn-danger-soft: rgba(220, 38, 38, 0.14);
+  --apn-node-fg: #ffb4ab;
+  --apn-node-bg: var(--apn-container);
+  --apn-node-border: var(--apn-hairline);
+  --apn-amber: #ffb95f;
+  --apn-amber-soft: rgba(255, 185, 95, 0.12);
+  --apn-green: #34d399;
+  --apn-green-soft: rgba(52, 211, 153, 0.14);
+  --apn-hairline: rgba(212, 228, 250, 0.09);
+  --apn-hairline-strong: rgba(212, 228, 250, 0.18);
+  --apn-outline: rgba(212, 228, 250, 0.45);
+  --apn-font-display: 'Oswald', 'Inter', system-ui, sans-serif;
+  --apn-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --apn-font-num: 'JetBrains Mono', ui-monospace, "SF Mono", monospace;
+
+  /* Tokens del header compartido (LandingHeader): sin ellos, landing.css
+     no puede resolver --lnd-* dentro de .apn y el header pierde padding,
+     fondo y borde (se veía distinto al resto de la web). */
+  --lnd-font-display: 'Oswald', 'Inter', system-ui, sans-serif;
+  --lnd-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --lnd-font-num: 'JetBrains Mono', ui-monospace, "SF Mono", monospace;
+  --lnd-gutter: clamp(1.25rem, 4vw, 3rem);
+  --lnd-bg: #071322;
+  --lnd-bg-2: #0d1f35;
+  --lnd-surface: #132842;
+  --lnd-surface-2: #1a2b3d;
+  --lnd-hairline: rgba(225, 229, 234, 0.12);
+  --lnd-text: #f3efe3;
+  --lnd-dim: #94a3b8;
+  --lnd-lights: #f8af3c;
+  --lnd-clay: #e11d48;
+  --lnd-green: #10b981;
+  --shadow-card: 0 22px 50px -24px rgba(0, 0, 0, 0.55);
+
+  --apn-header-h: 50px;
+  --apn-sidebar-w: 288px;
+  --apn-sidebar-active-bg: var(--apn-container-highest);
+  --apn-sidebar-active-border: var(--apn-primary);
+  --apn-sidebar-chip-bg: var(--apn-primary);
+  --apn-sidebar-chip-fg: var(--apn-on-primary, #ffffff);
+
+  min-height: 100vh;
+  background: var(--apn-bg);
+  color: var(--apn-text);
+  font-family: var(--apn-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme='light'] .apn,
+.apn[data-theme='light'] {
+  --apn-bg: #f8f9ff;
+  --apn-surface: #eff4ff;
+  --apn-surface-low: #ffffff;
+  --apn-surface-lowest: #ffffff;
+  --apn-container: #e6eeff;
+  --apn-container-high: #dde9ff;
+  --apn-container-highest: #d5e3fd;
+  --apn-text: #0d1c2f;
+  --apn-dim: #43474e;
+  --apn-muted: #5b6472;
+  --apn-primary: #1e3a5f;
+  --apn-primary-soft: rgba(30, 58, 95, 0.1);
+  --apn-primary-hover: #152a45;
+  --apn-danger: #be123c;
+  --apn-danger-soft: rgba(190, 18, 60, 0.1);
+  --apn-node-fg: #334155;
+  --apn-node-bg: #f1f5f9;
+  --apn-node-border: #e2e8f0;
+  --apn-amber: #9a5b10;
+  --apn-amber-soft: rgba(154, 91, 16, 0.1);
+  --apn-green: #047857;
+  --apn-green-soft: rgba(4, 120, 87, 0.12);
+  --apn-hairline: rgba(13, 28, 47, 0.1);
+  --apn-hairline-strong: rgba(13, 28, 47, 0.2);
+  --apn-outline: rgba(13, 28, 47, 0.5);
+  --apn-sidebar-w: 256px;
+  --apn-sidebar-active-bg: #eef5ff;
+  --apn-sidebar-active-border: #1e3a5f;
+  --apn-sidebar-chip-bg: #1e3a5f;
+  --apn-sidebar-chip-fg: #ffffff;
+
+  /* Paleta clara del header compartido (misma que .landing light) */
+  --lnd-bg: #ffffff;
+  --lnd-bg-2: #f0f7ff;
+  --lnd-surface: #ffffff;
+  --lnd-surface-2: #f8fafc;
+  --lnd-hairline: rgba(15, 39, 68, 0.08);
+  --lnd-text: #0f2744;
+  --lnd-dim: #64748b;
+  --lnd-lights: #0284c7;
+  --lnd-clay: #0369a1;
+  --lnd-green: #059669;
+  --shadow-card: 0 18px 40px -22px rgba(12, 22, 32, 0.25);
+}
+
+/* ═══════════════════ SHELL ═══════════════════ */
+.apn__shell {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(100vh - var(--apn-header-h, 50px));
+}
+
+.apn__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.apn__content {
+  flex: 1;
+  padding: 20px 24px 48px;
+}
+
+/* ═══════════════════ TOP BREADCRUMB + CHIPS ═══════════════════ */
+.apn__topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px;
+  background: var(--apn-bg);
+  border-bottom: 1px solid var(--apn-hairline);
+}
+
+.apn-crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--apn-font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--apn-muted);
+}
+
+.apn-crumb__sep {
+  color: var(--apn-outline);
+}
+
+.apn-crumb__current {
+  color: var(--apn-dim);
+}
+
+.apn-crumb__leaf {
+  color: var(--apn-primary);
+}
+
+.apn-crumb__tag {
+  font-weight: 400;
+}
+
+.apn-crumb__slug {
+  font-family: var(--apn-font-num);
+  font-weight: 400;
+  color: var(--apn-muted);
+}
+
+.apn-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--apn-font-num);
+  font-size: 0.7rem;
+  color: var(--apn-dim);
+}
+
+.apn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.apn-chip--sync {
+  color: var(--apn-text);
+  font-weight: 600;
+}
+
+.apn-chip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+  animation: apn-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes apn-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.apn-chip-sep {
+  color: var(--apn-outline);
+}
+
+/* ═══════════════════ SIDEBAR (Panel de Administración) ═══════════════════ */
+.apn-sidebar {
+  width: var(--apn-sidebar-w, 288px);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--apn-surface-low);
+  border-right: 1px solid var(--apn-hairline);
+  position: sticky;
+  top: var(--apn-header-h, 50px);
+  height: calc(100vh - var(--apn-header-h, 50px));
+}
+
+.apn-sidebar__scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 10px 12px;
+}
+
+/* Sección "FORMULARIOS & CRUD" (header del sidebar) */
+.apn-sidebar__section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px 12px;
+}
+
+.apn-sidebar__section-label {
+  font-family: var(--apn-font-display);
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--apn-dim);
+}
+
+.apn-sidebar__count {
+  font-family: var(--apn-font-num);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--apn-primary);
+  background: var(--apn-primary-soft);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.apn-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.apn-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--apn-dim);
+  font-family: var(--apn-font-display);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  transition: background 0.16s, color 0.16s, border-color 0.16s;
+  border-left: 3px solid transparent;
+}
+
+.apn-sidebar__link:hover {
+  background: var(--apn-container-high);
+  color: var(--apn-text);
+}
+
+.apn-sidebar__link--active {
+  background: var(--apn-sidebar-active-bg);
+  color: var(--apn-text);
+  font-weight: 700;
+  border-left-color: var(--apn-sidebar-active-border);
+}
+
+.apn-sidebar__dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--apn-sidebar-active-border);
+  box-shadow: 0 0 12px -1px var(--apn-sidebar-active-border);
+}
+
+.apn-sidebar__label {
+  flex: 1;
+}
+
+.apn-sidebar__chip {
+  font-family: var(--apn-font-num);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--apn-sidebar-chip-fg);
+  background: var(--apn-sidebar-chip-bg);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.apn-sidebar__chev {
+  color: var(--apn-outline);
+  flex-shrink: 0;
+  transition: color 0.16s, transform 0.16s;
+}
+
+.apn-sidebar__link:hover .apn-sidebar__chev {
+  color: var(--apn-text);
+  transform: translateX(2px);
+}
+
+/* Footer: card Licencia WBSC */
+.apn-sidebar__foot {
+  padding: 10px 12px 12px;
+}
+
+.apn-sidebar__card {
+  background: var(--apn-surface-lowest);
+  border: 1px solid var(--apn-hairline);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.55);
+  padding: 12px;
+}
+
+.apn-sidebar__card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.apn-sidebar__card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--apn-font-display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--apn-text);
+}
+
+.apn-sidebar__live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--apn-danger);
+  box-shadow: 0 0 12px -1px var(--apn-danger);
+  animation: apn-pulse 1.6s ease-in-out infinite;
+}
+
+.apn-sidebar__card-year {
+  font-family: var(--apn-font-num);
+  font-size: 0.7rem;
+  color: var(--apn-dim);
+}
+
+.apn-sidebar__card-sub {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  color: var(--apn-dim);
+}
+
+.apn-sidebar__logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: var(--apn-container);
+  color: var(--apn-text);
+  font-family: var(--apn-font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 7px 10px;
+  border-radius: 6px;
+  transition: background 0.16s, color 0.16s;
+}
+
+.apn-sidebar__logout:hover {
+  background: var(--apn-container-high);
+  color: var(--apn-danger);
+}
+
+/* Chip "NODO FED-01" (neutro en claro, tinte rojo en oscuro, según refs) */
+.apn-chip--node {
+  font-weight: 700;
+  color: var(--apn-node-fg);
+  background: var(--apn-node-bg);
+  border: 1px solid var(--apn-node-border);
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+}
+
+/* ═══════════════════ RESPONSIVE ═══════════════════ */
+@media (max-width: 980px) {
+  .apn-sidebar {
+    width: 220px;
+  }
+}
+
+@media (max-width: 780px) {
+  .apn-sidebar {
+    display: none;
+  }
+  .apn__topbar {
+    padding: 12px 16px;
+  }
+  .apn__content {
+    padding: 14px 14px 40px;
+  }
+}

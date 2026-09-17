@@ -1,36 +1,78 @@
-import React, { useMemo, useState } from "react";
+// Baseball_Management/src/components/FormulariosCRUD/BaseCRUD/DataTable.jsx
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import {
+  Search,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Printer,
+  Trash2,
+  X,
+} from "lucide-react";
 import ItemActions from "./ItemActions";
+
+const PAGE_SIZES = [10, 25, 50, 100];
+
+const initialsOf = (item) => {
+  const name = item?.name || "";
+  const last = item?.lastname || "";
+  const a = (name.trim() ? name.trim()[0] : "") + (last.trim() ? last.trim()[0] : "");
+  return a.toUpperCase() || "?";
+};
 
 const DataTable = ({
   data,
-  fields,
+  fieldsVisible,
   sortConfig,
   onSort,
+  onView,
   onEdit,
   onDelete,
-  onFilter,
+  onBulkDelete,
   loading,
+  pageSize,
+  onPageSizeChange,
+  currentPage,
+  totalPages,
+  goToPage,
+  filteredCount,
 }) => {
-  const [filters, setFilters] = useState({});
-  const [globalSearch, setGlobalSearch] = useState("");
+  const [selected, setSelected] = React.useState(() => new Set());
 
-  const fieldsVisible = useMemo(
-    () => fields.filter((f) => !f.hidden && f.type !== "password"),
-    [fields]
-  );
+  const pageIds = useMemo(() => data.map((d) => d.id), [data]);
+  const allSelected = data.length > 0 && pageIds.every((id) => selected.has(id));
 
-  const handleFilterChange = (field, value, filterType) => {
-    const newFilters = {
-      ...filters,
-      [field]: { ...filters[field], [filterType]: value },
-    };
-    setFilters(newFilters);
-    onFilter(newFilters);
+  const toggleRow = (id, checked) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
   };
 
-  const formatNumber = (value) => {    if (typeof value === "number") {
+  const toggleAll = (checked) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) pageIds.forEach((id) => next.add(id));
+      else pageIds.forEach((id) => next.delete(id));
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (!onBulkDelete || selected.size === 0) return;
+    const ok = await onBulkDelete(Array.from(selected));
+    if (ok) setSelected(new Set());
+  };
+
+  const formatNumber = (value) => {
+    if (typeof value === "number") {
       return Number.isInteger(value) ? value.toString() : value.toFixed(3);
     }
     return value;
@@ -47,72 +89,19 @@ const DataTable = ({
     }).format(date);
   };
 
-  const getPersonName = (P_id, field) => {
-    if (!field.options) return "N/A";
-    const person = field.options.find((option) => option.id === P_id);
-    return person ? person.name : "N/A";
-  };
-
-  const applyStringFilter = (item, field, filterValue) => {
-    if (field.name === "P_id") {
-      return getPersonName(item[field.name], field)
-        .toLowerCase()
-        .includes(filterValue.toLowerCase());
+  const displayValue = (item, field) => {
+    const raw = item[field.name];
+    if (raw === null || raw === undefined) return "—";
+    if (field.type === "select" && field.options) {
+      return field.options.find((o) => String(o.id) === String(raw))?.name ?? raw;
     }
-    const fieldValue = item[field.name]
-      ? item[field.name].toString().toLowerCase()
-      : "";
-    return fieldValue.includes(filterValue.toLowerCase());
+    if (field.type === "number") return formatNumber(raw);
+    if (field.type === "date") return formatDate(raw);
+    return raw;
   };
-
-  const filterData = (data) => {
-    return data.filter((item) => {
-      return Object.keys(filters).every((fieldName) => {
-        const field = fields.find((f) => f.name === fieldName);
-        if (!field) return true;
-
-        const filter = filters[fieldName];
-        if (field.type === "number") {
-          const value = item[fieldName];
-          return (
-            (!filter.min || value >= parseFloat(filter.min)) &&
-            (!filter.max || value <= parseFloat(filter.max))
-          );
-        } else if (field.type === "date") {
-          const date = new Date(item[fieldName]);
-          return (
-            (!filter.start || date >= new Date(filter.start)) &&
-            (!filter.end || date <= new Date(filter.end))
-          );
-        } else if (field.type === "text" || field.type === "email") {
-          return applyStringFilter(item, field, filter.search || "");
-        }
-        return true;
-      });
-    });
-  };
-
-  const matchesGlobal = (item) => {
-    if (!globalSearch.trim()) return true;
-    const q = globalSearch.toLowerCase();
-    return fieldsVisible.some((field) => {
-      const raw = item[field.name];
-      if (field.name === "P_id") {
-        return getPersonName(item[field.name], field)
-          .toLowerCase()
-          .includes(q);
-      }
-      return raw !== null && raw !== undefined
-        ? String(raw).toLowerCase().includes(q)
-        : false;
-    });
-  };
-
-  const filteredData = filterData(data).filter(matchesGlobal);
 
   const renderSortIcon = (field) => {
-    if (sortConfig.key !== field.name)
-      return <ChevronsUpDown size={14} className="dt-sort-idle" />;
+    if (sortConfig.key !== field.name) return <ChevronsUpDown size={14} className="dt-sort-idle" />;
     return sortConfig.direction === "ascending" ? (
       <ChevronUp size={14} className="dt-sort-active" />
     ) : (
@@ -120,148 +109,243 @@ const DataTable = ({
     );
   };
 
+  const columnFields = useMemo(() => fieldsVisible.filter((f) => f.name !== 'id'), [fieldsVisible]);
+
+  const renderCell = (item, field) => {
+    if (field.type === "password" || field.hidden) return null;
+    if (field.name === "name") {
+      const initials = initialsOf(item);
+      return (
+        <div className="bc-person">
+          <span className="bc-person__avatar">{initials}</span>
+          <div className="bc-person__body">
+            <span className="bc-person__name">{item.name}</span>
+            <span className="bc-person__sub">{item.lastname}</span>
+          </div>
+        </div>
+      );
+    }
+    if (field.type === "select") {
+      return <span className="bc-pill bc-pill--soft">{displayValue(item, field)}</span>;
+    }
+    if (field.type === "number") {
+      return <span className="bc-cell-mono">{displayValue(item, field)}</span>;
+    }
+    return displayValue(item, field);
+  };
+
+  const pageNumbers = useMemo(() => {
+    const total = totalPages;
+    const current = currentPage;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    if (current <= 4) return [1, 2, 3, 4, 5, "...", total];
+    if (current >= total - 3) return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
+    return [1, "...", current - 1, current, current + 1, "...", total];
+  }, [totalPages, currentPage]);
+
+  const startIndex = filteredCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const endIndex = Math.min(currentPage * pageSize, filteredCount);
+
   return (
-    <div className="item-list">
-      {/* Barra de búsqueda global */}
-      <div className="dt-toolbar">
-        <div className="dt-search">
-          <Search size={16} className="dt-search__icon" />
-          <input
-            type="text"
-            placeholder="Buscar en todos los campos…"
-            value={globalSearch}
-            onChange={(e) => setGlobalSearch(e.target.value)}
-            className="dt-search__input"
-          />
+    <div className="bc-table-card">
+      {/* Util strip */}
+      <div className="bc-util">
+        <div className="bc-util__left">
+          <label className="bc-util__selectall">
+            <input
+              type="checkbox"
+              className="bc-util__checkbox"
+              checked={allSelected}
+              onChange={(e) => toggleAll(e.target.checked)}
+            />
+            <span>Seleccionar Todos en Página</span>
+          </label>
+          <span className="bc-util__sep">|</span>
+          <button
+            className="bc-util__print"
+            onClick={() => window.print()}
+            title="Imprimir padrón"
+          >
+            <Printer size={15} /> Imprimir Padrón
+          </button>
+          {selected.size > 0 && (
+            <>
+              <span className="bc-util__selected">{selected.size} seleccionados</span>
+              <button
+                className="bc-util__bulk bc-util__bulk--danger"
+                onClick={handleBulkDelete}
+                title="Eliminar los registros seleccionados"
+              >
+                <Trash2 size={15} /> Eliminar seleccionados
+              </button>
+              <button
+                className="bc-util__bulk"
+                onClick={() => setSelected(new Set())}
+                title="Quitar la selección"
+              >
+                <X size={15} /> Deseleccionar
+              </button>
+            </>
+          )}
+        </div>
+        <div className="bc-util__right">
+          <span className="bc-util__label">Filas por página:</span>
+          <select
+            className="bc-util__select"
+            value={pageSize}
+            onChange={(e) => onPageSizeChange(parseInt(e.target.value, 10))}
+          >
+            {PAGE_SIZES.map((s) => (
+              <option key={s} value={s}>
+                {s} registros
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      <div className="dt-table-wrap">
-        <table className="dt-table">
+      <div className="bc-table-wrap">
+        <table className="bc-table">
           <thead>
-            <tr className="dt-filter-row">
-              {fieldsVisible.map((field) => (
-                <th key={`${field.name}-filter`}>
-                  {field.type === "number" && (
-                    <div className="dt-filter-range">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        onChange={(e) =>
-                          handleFilterChange(field.name, e.target.value, "min")
-                        }
-                      />
-                      <input
-                        type="number"
-                        placeholder="Max"
-                        onChange={(e) =>
-                          handleFilterChange(field.name, e.target.value, "max")
-                        }
-                      />
-                    </div>
-                  )}
-                  {field.type === "date" && (
-                    <div className="dt-filter-range">
-                      <input
-                        type="date"
-                        placeholder="Inicio"
-                        onChange={(e) =>
-                          handleFilterChange(field.name, e.target.value, "start")
-                        }
-                      />
-                      <input
-                        type="date"
-                        placeholder="Final"
-                        onChange={(e) =>
-                          handleFilterChange(field.name, e.target.value, "end")
-                        }
-                      />
-                    </div>
-                  )}
-                  {(field.type === "text" || field.type === "email") && (
-                    <input
-                      type="text"
-                      placeholder="Buscar"
-                      onChange={(e) =>
-                        handleFilterChange(field.name, e.target.value, "search")
-                      }
-                    />
-                  )}
+            <tr className="bc-thead">
+              <th className="bc-th bc-th--check">
+                <span className="sr-only">Seleccionar</span>
+              </th>
+              <th className="bc-th bc-th--sort" onClick={() => onSort("id")}>
+                <div className="bc-th__inner">
+                  <span>ID</span>
+                  {renderSortIcon({ name: "id" })}
+                </div>
+              </th>
+              {columnFields.map((field) => (
+                <th
+                  key={field.name}
+                  className={`bc-th${field.type === "select" ? "" : " bc-th--sort"}`}
+                  onClick={field.type !== "select" ? () => onSort(field.name) : undefined}
+                >
+                  <div className="bc-th__inner">
+                    <span>{field.label}</span>
+                    {field.type !== "select" && renderSortIcon(field)}
+                  </div>
                 </th>
               ))}
-              <th className="dt-actions-head"></th>
-            </tr>
-
-            <tr className="dt-header-row">
-              {fieldsVisible.map((field) => (
-                <th key={field.name} className="dt-th">
-                  <button
-                    className="dt-sort-btn"
-                    onClick={() => onSort(field.name)}
-                    title={`Ordenar por ${field.label}`}
-                  >
-                    {field.label} {renderSortIcon(field)}
-                  </button>
-                </th>
-              ))}
-              <th className="dt-actions-head">Acciones</th>
+              <th className="bc-th bc-th--actions">Acciones Oficiales</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <tr key={`skeleton-${i}`} className="dt-skeleton-row">
-                  {fieldsVisible.map((f, j) => (
-                    <td key={j} className="dt-cell">
-                      <div className="dt-skeleton-cell" />
-                    </td>
-                  ))}
-                  <td className="dt-cell">
-                    <div className="dt-skeleton-actions" />
+                <tr key={`skeleton-${i}`} className="bc-skeleton-row">
+                  <td colSpan={columnFields.length + 3}>
+                    <div className="bc-skeleton" />
                   </td>
                 </tr>
               ))
-            ) : filteredData.length === 0 ? (
+            ) : data.length === 0 ? (
               <tr>
-                <td
-                  colSpan={fieldsVisible.length + 1}
-                  className="dt-empty"
-                >
-                  <div className="dt-empty__inner">
-                    <Search size={32} />
+                <td colSpan={columnFields.length + 3} className="bc-empty">
+                  <div className="bc-empty__inner">
+                    <Search size={30} />
                     <p>No se encontraron registros</p>
                     <span>Prueba ajustando la búsqueda o los filtros.</span>
                   </div>
                 </td>
               </tr>
             ) : (
-              filteredData.map((item, index) => (
+              data.map((item, index) => (
                 <motion.tr
                   key={item.id}
-                  className="dt-row"
+                  className={`bc-row${selected.has(item.id) ? " bc-row--selected" : ""}`}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.4) }}
+                  transition={{ duration: 0.3, delay: Math.min(index * 0.02, 0.3) }}
                 >
-                  {fieldsVisible.map((field) => (
-                    <td key={field.name} className="dt-cell">
-                      {field.name === "P_id"
-                        ? getPersonName(item[field.name], field)
-                        : field.type === "number"
-                        ? formatNumber(item[field.name])
-                        : field.type === "date"
-                        ? formatDate(item[field.name])
-                        : item[field.name] || "—"}
+                  <td className="bc-td bc-td--check">
+                    <input
+                      type="checkbox"
+                      className="bc-util__checkbox"
+                      checked={selected.has(item.id)}
+                      onChange={(e) => toggleRow(item.id, e.target.checked)}
+                    />
+                  </td>
+                  <td className="bc-td">
+                    <span className="bc-cell-mono bc-cell-id">
+                      #{String(item.id).padStart(4, "0")}
+                    </span>
+                  </td>
+                  {columnFields.map((field) => (
+                    <td key={field.name} className="bc-td">
+                      {renderCell(item, field)}
                     </td>
                   ))}
-                  <td className="dt-cell dt-actions">
-                    <ItemActions item={item} onEdit={onEdit} onDelete={onDelete} />
+                  <td className="bc-td bc-td--actions">
+                    <ItemActions item={item} onView={onView} onEdit={onEdit} onDelete={onDelete} />
                   </td>
                 </motion.tr>
               ))
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Footer */}
+      <div className="bc-pagination">
+        <div className="bc-pagination__info">
+          <span>
+            Mostrando <strong>{startIndex} a {endIndex}</strong> de{" "}
+            <strong>{filteredCount}</strong> registros | Página{" "}
+            <strong>{currentPage} de {totalPages}</strong>
+          </span>
+        </div>
+        <div className="bc-pagination__controls">
+          <button
+            className="bc-page-btn"
+            disabled={currentPage === 1}
+            onClick={() => goToPage(1)}
+            title="Primera página"
+          >
+            <ChevronsLeft size={17} />
+          </button>
+          <button
+            className="bc-page-btn"
+            disabled={currentPage === 1}
+            onClick={() => goToPage(currentPage - 1)}
+            title="Página anterior"
+          >
+            <ChevronLeft size={17} />
+          </button>
+          {pageNumbers.map((p, i) =>
+            p === "..." ? (
+              <span key={`ellipsis-${i}`} className="bc-page-ellipsis">
+                ...
+              </span>
+            ) : (
+              <button
+                key={p}
+                className={`bc-page-btn${currentPage === p ? " bc-page-btn--active" : ""}`}
+                onClick={() => goToPage(p)}
+              >
+                {p}
+              </button>
+            )
+          )}
+          <button
+            className="bc-page-btn"
+            disabled={currentPage === totalPages}
+            onClick={() => goToPage(currentPage + 1)}
+            title="Página siguiente"
+          >
+            <ChevronRight size={17} />
+          </button>
+          <button
+            className="bc-page-btn"
+            disabled={currentPage === totalPages}
+            onClick={() => goToPage(totalPages)}
+            title="Última página"
+          >
+            <ChevronsRight size={17} />
+          </button>
+        </div>
       </div>
     </div>
   );

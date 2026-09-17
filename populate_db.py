@@ -585,6 +585,83 @@ def simulate_championship_with_participations(positions, team_player_mapping, se
     }
 
 
+UPCOMING_SERIES_NAME = "Calendario Futuro LNB"
+
+
+def schedule_upcoming_games(rounds=5, days_between=6):
+    """
+    Programa juegos futuros (round-robin) para que el panel DT muestre próximos partidos.
+
+    Crea una serie nueva llamada UPCOMING_SERIES_NAME que comienza hoy, clona las
+    participaciones de la serie más reciente (para que el bullpen del panel siga
+    funcionando) y genera un round-robin sin score con fechas futuras espaciadas.
+    Idempotente: si la serie ya existe, no hace nada.
+    """
+    if Series.objects.filter(name=UPCOMING_SERIES_NAME).exists():
+        print(f"> '{UPCOMING_SERIES_NAME}' ya existe; no se agregaron juegos.")
+        return
+
+    teams = list(Team.objects.all().order_by('id'))
+    if len(teams) < 2:
+        print("> No hay suficientes equipos para programar futuros juegos.")
+        return
+
+    lineups = {}
+    for team in teams:
+        lineup = LineUp.objects.filter(team_id=team).first()
+        if lineup:
+            lineups[team.id] = lineup
+    if not lineups:
+        print("> No hay alineaciones de equipos; no se programó nada.")
+        return
+
+    now = datetime.now(pytz.UTC)
+    season, _ = Season.objects.get_or_create(name="Temporada Futura")
+    upcoming_series = SeriesFactory(
+        season=season,
+        name=UPCOMING_SERIES_NAME,
+        init_date=now,
+        end_date=now + timedelta(days=rounds * days_between + 7),
+    )
+
+    # Clonar participaciones desde la serie más reciente para que el bullpen funcione
+    base_series = Series.objects.exclude(name=UPCOMING_SERIES_NAME).order_by('-end_date').first()
+    added_participations = 0
+    if base_series:
+        for team in teams:
+            for bp_id in BPParticipation.objects.filter(series=base_series, team_id=team).values_list('BP_id', flat=True):
+                BPParticipation.objects.get_or_create(series=upcoming_series, team_id=team, BP_id_id=bp_id)
+                added_participations += 1
+
+    # Round-robin por rotación (cada equipo juega una vez por ronda)
+    rotation = teams[:]
+    round_robin = []
+    for r in range(rounds):
+        half = len(rotation) // 2
+        for i in range(half):
+            local, rival = rotation[i], rotation[-1 - i]
+            if r % 2 == 1:
+                local, rival = rival, local
+            round_robin.append((local, rival, r))
+        rotation = [rotation[0]] + [rotation[-1]] + rotation[1:-1]
+
+    games_created = 0
+    for local_team, rival_team, r in round_robin:
+        if local_team.id not in lineups or rival_team.id not in lineups:
+            continue
+        game_date = (now + timedelta(days=3 + r * days_between)).replace(hour=19, minute=0, second=0, microsecond=0)
+        GameFactory(
+            local=TeamOnTheFieldFactory(lineup_id=lineups[local_team.id]),
+            rival=TeamOnTheFieldFactory(lineup_id=lineups[rival_team.id]),
+            series=upcoming_series,
+            score=None,
+            date=game_date,
+        )
+        games_created += 1
+
+    print(f"> '{UPCOMING_SERIES_NAME}' creada: {games_created} juegos futuros, {added_participations} participaciones clonadas.")
+
+
 def generate_player_portraits(players):
     """
     Genera retratos placeholder (gradiente + iniciales) con Pillow para cada jugador.

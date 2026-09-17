@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Users, ShieldCheck, Link, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const BPParticipationCRUD = () => {
     
@@ -92,12 +94,23 @@ const BPParticipationCRUD = () => {
         series: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Participaciones", Users, { sub: 'jugadores en series', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Vinculación", Link, 'ACTIVA', { sub: 'equipo-serie', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Participación de jugadores de béisbol por equipo y serie.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Participación de Jugadores"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

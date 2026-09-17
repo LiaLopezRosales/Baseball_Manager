@@ -2,6 +2,8 @@
 
 import React from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Calendar, ShieldCheck, RotateCcw, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const SeasonCRUD = () => {
     const fields = [
@@ -13,12 +15,24 @@ const SeasonCRUD = () => {
         id : "",
         name: "",
     };
+
+    const kpis = [
+        makeCountKpi("Total Temporadas", Calendar, { sub: 'temporadas registradas', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Ciclo Deportivo", RotateCcw, 'ACTIVO', { sub: 'temporada en curso', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Temporadas del campeonato: definición de ciclos deportivos.";
+
     return (
         <BaseCRUD
           apiUrl={apiUrl}
           fields={fields}
           title="Temporadas"
           initialFormValues={initialFormValues}
+          kpis={kpis}
+          subtitle={subtitle}
         />
     );
 };

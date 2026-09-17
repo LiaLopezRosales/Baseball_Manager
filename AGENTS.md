@@ -136,11 +136,11 @@ se resuelve por píxeles, no por coordenadas del elemento.
 
 ### Arquitectura de rutas (URL-based)
 - `/` — Landing pública (hero, stat cards, standings, líderes de bateo, estrellas, campeones)
-- `/admin/:slug` — CRUD Admin (protegido, rol "Admin")
+- `/admin/:slug` — Panel administrativo CRUD **standalone** (protegido, rol "Admin"); `/admin` redirige a `/admin/personas`
 - `/reporte/:slug` — Reportes (público, sin restricción de rol)
 - `/consultas/:tabla` — Consultas dinámicas (público, sin restricción de rol)
-- `/dt/cambios` — Definir cambios DT (protegido, rol "Director Técnico")
-- `/dt/listar-cambios` — Listar cambios DT (protegido, rol "Director Técnico")
+- `/dt/cambios` — Panel de cambios DT **standalone** (protegido, rol "Director Técnico")
+- `/dt/listar-cambios` — Historial de cambios DT **standalone** (protegido, rol "Director Técnico")
 - `/equipo/:id` — Perfil de equipo (público, con lista de jugadores enlazados)
 - `/jugador/:id` — Perfil de jugador (público, con stats + radar chart ECharts)
 
@@ -359,6 +359,66 @@ así que **todos los filtros usan `user_id`** (nunca `request.user` directo en l
   - `ollama show gemma4:12b` confirma capabilities `vision` (requiere Ollama ≥0.30.5).
   - El modelo no distingue bien light/dark según el nombre del archivo; pasa como contexto las
     capturas Light y Dark cuando el brief lo requiera.
+
+## Frontend: Panel administrativo CRUD (standalone, refs stitch 27/28)
+
+- **Rutas**: `/admin/:slug` en rama propia de `App.js` (`pathname.startsWith('/admin')`). Si el slug no
+  existe en `CRUD_ROUTES`, `AdminLayout` redirige a `/admin/personas`; la rama `/admin` también. Protegido
+  con `<ProtectedRoute roles={['Admin']}>` (muestra `AdminLayout`, no el CRUDRoute directo como antes).
+- **Componentes** (`src/components/admin/`): `AdminLayout.jsx` (header LandingHeader + shell + crumb +
+  chips de estado; `data-theme={theme}` propio vía `getInitialTheme/applyTheme`), `AdminSidebar.jsx`
+  (nav "Formularios & CRUD" con `ADMIN_NAV`, ítem activo por `pathname`, logout), `adminPanel.css`
+  (tokens `.apn`, doble tema), `adminNav.js` = `ADMIN_NAV` (20 ítems option→label) + heading.
+- **Resolución**: `useParams().slug` → `CRUD_ROUTES[slug]` (=option) → `CRUDRoute` en `viewRoutes.jsx`
+  mapa `CRUD_COMPONENTS` (option→componente `.jsx` de `FormulariosCRUD/`). Tabla de las 20 URLs en
+  `src/routes.js` (`CRUD_ROUTES`); ayuda opción→path en `path.js` (`toCRUDPath`) y `CRUD_OPTION_TO_SLUG`.
+- **CRUD genérico**: `FormulariosCRUD/BaseCRUD.jsx` (+ `BaseCRUD/` con `CRUDForm`, `DataTable`,
+  `ItemActions`, `useCRUD`; `BaseCRUD.css`) y `kpiDefs.js` definen el comportamiento común; cada entidad
+  tiene un `*CRUD.jsx` delgado que pasa columnas/KPIs. El panel administrativo viejo (`components/admin.jsx`,
+  antes `components/AdminPanel.jsx`) fue **borrado**; el sidebar viejo solo conserva el ítem "Panel
+  Administrativo" que navega fuera (el shell viejo dejó de alojar el CRUD).
+- **Gotchas**: los `*CRUD.jsx` usan `fields`/columnas explícitas (no `'__all__'`) para el render del
+  cliente; `kpiDefs.js` centraliza los KPIs por entidad. El borrado de registros CRUD usa `apiDelete`.
+  `ApiError` y el flujo de error por entidad viven en `BaseCRUD.jsx`. Verificación previa: build + smoke
+  login Admin → crumb con slug, sidebar activo, CRUD listando datos.
+
+## Frontend: Panel de cambios DT (refactor LNB Pro, refs stitch 29/30)
+
+- **Páginas standalone**: `/dt/cambios` (`DtPanel.jsx`) y `/dt/listar-cambios` (`DtHistorial.jsx`)
+  viven en `src/components/dt/` con `dtPanel.css` (tokens `.dt`, doble tema). Salen del shell viejo:
+  rama propia en `App.js` (`pathname.startsWith('/dt')` → `<ProtectedRoute roles={['Director Técnico']}>`),
+  `path="*"` de la rama shell ahora navega a `/` (Landing standalone de `/equipo` y `/jugador`). El
+  grupo "Alineaciones" del sidebar fue eliminado. Los viejos `PlayerSwapForm/Table.jsx|css` y
+  `TeamManagement.jsx` fueron borrados.
+- **DtPanel** = broadcast por refs 29/30: banner WBSC Regla 5.10, crumb "Panel de Cambios", card
+  Equipo/DT (abreviatura + dueño), selector de juego (carga `GET /api/player-swap/<team_id>/` con
+  `game_data`), mini-diamante "Previa del encuentro" (estado neutro SIN lineup cargado), Lineup Titular
+  WBSC (efectividad media), campo SVG con 9 chips posicionales (`POS_COORDS`/`POS_SHORT` mapean
+  Pitcher→P … RF), toggles Táctico/Métricas, tira de 4 métricas (Efectividad Media, Posiciones en Fila,
+  Jugadores en Reserva, Cambios Registrados), drawer "Ejecutar Sustitución" (Sale del Juego / Entra al
+  Juego / Causa decorativa) + "Bullpen & Reserva Activa" (filtro por posición vía
+  `GET /api/player-swap/available/<team>/<position>/<series>/<lineup>/`), registro reciente (8 filas de
+  `GET /api/player-swaps/team/<team>/`) con link "Historial Completo".
+- **DtHistorial** = tabla broadcast completa: orden por columnas, paginación 10/página, "Nuevo Cambio"
+  → `/dt/cambios`, eliminar con `DELETE /api/player-swaps/delete/<id>/`.
+- **`api.js`**: `apiPost` solo hace POST; el borrado usa el nuevo helper `apiDelete(path)` (token Auth).
+- **Solo juegos pendientes (backend)**: `GET /api/player-swap/<team_id>/` filtra `game_data` a
+  `Game.date >= now` (comparado contra `timezone.now()`, `USE_TZ=False`) y los ordena por fecha
+  ascendente; el dropdown del panel solo ofrece partidos futuros. `POST /api/player-swap/` valida que
+  el `Game` del `game_team` (TeamOnTheField, como `local` o `rival`) sea futuro → `400` "No es posible
+  registrar cambios para un juego ya disputado." si ya pasó (evita bypass por API; usa la fecha real
+  del `Game`, no el string `date` del payload). En el front, si `games.length===0` se muestra
+  "Sin juegos pendientes" y el campo queda en "Previa del encuentro".
+- **Seed de próximos partidos**: `populate_db.schedule_upcoming_games(rounds=5, days_between=6)`
+  crea la serie fija **"Calendario Futuro LNB"** (name tipo guaranteed), clona las participaciones de
+  la serie más reciente (para que el bullpen del panel siga funcionando) y genera un round-robin de
+  juegos sin score con fechas futuras espaciadas. **Idempotente**: si la serie ya existe no hace nada;
+  re-ejecutable más adelante cuando esas fechas caduquen.
+- **Flujo swap verificado (smoke)**: seleccionar juego → 9 chips con AVG reales → clic chip →
+  bullpen por posición → Confirmar → `POST /api/player-swap/` 201 + fila nueva "Aprobado WBSC" →
+  el historial la lista y `DELETE` la elimina (200). Invitado redirige a `/`; `/dt/*` desconocida →
+  `/`. Sin errores de consola; build (`CI=false npx react-scripts build`) y `python manage.py test
+  db_structure` (96) en verde.
 
 ## Frontend: módulo de estadísticas — boletín, impresión y filtros default
 

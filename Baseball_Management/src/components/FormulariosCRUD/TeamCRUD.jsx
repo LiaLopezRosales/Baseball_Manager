@@ -2,6 +2,8 @@
 
 import React from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Trophy, ShieldCheck, Building2, LayoutGrid } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const TeamCRUD = () => {
     const fields = [
@@ -20,12 +22,23 @@ const TeamCRUD = () => {
         representative_entity: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Equipos", Trophy, { sub: 'franquicias afiliadas', tone: 'amber' }),
+        makeStatusKpi("Padrón Equipos", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Entidad Representativa", Building2, 'VERIFICADA', { sub: 'registro activo', tone: 'green' }),
+        makeCountKpi("Equipos en Directorio", LayoutGrid, { sub: 'asignados', tone: 'amber' }),
+    ];
+
+    const subtitle = "Franquicias afiliadas al campeonato, colores oficiales y entidades representativas.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Equipos"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

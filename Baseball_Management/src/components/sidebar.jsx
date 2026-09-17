@@ -8,16 +8,15 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
-  FolderOpen,
   User,
-  LayoutGrid,
+  Settings,
   Sun,
   Moon,
   LogOut,
 } from 'lucide-react';
 import Logo from '../logo.jpg';
 import { getInitialTheme, applyTheme } from '../theme';
-import { REPORT_ROUTES, CRUD_ROUTES } from '../routes';
+import { REPORT_ROUTES } from '../routes';
 import NotificationBell from './NotificationBell';
 import './sidebar.css';
 
@@ -51,36 +50,10 @@ const REPORTS = [
   'Jugadores de un equipo',
 ];
 
-const ADMIN_FORMS = [
-  { option: 'Usuarios', label: 'Usuarios' },
-  { option: 'Personas', label: 'Personas' },
-  { option: 'Trabajadores', label: 'Trabajadores' },
-  { option: 'Jugadores', label: 'Jugadores' },
-  { option: 'Pitchers', label: 'Lanzadores' },
-  { option: 'Direction Team', label: 'Equipos de Dirección' },
-  { option: 'Directores Técnicos', label: 'Directores Técnicos' },
-  { option: 'Temporadas', label: 'Temporadas' },
-  { option: 'Series', label: 'Series' },
-  { option: 'Juegos', label: 'Juegos' },
-  { option: 'Puntuaciones', label: 'Marcadores' },
-  { option: 'Equipos', label: 'Equipos' },
-  { option: 'Alineaciones', label: 'Alineaciones' },
-  { option: 'Jugadores en Alineación', label: 'Jugadores en Alineación' },
-  { option: 'Intercambios de Jugadores', label: 'Cambios de Jugador' },
-  { option: 'Equipos en el Campo', label: 'Equipos en el Campo' },
-  { option: 'BP Participations', label: 'Participación de Jugadores' },
-  { option: 'Posiciones', label: 'Posiciones' },
-  { option: 'Jugadores en Posición', label: 'Jugadores en Posición' },
-  { option: 'Jugadores Estrella', label: 'Jugadores Estrella' },
-];
-
 function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [showReports, setShowReports] = useState(() => pathname.startsWith('/reporte'));
-  const [showForms, setShowForms] = useState(
-    () => pathname.startsWith('/admin') || pathname.startsWith('/dt')
-  );
   const [showQueries, setShowQueries] = useState(() => pathname.startsWith('/consultas'));
   const [theme, setTheme] = useState(getInitialTheme());
 
@@ -89,7 +62,6 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
   }, [theme]);
 
   const reportSlugs = useMemo(() => Object.keys(REPORT_ROUTES), []);
-  const crudSlugs = useMemo(() => Object.keys(CRUD_ROUTES), []);
 
   const isActive = (path) => pathname === path || (pathname.startsWith(path) && path !== '/');
   const isReportActive = (slug) => pathname === `/reporte/${slug}`;
@@ -105,7 +77,6 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
     });
   };
   const handleReportsClick = () => setShowReports((s) => !s);
-  const handleFormsClick = () => setShowForms((s) => !s);
   const handleQueriesClick = () => setShowQueries((s) => !s);
   const handleQuerySelect = (table) => onOptionSelect('Qy', table);
 
@@ -210,73 +181,16 @@ function Sidebar({ role, onOptionSelect, onModalOpen, onLogout }) {
             </ul>
           )}
 
-          {/* Formularios */}
+          {/* Panel Administrativo (standalone) */}
           {role === 'Admin' && (
-            <>
-              <li
-                className={`sidebar__item sidebar__item--group${pathname.startsWith('/admin') ? ' sidebar__item--active' : ''}`}
-                onClick={handleFormsClick}
-                title="Formularios"
-              >
-                <FolderOpen size={20} className="sidebar__icon" />
-                {!collapsed && <span className="sidebar__label">Formularios</span>}
-                {!collapsed && <BranchIcon isOpen={showForms} />}
-              </li>
-
-              {showForms && !collapsed && (
-                <ul className="sidebar__sublist">
-                  {ADMIN_FORMS.map((f) => {
-                    const slug = crudSlugs.find((s) => CRUD_ROUTES[s] === f.option);
-                    return (
-                      <li
-                        key={f.option}
-                        className={`sidebar__subitem${slug && pathname === `/admin/${slug}` ? ' sidebar__subitem--active' : ''}`}
-                        title={f.label}
-                        onClick={() => onOptionSelect(f.option)}
-                      >
-                        <span className="sidebar__sub-dot" />
-                        {f.label}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </>
-          )}
-
-          {role === 'Director Técnico' && (
-            <>
-              <li
-                className={`sidebar__item sidebar__item--group${pathname.startsWith('/dt') ? ' sidebar__item--active' : ''}`}
-                onClick={handleFormsClick}
-                title="Alineaciones"
-              >
-                <LayoutGrid size={20} className="sidebar__icon" />
-                {!collapsed && (
-                  <span className="sidebar__label">Alineaciones</span>
-                )}
-                {!collapsed && <BranchIcon isOpen={showForms} />}
-              </li>
-
-              {showForms && !collapsed && (
-                <ul className="sidebar__sublist">
-                  <li
-                    className={`sidebar__subitem${pathname === '/dt/cambios' ? ' sidebar__subitem--active' : ''}`}
-                    onClick={() => onOptionSelect('Definir Cambios')}
-                  >
-                    <span className="sidebar__sub-dot" />
-                    Establecer Cambios
-                  </li>
-                  <li
-                    className={`sidebar__subitem${pathname === '/dt/listar-cambios' ? ' sidebar__subitem--active' : ''}`}
-                    onClick={() => onOptionSelect('Listar Cambios')}
-                  >
-                    <span className="sidebar__sub-dot" />
-                    Mostrar Cambios
-                  </li>
-                </ul>
-              )}
-            </>
+            <li
+              className={`sidebar__item${pathname.startsWith('/admin') ? ' sidebar__item--active' : ''}`}
+              onClick={() => onOptionSelect('Personas')}
+              title="Panel Administrativo"
+            >
+              <Settings size={20} className="sidebar__icon" />
+              {!collapsed && <span className="sidebar__label">Panel Administrativo</span>}
+            </li>
           )}
         </ul>
       </nav>

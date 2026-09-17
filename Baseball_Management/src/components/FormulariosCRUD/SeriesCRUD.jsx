@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Layers, ShieldCheck, CalendarRange, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const SeriesCRUD = () => {
 
@@ -46,12 +48,23 @@ const SeriesCRUD = () => {
         end_date: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Series", Layers, { sub: 'series del campeonato', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Cronograma", CalendarRange, 'DEFINIDO', { sub: 'fechas trazadas', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Series del campeonato: nombre, tipo, temporada y fechas de disputa.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Series"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

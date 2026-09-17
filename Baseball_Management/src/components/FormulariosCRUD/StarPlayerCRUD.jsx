@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Star, ShieldCheck, Award, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const StarPlayerCRUD = () => {
     
@@ -96,12 +98,23 @@ const StarPlayerCRUD = () => {
         position: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Estrellas", Star, { sub: 'jugadores destacados', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Destacados WBSC", Award, 'NOMINADO', { sub: 'selección oficial', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Jugadores estrella seleccionados por rendimiento destacado en cada serie.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Jugadores Estrella"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

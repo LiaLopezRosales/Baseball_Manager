@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import './App.css';
@@ -13,15 +13,13 @@ import RegisterBoard from './components/Register';
 import { TeamProfile, PlayerProfile } from './components/profilePages';
 import PlayerCompare from './components/PlayerCompare';
 import ProtectedRoute from './components/ProtectedRoute';
-import PlayerSwapForm from './components/PlayerSwapForm';
-import PlayerSwapTable from './components/PlayerSwapTable';
-import { CRUDRoute } from './viewRoutes';
+import DtPanel from './components/dt/DtPanel';
+import DtHistorial from './components/dt/DtHistorial';
+import AdminLayout from './components/admin/AdminLayout';
 import {
   toCRUDPath,
   toReportPath,
   toQueryPath,
-  toSwapDefinePath,
-  toSwapListPath,
   toComparePath,
 } from './path';
 
@@ -48,14 +46,6 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
     }
     if (option === 'Qy') {
       navigate(toQueryPath(table));
-      return;
-    }
-    if (option === 'Definir Cambios') {
-      navigate(toSwapDefinePath());
-      return;
-    }
-    if (option === 'Listar Cambios') {
-      navigate(toSwapListPath());
       return;
     }
     if (option === 'Comparar Jugadores') {
@@ -144,6 +134,59 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
         onLogout={onLogout}
       />
     </ProtectedRoute>
+  ) : location.pathname.startsWith('/admin') ? (
+    <Routes>
+      <Route
+        path="/admin/:slug"
+        element={
+          <ProtectedRoute roles={['Admin']}>
+            <AdminLayout
+              isLogged={isLogged}
+              userName={userName}
+              role={role}
+              onModalOpen={onModalOpen}
+              onRegisterOpen={onRegisterOpen}
+              onLogout={onLogout}
+            />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/admin" element={<Navigate to="/admin/personas" replace />} />
+    </Routes>
+) : location.pathname.startsWith('/dt') ? (
+    <ProtectedRoute roles={['Director Técnico']}>
+      <Routes>
+        <Route
+          path="/dt/cambios"
+          element={
+            <DtPanel
+              teamId={team}
+              isLogged={isLogged}
+              userName={userName}
+              role={role}
+              onModalOpen={onModalOpen}
+              onRegisterOpen={onRegisterOpen}
+              onLogout={onLogout}
+            />
+          }
+        />
+        <Route
+          path="/dt/listar-cambios"
+          element={
+            <DtHistorial
+              teamId={team}
+              isLogged={isLogged}
+              userName={userName}
+              role={role}
+              onModalOpen={onModalOpen}
+              onRegisterOpen={onRegisterOpen}
+              onLogout={onLogout}
+            />
+          }
+        />
+        <Route path="/dt/*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ProtectedRoute>
   ) : (
     <>
       <header className="App-header">
@@ -165,10 +208,7 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/registro" element={<RegisterRedirect onOpen={onRegisterOpen} />} />
-              <Route path="/admin/:slug" element={<ProtectedRoute roles={['Admin']}><CRUDRoute /></ProtectedRoute>} />
-              <Route path="/dt/cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapForm teamId={team} /></ProtectedRoute>} />
-              <Route path="/dt/listar-cambios" element={<ProtectedRoute roles={['Director Técnico']}><PlayerSwapTable teamId={team} /></ProtectedRoute>} />
-              <Route path="*" element={<Landing />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </motion.div>
         </AnimatePresence>

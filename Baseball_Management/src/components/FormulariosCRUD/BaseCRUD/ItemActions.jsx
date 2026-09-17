@@ -1,10 +1,20 @@
 import React from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
-const ItemActions = ({ item, onEdit, onDelete }) => (
-  <div className="dt-actions-group">
+const ItemActions = ({ item, onView, onEdit, onDelete }) => (
+  <div className="bc-actions-group">
+    {onView && (
+      <button
+        className="bc-action-btn bc-action-btn--view"
+        onClick={() => onView(item)}
+        title="Ver ficha completa"
+        aria-label="Ver ficha completa"
+      >
+        <Eye size={16} />
+      </button>
+    )}
     <button
-      className="dt-action-btn dt-action-btn--edit"
+      className="bc-action-btn bc-action-btn--edit"
       onClick={() => onEdit(item)}
       title="Editar"
       aria-label="Editar"
@@ -12,7 +22,7 @@ const ItemActions = ({ item, onEdit, onDelete }) => (
       <Pencil size={16} />
     </button>
     <button
-      className="dt-action-btn dt-action-btn--delete"
+      className="bc-action-btn bc-action-btn--delete"
       onClick={() => onDelete(item.id)}
       title="Eliminar"
       aria-label="Eliminar"

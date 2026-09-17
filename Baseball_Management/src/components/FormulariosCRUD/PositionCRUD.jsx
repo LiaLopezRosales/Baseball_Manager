@@ -2,6 +2,8 @@
 
 import React from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Layers, ShieldCheck, Bookmark, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const PositionCRUD = () => {
     const fields = [
@@ -14,12 +16,23 @@ const PositionCRUD = () => {
         name: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Posiciones", Layers, { sub: 'posiciones del béisbol', tone: 'amber' }),
+        makeStatusKpi("Configuración", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Catálogo", Bookmark, 'WBSC', { sub: 'normativa', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Posiciones oficiales del béisbol según normativa WBSC.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Posiciones"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

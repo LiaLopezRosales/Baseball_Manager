@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Target, ShieldCheck, Link, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const TeamOnTheFieldCRUD = () => {
     const [lineups, setLineups] = useState([]);
@@ -54,12 +56,23 @@ const TeamOnTheFieldCRUD = () => {
         lineup_id: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Asignaciones", Target, { sub: 'equipos en campo', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Alineaciones Vinculadas", Link, 'ACTIVA', { sub: 'en campo', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Asignación de equipos activos en cada juego del campeonato.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Equipos en el Campo"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

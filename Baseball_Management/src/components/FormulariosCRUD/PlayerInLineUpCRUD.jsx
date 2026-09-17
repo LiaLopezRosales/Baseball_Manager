@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { UserCheck, ShieldCheck, Shield, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const PlayerInLineUpCRUD = () => {
     
@@ -85,12 +87,23 @@ const PlayerInLineUpCRUD = () => {
         player_in_position: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Asignaciones", UserCheck, { sub: 'jugadores alineados', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Alineación WBSC", Shield, 'CONFORME', { sub: 'reglamento vigente', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Asignación de jugadores en posición a cada alineación titular.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Jugadores en Alineación"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

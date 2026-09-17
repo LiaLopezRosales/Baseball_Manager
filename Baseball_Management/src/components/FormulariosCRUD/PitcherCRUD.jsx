@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Disc3, Trophy, XCircle, BarChart3 } from "lucide-react";
+import { makeCountKpi, makeSumKpi, makeAvgKpi } from "./kpiDefs";
 
 const PitcherCRUD = () => {
 
@@ -58,12 +60,23 @@ const PitcherCRUD = () => {
         running_average: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Lanzadores", Disc3, { sub: 'lanzadores activos', tone: 'amber' }),
+        makeSumKpi("Juegos Ganados", Trophy, "No_games_won", { sub: 'victorias acumuladas', tone: 'green' }),
+        makeSumKpi("Juegos Perdidos", XCircle, "No_games_lost", { sub: 'derrotas acumuladas', tone: 'red' }),
+        makeAvgKpi("ERA Promedio", BarChart3, "running_average", { decimals: 1, sub: 'promedio de carreras', tone: 'amber' }),
+    ];
+
+    const subtitle = "Estadísticas de pitcheo: lanzadores, victorias, derrotas y promedio de carreras.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Lanzadores"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

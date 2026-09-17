@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Hash, ShieldCheck, Lock, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const ScoreCRUD = () => {
 
@@ -52,12 +54,23 @@ const ScoreCRUD = () => {
         l_points: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Marcadores", Hash, { sub: 'resultados registrados', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Integridad", Lock, 'VERIFICADA', { sub: 'datos consistentes', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Marcadores oficiales de los juegos del campeonato.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Marcadores"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Crown, ShieldCheck, Link, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const TechnicalDirectorCRUD = () => {
     const [directionTeams, setDirectionTeams] = useState([]);
@@ -68,12 +70,23 @@ const TechnicalDirectorCRUD = () => {
         W_id: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total DTs", Crown, { sub: 'directores activos', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Afiliación", Link, 'WBSC', { sub: 'verificada', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Directores técnicos asignados a cada equipo de dirección.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Directores Técnicos"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { ArrowLeftRight, ShieldCheck, Scale, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const PlayerSwapCRUD = () => {
     
@@ -124,12 +126,23 @@ const PlayerSwapCRUD = () => {
         position: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Cambios", ArrowLeftRight, { sub: 'sustituciones registradas', tone: 'amber' }),
+        makeStatusKpi("Estado de Cambios", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Regulación WBSC", Scale, 'ART 5.10', { sub: 'conforme', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Registro de sustituciones de jugadores durante los juegos (Regla 5.10 WBSC).";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Cambios de Jugador"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

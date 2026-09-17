@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Network, ShieldCheck, Building2, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const DirectionTeamCRUD = () => {
     const [teams, setTeams] = useState([]);
@@ -39,12 +41,23 @@ const DirectionTeamCRUD = () => {
         Team_id: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Equipos Dirección", Network, { sub: 'equipos asignados', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Organización", Building2, 'ACTIVA', { sub: 'estructura vigente', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Equipos de dirección: estructura organizativa de cada franquicia.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Equipos de Dirección"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

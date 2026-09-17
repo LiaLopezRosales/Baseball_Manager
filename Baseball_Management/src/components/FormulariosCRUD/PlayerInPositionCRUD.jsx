@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Users, TrendingUp, ShieldCheck, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeAvgKpi, makeStatusKpi } from "./kpiDefs";
 
 const PlayerInPositionCRUD = () => {
 
@@ -73,12 +75,23 @@ const PlayerInPositionCRUD = () => {
         effectiveness: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Asignaciones", Users, { sub: 'jugadores-position', tone: 'amber' }),
+        makeAvgKpi("Efectividad Promedio", TrendingUp, "effectiveness", { decimals: 3, sub: 'promedio general', tone: 'green' }),
+        makeStatusKpi("Estado del Padrón", ShieldCheck, { tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Relación entre jugadores de béisbol y sus posiciones asignadas en el campeonato.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Jugadores en Posición"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };

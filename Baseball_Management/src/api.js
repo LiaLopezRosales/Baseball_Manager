@@ -56,6 +56,24 @@ export async function apiPost(path, body = {}) {
 }
 
 /**
+ * DELETE a un endpoint con token de autenticación.
+ */
+export async function apiDelete(path) {
+  const headers = {};
+  const token = localStorage.getItem('token');
+  if (token) headers['Authorization'] = `Token ${token}`;
+  const res = await fetch(`${API_URL}${path}`, { method: 'DELETE', headers });
+  if (!res.ok) {
+    let message = `Error ${res.status} al eliminar ${path}`;
+    try {
+      const data = await res.json();
+      if (data.error) message = data.error;
+    } catch { /* vacío */ }
+    throw new ApiError(message, res.status);
+  }
+}
+
+/**
  * Obtiene el listado de una tabla CRUD (DRF pagina a través de `results`).
  */
 export async function fetchTable(path) {

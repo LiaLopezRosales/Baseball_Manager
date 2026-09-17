@@ -1,6 +1,8 @@
 // Baseball_Management/src/components/FormulariosCRUD/GameCRUD.jsx
 import React, { useState, useEffect } from "react";
 import BaseCRUD from "./BaseCRUD";
+import { Gamepad2, ShieldCheck, CalendarCheck, ClipboardList } from "lucide-react";
+import { makeCountKpi, makeStatusKpi, makeBrandKpi } from "./kpiDefs";
 
 const GameCRUD = () => {
     
@@ -90,12 +92,23 @@ const GameCRUD = () => {
         score: "",
     };
 
+    const kpis = [
+        makeCountKpi("Total Juegos", Gamepad2, { sub: 'juegos programados', tone: 'amber' }),
+        makeStatusKpi("Estado", ShieldCheck, { tone: 'green' }),
+        makeBrandKpi("Calendario", CalendarCheck, 'ACTIVO', { sub: 'juegos en curso', tone: 'green' }),
+        makeCountKpi("Registros", ClipboardList, { sub: 'por página', tone: 'amber' }),
+    ];
+
+    const subtitle = "Programación y resultados de los juegos del campeonato.";
+
     return (
         <BaseCRUD
             apiUrl={apiUrl}
             fields={fields}
             title="Juegos"
             initialFormValues={initialFormValues}
+            kpis={kpis}
+            subtitle={subtitle}
         />
     );
 };
