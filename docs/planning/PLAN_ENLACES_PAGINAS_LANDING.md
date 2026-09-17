@@ -1,6 +1,9 @@
 # Plan: Enlaces de la landing + Páginas de reemplazo temporal
 
-Estado: Documentado, pendiente de estilo y ejecución (2026-09-14)
+Estado: Ejecutado (2026-09-17). Enlaces equipo/jugador/nav/callout y footer
+re-mapeados; 10 páginas informativas creadas con un `InfoPage` unificado
+(estilo landing, sin referencia externa propia) — 9 estáticas + `/altas-bajas`
+funcional. Se añadieron además `/comision-arbitraje` y `/sala-prensa`.
 
 ## Contexto / motivación
 
@@ -143,18 +146,24 @@ En **letras pequeñas** (`<small>`), al pie del contenido, aproximadamente:
 
 ---
 
-## Fases / checklist de ejecución (aún no ejecutadas)
+## Fases / checklist de ejecución (completadas 2026-09-17)
 
-- [ ] A. IDs de enlace: `podiumData` gana `playerId`/`teamId`; estrellas/hero/
+- [x] A. IDs de enlace: `podiumData` gana `playerId`/`teamId`; estrellas/hero/
       standings/recent/bento ya tienen id.
-- [ ] B. Envolver nombres de equipos y jugadores en `Link` con fallback a texto.
-- [ ] C. Nav `<a>` → `<Link>` (SPA, conservar protección Comparador).
-- [ ] D. Callout por rol → modal de login si no corresponde el rol.
-- [ ] E. "REGLAMENTO SERIE 2026" → `Link to="/reglamento"` (quitar handler scroll).
-- [ ] F. Crear las 10 páginas con el patrón + disclaimer + clases de estilo
-      (depende del estilo que entregue el usuario).
-- [ ] G. Registrar rutas en `App.js`.
-- [ ] H. Re-mapear destinos del footer con la tabla de las 10 páginas.
+- [x] B. Envolver nombres de equipos y jugadores en `Link` con fallback a texto.
+- [x] C. Nav `<a>` → `<Link>` (SPA, conservar protección Comparador).
+- [x] D. Callout por rol → modal de login si no corresponde el rol.
+- [x] E. "REGLAMENTO SERIE 2026" → `Link to="/reglamento"` (quitar handler scroll).
+- [x] F. Crear las páginas con el patrón + disclaimer + clases de estilo.
+      Implementadas con `InfoPage` unificado (estilo landing, sin ref propia):
+      `/reglamento`, `/protocolo-antidopaje`, `/comision-arbitraje`,
+      `/sala-prensa`, `/federacion`, `/api-publica`, `/playoffs`, `/terminos`,
+      `/privacidad` + `/altas-bajas` funcional (PlayerSwap vía dinamic-filter).
+- [x] G. Registrar rutas en `App.js` (rama de fallback: `/altas-bajas` y
+      `INFO_PAGES[pathname]`).
+- [x] H. Re-mapear destinos del footer (extraído a `LandingFooter.jsx`) con la
+      tabla de páginas; legal del footer y de `ConsultasLayout` a `/terminos`,
+      `/privacidad`, `/federacion`.
 
 ## Verificación planificada
 

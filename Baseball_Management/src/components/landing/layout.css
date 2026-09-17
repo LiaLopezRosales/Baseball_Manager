@@ -358,8 +358,12 @@ html[data-theme='light'] .data-layout,
   display: flex;
   gap: 16px;
 }
-.data-layout__footer-right span {
-  cursor: default;
+.data-layout__footer-right span,
+.data-layout__footer-right a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
   transition: color 0.2s;
 }
-.data-layout__footer-right span:hover { color: var(--lnd-text); }
+.data-layout__footer-right span:hover,
+.data-layout__footer-right a:hover { color: var(--lnd-text); }

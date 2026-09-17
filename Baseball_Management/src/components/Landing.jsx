@@ -5,6 +5,7 @@ import { apiGet } from '../api';
 import FavoritesPanel from './FavoritesPanel';
 import LandingHeader from './landing/LandingHeader';
 import LandingHero from './landing/LandingHero';
+import LandingFooter from './landing/LandingFooter';
 import { getInitialTheme, applyTheme } from '../theme';
 import './landing.css';
 
@@ -1121,115 +1122,7 @@ function Landing({ isLogged = false, role = '', onModalOpen, onRegisterOpen, onL
       {isLogged && <FavoritesPanel />}
 
       {/* FOOTER 5-COLUMNAS — fiel al mockup (bg #081626) */}
-      <footer className="landing__footer">
-        <div className="landing__footer-top">
-          <div className="landing__footer-brand-col">
-            <span className="landing__footer-name">
-              Liga Nacional de Béisbol
-            </span>
-            <p className="landing__footer-tagline">
-              Órgano rector y circuito élite del béisbol profesional nacional.
-              Plataforma de telemetría, asignaciones oficiales de rosters,
-              boxscores en vivo y recopilación estadística certificada para la
-              Serie Nacional 2025-2026.
-            </p>
-            <div className="landing__footer-badges">
-              <span className="landing__footer-badge landing__footer-badge--gold">
-                Homologación WBSC
-              </span>
-              <span className="landing__footer-badge landing__footer-badge--slate">
-                Radar Statcast Sync
-              </span>
-            </div>
-          </div>
-
-          <div className="landing__footer-col">
-            <h4>Competición</h4>
-            <ul>
-              <li>
-                <Link to="/reporte/estadisticas-juegos-por-equipos">
-                  Tabla de Posiciones
-                </Link>
-              </li>
-              <li>
-                <Link to="/reporte/average">Líderes Ofensivos y Pitcheo</Link>
-              </li>
-              <li>
-                <Link to="/consultas/Series">Calendario de Temporada</Link>
-              </li>
-              <li>
-                <Link to="/comparar">Comparador de Peloteros</Link>
-              </li>
-              <li>
-                <Link to="/consultas/Game">Cuadro de Play-Offs</Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="landing__footer-col">
-            <h4>Reportes Oficiales</h4>
-            <ul>
-              <li>
-                <Link to="/reporte/equipos-ganadores">
-                  Anotaciones Certificadas
-                </Link>
-              </li>
-              <li>
-                <Link to="/reporte/jugadores-estrellas">Altas y Bajas Semanales</Link>
-              </li>
-              <li>
-                <Link to="/reporte/carreras-limpias-juegos-ganados">
-                  Reglamento de Campeonato 2025
-                </Link>
-              </li>
-              <li>
-                <Link to="/reporte/efectividad-por-posicion">
-                  Protocolo Antidopaje
-                </Link>
-              </li>
-              <li>
-                <Link to="/reporte/jugadores-de-un-equipo">
-                  API Pública de Estadísticas
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="landing__footer-col">
-            <h4>Portales Técnicos</h4>
-            <ul>
-              <li>
-                <Link to="/dt/cambios">Portal Directores Técnicos</Link>
-              </li>
-              <li>
-                <Link to="/dt/listar-cambios">Mesa de Control y Anotadores</Link>
-              </li>
-              <li>
-                <Link to="/consultas/Team">Comisión de Arbitraje</Link>
-              </li>
-              <li>
-                <Link to="/consultas/Worker">Sala de Prensa y Acreditaciones</Link>
-              </li>
-              <li>
-                <button type="button" className="landing__footer-link" onClick={onRegisterOpen}>
-                  Federación Deportiva Nacional
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="landing__footer-bottom">
-          <span className="landing__footer-copy">
-            © 2025-2026 Liga Nacional de Béisbol. Todos los derechos reservados.
-          </span>
-          <div className="landing__footer-legal">
-            <a href="/registro" className="landing__footer-legal-link">Términos de Uso</a>
-            <a href="/registro" className="landing__footer-legal-link">Política de Privacidad</a>
-            <a href="/registro" className="landing__footer-legal-link">Auditoría de Datos</a>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }

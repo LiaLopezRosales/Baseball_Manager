@@ -163,9 +163,9 @@ function ConsultasLayout({
               </span>
             </div>
             <div className="data-layout__footer-right">
-              <span title="Página en construcción">Privacidad</span>
-              <span title="Página en construcción">Términos de Datos</span>
-              <span title="Página en construcción">Contacto Técnico</span>
+              <Link to="/privacidad">Privacidad</Link>
+              <Link to="/terminos">Términos de Datos</Link>
+              <Link to="/federacion">Contacto Técnico</Link>
             </div>
           </div>
         </footer>

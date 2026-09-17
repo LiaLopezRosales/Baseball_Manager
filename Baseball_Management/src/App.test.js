@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders the sidebar with Inicio option', () => {
+test('renders the landing navigation', () => {
   render(<App />);
-  expect(screen.getByText('Inicio')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Inicio' })).toBeInTheDocument();
 });
 
-test('renders the main page welcome subtitle', () => {
+test('renders the register call to action for guests', () => {
   render(<App />);
   expect(
-    screen.getByText(/Datos, estadísticas y gestión en tiempo real/i)
+    screen.getByRole('button', { name: 'Crear Cuenta' })
   ).toBeInTheDocument();
 });

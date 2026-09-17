@@ -1,0 +1,198 @@
+/* ============================================================
+   Páginas informativas públicas — estilo landing (tokens --lnd-*)
+   ============================================================ */
+
+.inf {
+  min-height: 100vh;
+  background: var(--lnd-bg);
+  color: var(--lnd-text);
+  font-family: var(--lnd-font-body);
+  display: flex;
+  flex-direction: column;
+}
+
+.inf__main {
+  flex: 1;
+  width: 100%;
+  padding: clamp(2rem, 5vw, 4rem) var(--lnd-gutter) clamp(3rem, 6vw, 5rem);
+}
+
+/* Hero */
+.inf__hero {
+  max-width: 900px;
+  margin: 0 auto clamp(2rem, 4vw, 3rem);
+  text-align: center;
+}
+
+.inf__eyebrow {
+  display: inline-block;
+  margin-bottom: 0.9rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--lnd-hairline);
+  border-radius: 999px;
+  background: var(--lnd-surface);
+  color: var(--lnd-lights);
+  font-family: var(--lnd-font-num);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.inf__title {
+  margin: 0 0 0.85rem;
+  font-family: var(--lnd-font-display);
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--lnd-text);
+}
+
+.inf__lead {
+  max-width: 68ch;
+  margin: 0 auto;
+  color: var(--lnd-dim);
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.65;
+}
+
+/* Cuerpo */
+.inf__body {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.inf__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inf__section {
+  padding: clamp(1.25rem, 3vw, 1.9rem) clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--lnd-hairline);
+  border-radius: 16px;
+  background: var(--lnd-surface);
+}
+
+.inf__section h2 {
+  margin: 0 0 0.85rem;
+  font-family: var(--lnd-font-display);
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  font-weight: 600;
+  color: var(--lnd-text);
+}
+
+.inf__section p {
+  margin: 0 0 0.85rem;
+  color: var(--lnd-dim);
+  line-height: 1.7;
+}
+
+.inf__section p:last-child {
+  margin-bottom: 0;
+}
+
+.inf__section ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.inf__section li {
+  color: var(--lnd-dim);
+  line-height: 1.6;
+}
+
+.inf__section li::marker {
+  color: var(--lnd-lights);
+}
+
+/* Estados */
+.inf__state {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--lnd-dim);
+}
+
+.inf__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.1rem 1.35rem;
+  border: 1px solid var(--lnd-hairline);
+  border-radius: 14px;
+  background: var(--lnd-surface);
+}
+
+.inf__notice .material-symbols-outlined {
+  color: var(--lnd-lights);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.inf__notice p {
+  margin: 0;
+  color: var(--lnd-dim);
+  line-height: 1.6;
+}
+
+/* Tabla */
+.inf__table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--lnd-hairline);
+  border-radius: 16px;
+  background: var(--lnd-surface);
+}
+
+.inf__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.inf__table thead th {
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  background: var(--lnd-surface-2);
+  color: var(--lnd-text);
+  font-family: var(--lnd-font-num);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.inf__table tbody td {
+  padding: 0.85rem 1.1rem;
+  border-top: 1px solid var(--lnd-hairline);
+  color: var(--lnd-dim);
+  white-space: nowrap;
+}
+
+.inf__table tbody tr:hover td {
+  background: var(--lnd-surface-2);
+  color: var(--lnd-text);
+}
+
+/* Disclaimer */
+.inf__disclaimer {
+  max-width: 1080px;
+  margin: clamp(2rem, 4vw, 3rem) auto 0;
+  text-align: center;
+}
+
+.inf__disclaimer small {
+  color: var(--lnd-dim);
+  font-size: 0.78rem;
+  font-style: italic;
+  line-height: 1.5;
+}

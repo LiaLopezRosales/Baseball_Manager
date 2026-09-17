@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { applyTheme } from '../../theme';
+import NotificationBell from '../NotificationBell';
 
 const NAV = [
   { to: '/', label: 'Inicio' },
@@ -90,16 +91,7 @@ function LandingHeader({
 
           {isLogged ? (
             <>
-              <Link
-                to="/"
-                className="landing__icon-btn"
-                aria-label="Notificaciones"
-                title="Notificaciones"
-              >
-                <span className="material-symbols-outlined" aria-hidden="true">
-                  notifications
-                </span>
-              </Link>
+              <NotificationBell />
 
               <div className="landing__usermenu">
                 <button

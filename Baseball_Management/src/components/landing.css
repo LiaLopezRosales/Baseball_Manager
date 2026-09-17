@@ -188,6 +188,26 @@ html[data-theme='light'] .landing__brand-accent { color: #0284c7; }
   outline-offset: 2px;
 }
 
+/* Campana de notificaciones: alinear con los icon-btn del header */
+.landing__nav-actions .notification-bell {
+  display: flex;
+  align-items: center;
+  margin-left: 0;
+}
+.landing__nav-actions .notification-bell__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid var(--lnd-hairline);
+  background: transparent;
+  color: var(--lnd-text);
+}
+.landing__nav-actions .notification-bell__btn:hover {
+  background: color-mix(in oklch, var(--lnd-lights) 14%, transparent);
+  color: var(--lnd-text);
+  border-color: var(--lnd-hairline);
+}
+
 /* buttons */
 .landing__btn {
   display: inline-flex;

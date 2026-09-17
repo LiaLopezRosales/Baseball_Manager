@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { Menu } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 import './App.css';
-import Sidebar from './components/sidebar';
 import LoginBoard from './components/login';
 import Modal from './components/Modal';
 import Landing from './components/Landing';
@@ -16,12 +13,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import DtPanel from './components/dt/DtPanel';
 import DtHistorial from './components/dt/DtHistorial';
 import AdminLayout from './components/admin/AdminLayout';
-import {
-  toCRUDPath,
-  toReportPath,
-  toQueryPath,
-  toComparePath,
-} from './path';
+import InfoPage from './components/infoPages/InfoPage';
+import AltasBajasPage from './components/infoPages/AltasBajasPage';
+import { INFO_PAGES } from './components/infoPages/infoContent';
 
 // El registro ya no es una página: navegar a /registro abre el modal y vuelve al inicio
 function RegisterRedirect({ onOpen }) {
@@ -35,35 +29,9 @@ function RegisterRedirect({ onOpen }) {
 
 // Componente interno que usa useNavigate (debe estar dentro del Router)
 function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen, onLogout }) {
-  const navigate = useNavigate();
   const location = useLocation();
   const isStandalone = location.pathname === '/';
-
-  const handleOptionSelect = (option, table = '') => {
-    if (option === 'Main') {
-      navigate('/');
-      return;
-    }
-    if (option === 'Qy') {
-      navigate(toQueryPath(table));
-      return;
-    }
-    if (option === 'Comparar Jugadores') {
-      navigate(toComparePath());
-      return;
-    }
-    const reportPath = toReportPath(option);
-    if (reportPath !== '/') {
-      navigate(reportPath);
-      return;
-    }
-    const crudPath = toCRUDPath(option);
-    if (crudPath !== '/') {
-      navigate(crudPath);
-      return;
-    }
-    navigate('/');
-  };
+  const infoContent = INFO_PAGES[location.pathname];
 
   return isStandalone ? (
     <Landing
@@ -187,33 +155,30 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
         <Route path="/dt/*" element={<Navigate to="/" replace />} />
       </Routes>
     </ProtectedRoute>
+  ) : location.pathname === '/altas-bajas' ? (
+    <AltasBajasPage
+      isLogged={isLogged}
+      userName={userName}
+      role={role}
+      onModalOpen={onModalOpen}
+      onRegisterOpen={onRegisterOpen}
+      onLogout={onLogout}
+    />
+  ) : infoContent ? (
+    <InfoPage
+      content={infoContent}
+      isLogged={isLogged}
+      userName={userName}
+      role={role}
+      onModalOpen={onModalOpen}
+      onRegisterOpen={onRegisterOpen}
+      onLogout={onLogout}
+    />
   ) : (
-    <>
-      <header className="App-header">
-        <button className="mobile-menu-btn" aria-label="Abrir menú">
-          <Menu size={20} />
-        </button>
-
-        <Sidebar role={role} onOptionSelect={handleOptionSelect} onModalOpen={onModalOpen} onLogout={onLogout} />
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={window.location.pathname}
-            className="content"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/registro" element={<RegisterRedirect onOpen={onRegisterOpen} />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </motion.div>
-        </AnimatePresence>
-      </header>
-    </>
+    <Routes>
+      <Route path="/registro" element={<RegisterRedirect onOpen={onRegisterOpen} />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
