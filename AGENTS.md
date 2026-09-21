@@ -83,9 +83,38 @@ Three roles defined in `api/roles.py`: `Admin` (full access), `Director Técnico
 ## Testing
 
 ```bash
+# Suite unitaria (MagicMock, sin BD)
 python manage.py test db_structure
+
+# Suite de integración (Postgres REAL, autocontenida). SOLO corre con el flag:
+INTEGRATION_TESTS=1 python manage.py test api.tests.integration
+
+# Frontend (componentes + App)
+cd Baseball_Management && npm test -- --watchAll=false
 ```
-Tests use `unittest` with `MagicMock` (no DB required). Located in `db_structure/tests/`.
+
+Tests unitarios: `unittest` + `MagicMock`, en `db_structure/tests/` (96).
+
+Tests de integración: `api/tests/integration/` (27). **Autocontenidos**: `seed.py`
+expone `seed_test_championship()` que reusa las factories de `populate_db` para
+sembrar roles/seasons/equipos/DT/jugadores/campeonato/notificaciones necesarios que
+login, registro público y reportes exigen — el runner crea una BD de test vacía y el
+CI NO corre `populate_db.py`, así que sin seed propio la suite vería listas vacías.
+Detalles de alineación con la implementación real:
+
+- Los clientes DRF (`APIClient`) exponen `.data`, NO `.json()` (Django devuelve
+  responses con `.json()`, DRF no).
+- `toggle_favorite_*` devuelve **201** al crear (add) y **200** al eliminar (remove).
+- `DashboardView` emite `favorite_team`/`recent_games`/`favorite_players`/
+  `unread_notifications`; en dashboard/notis los tests usan claves reales.
+- `ReportSerializer` valida `report_id` ∈ 0–8; un id inválido → 400 con
+  `{'report_id': [...]}` (field errors), no `{'error': ...}`.
+- Los 3 casos de `test_serializers.py` que validan PKs (Rol/Team/Player) requieren
+  una BD sembrada: contra una test DB vacía fallan (esperado; se validan en CI con seed).
+
+Frontend: 14 tests (`.test.jsx` junto a cada componente). Prefijo de grupo `(WP5)`.
+RadarChart mockea `echarts-for-react` (jsdom sin canvas); FavoriteButton/NotificationBell/
+UserDashboard mockean `src/api`.
 
 ## Conventions
 

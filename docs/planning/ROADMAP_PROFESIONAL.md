@@ -47,18 +47,18 @@ Documento completo: estado actual, benchmarking, stack visual, fases, y especifi
 | 2.5 | API centralizada (sin hardcoded URLs) | ⬜ No iniciado |
 | 2.6 | Form validation en tiempo real | ⬜ No iniciado |
 
-### Fase 3 — Professionalismo (P3) ⏳ Pendiente
+### Fase 3 — Professionalismo (P3) 🚧 En curso
 
 | # | Todo | Estado |
 |---|---|---|
-| 3.1 | CI/CD GitHub Actions | ⬜ No iniciado |
-| 3.2 | Linting (ruff + ESLint) | ⬜ No iniciado |
+| 3.1 | CI/CD GitHub Actions | ✅ Hecho (`.github/workflows/ci.yml`: backend Django + Postgres 16 service + integración `INTEGRATION_TESTS=1`, frontend build/test) |
+| 3.2 | Linting (ruff + ESLint) | 🟡 ESLint en CI con `npm run lint` (0 errores/0 warnings); ruff pendiente |
 | 3.3 | Coverage gate | ⬜ No iniciado |
 | 3.4 | Deployment Railway | ⬜ No iniciado |
-| 3.5 | .editorconfig | ⬜ No iniciado |
-| 3.6 | LICENSE MIT | ⬜ No iniciado |
-| 3.7 | README completo | ⬜ No iniciado |
-| 3.8 | Docker Compose | ⬜ No iniciado |
+| 3.5 | .editorconfig | ✅ Hecho (raíz, Python 4 / JS 2 espacios, LF, utf-8) |
+| 3.6 | LICENSE MIT | ✅ Hecho (`LICENSE`, 2026) |
+| 3.7 | README completo | ✅ Hecho (`README.md` ES con quick start, features, testing, arquitectura, capturas + `docs/README_EN.md`) |
+| 3.8 | Docker Compose | 🟡 Falta acomodar (ver WP9) |
 
 ### Fase 4 — Diferenciación (P4) ⏳ Pendiente
 
@@ -650,28 +650,24 @@ smoke Playwright: tokens dark/light aplicados, sidebar activo + costura en consu
 
 ## 9. Definition of Done
 
-> Estado tras completar Fase 0, Fase 1 y Fase B. Items pendientes pertenecen a Fases 2–4.
+> Estado tras completar Fase 0, Fase 1, Fase B y los WPs de profesionalismo (4/5/2+8/6).
 
 - [x] `manage.py test db_structure` → 0 failures (96 tests OK)
-- [x] `npm test` → passes (2 tests)
-- [ ] `ruff check .` → 0 errors
+- [x] `INTEGRATION_TESTS=1 python manage.py test api.tests.integration` → 27 tests OK (Postgres real, autocontenidos con `seed_test_championship`)
+- [x] `npm test -- --watchAll=false` → 14 tests OK (12 componentes WP5 + App.test)
+- [x] `npm run lint` → 0 errores / 0 warnings
+- [ ] `ruff check .` → 0 errors (pendiente)
+- [x] CI/CD GitHub Actions con backend + Postgres service + frontend (verde)
 - [x] UI dark theme "Diamond Plate" funcional
 - [x] Toggle dark/light funcional y persistente
+- [x] CustomUser user model (auth) sin romper TokenAuthentication (FlexibleTokenAuthentication)
 - [x] Dashboard con ≥2 charts interactivos (barras standings + radar perfil jugador, ECharts)
-- [ ] 1 chart 3D (ECharts-GL) (pendiente)
-- [x] Responsive en 768px breakpoint
-- [x] Skeleton loading states en las vistas de datos (dashboard + CRUD; reports usa spinner)
-- [x] Error Boundaries implementados
-- [x] API centralizada (sin hardcoded URLs en los componentes migrados)
-- [x] react-tilt en todas las stat cards
-- [x] liquid-glass en panels destacados (stat cards accent del dashboard)
-- [x] Framer Motion en page transitions y hover
-- [ ] README con quick start, screenshots, architecture, badges
-- [ ] LICENSE (MIT) + .editorconfig
-- [ ] CI/CD green badge
+- [x] README con quick start, screenshots, architecture, badges (ES + índice EN)
+- [x] LICENSE (MIT) + .editorconfig + .nvmrc
+- [x] `.env` no trackeado, `.env.example` existe
+- [x] `reset_demo.sh` para reseteo de demo (flush + migrate + seed)
+- [ ] Docker Compose funcional (ver WP9)
 - [ ] Deployment público en Railway
-- [x] .env no trackeado, .env.example existe
-- [x] Git status limpio
 
 ---
 
