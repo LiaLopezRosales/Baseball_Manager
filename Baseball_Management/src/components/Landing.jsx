@@ -627,9 +627,12 @@ function Landing({ isLogged = false, userName = '', role = '', onModalOpen, onRe
         onRegisterOpen={onRegisterOpen}
       />
 
-      {/* PANEL DEL USUARIO (solo con sesión) */}
+      {/* PANEL DEL USUARIO + FAVORITOS (solo logueados) — lado a lado */}
       {isLogged && (
-        <UserDashboard standings={standings} stars={starsData} />
+        <div className="landing__user-grid">
+          <UserDashboard standings={standings} stars={starsData} />
+          <FavoritesPanel />
+        </div>
       )}
 
       {/* S3: RESUMEN EJECUTIVO DE CIRCUITO */}
@@ -1154,9 +1157,6 @@ function Landing({ isLogged = false, userName = '', role = '', onModalOpen, onRe
           </div>
         </section>
       )}
-
-      {/* FAVORITOS (solo logueados) */}
-      {isLogged && <FavoritesPanel />}
 
       {/* FOOTER 5-COLUMNAS — fiel al mockup (bg #081626) */}
       <LandingFooter />

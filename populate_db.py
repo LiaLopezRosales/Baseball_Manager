@@ -780,7 +780,10 @@ def seed_favorites_and_notifications(teams=None):
         print("Sin equipos: no se sembraron favoritos.")
         return
 
-    targets = [(general, team_list[:2]), (admin, team_list[:1])]
+    targets = [
+        (general, team_list[:5]),
+        (admin, team_list[-4:] if len(team_list) >= 4 else team_list[:1]),
+    ]
     for user, fav_teams in targets:
         if not user:
             continue
@@ -788,9 +791,12 @@ def seed_favorites_and_notifications(teams=None):
             FavoriteTeam.objects.get_or_create(user=user, team=team)
 
     if general:
-        bp = BaseballPlayer.objects.first()
-        if bp:
+        for bp in BaseballPlayer.objects.all()[:5]:
             FavoritePlayer.objects.get_or_create(user=general, player=bp)
+
+    if admin:
+        for bp in BaseballPlayer.objects.all()[5:10]:
+            FavoritePlayer.objects.get_or_create(user=admin, player=bp)
 
     if (
         general

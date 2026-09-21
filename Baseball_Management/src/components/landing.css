@@ -197,6 +197,7 @@ html[data-theme='light'] .landing__brand-accent { color: #0284c7; }
 .landing__nav-actions .notification-bell__btn {
   width: 36px;
   height: 36px;
+  padding: 0;
   border-radius: 9px;
   border: 1px solid var(--lnd-hairline);
   background: transparent;
@@ -206,6 +207,8 @@ html[data-theme='light'] .landing__brand-accent { color: #0284c7; }
   background: color-mix(in oklch, var(--lnd-lights) 14%, transparent);
   color: var(--lnd-text);
   border-color: var(--lnd-hairline);
+  transform: none;
+  box-shadow: none;
 }
 
 /* buttons */
@@ -889,6 +892,30 @@ html[data-theme='light'] .landing__hero-card-empty,
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
+}
+
+/* "Tu panel" + "Tus favoritos" lado a lado (solo logueados) */
+.landing__user-grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 56px 24px 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  align-items: start;
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.landing__user-grid > .landing__section {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+@media (max-width: 720px) {
+  .landing__user-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* tabla posiciones */

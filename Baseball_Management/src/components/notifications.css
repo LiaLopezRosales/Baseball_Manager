@@ -13,6 +13,9 @@
   place-items: center;
   width: 40px;
   height: 40px;
+  padding: 0;
+  line-height: 1;
+  transform: none;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
   background: var(--bg-tertiary);
@@ -25,6 +28,8 @@
   color: var(--accent);
   border-color: var(--accent);
   background: var(--bg-elevated);
+  transform: none;
+  box-shadow: none;
 }
 
 .notification-bell__badge {
