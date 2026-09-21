@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import MagicMock
-from unittest.mock import patch
 from db_structure.serializers import (
     RolSerializer, UserSerializer, TeamSerializer, ScoreSerializer, PositionSerializer, SeasonSerializer, PersonSerializer,
     BaseballPlayerSerializer, BPParticipationSerializer, PlayerInLineUpSerializer, PlayerInPositionSerializer

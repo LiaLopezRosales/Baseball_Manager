@@ -8,12 +8,10 @@ django.setup()
 import factory
 import pytz
 import random
-from collections import defaultdict
 from datetime import datetime, timedelta
 from faker import Faker
 from factory.django import DjangoModelFactory
-from django.core.exceptions import ValidationError
-from db_structure.models import User, Rol, TechnicalDirector, Worker, DirectionTeam, Team, Person, Position, BaseballPlayer, Season, Series, Pitcher, BPParticipation, LineUp, LineUp, TeamOnTheField, StarPlayer, PlayerInPosition, Score, Game, PlayerSwap, PlayerInLineUp
+from db_structure.models import User, Rol, TechnicalDirector, Worker, DirectionTeam, Team, Person, Position, BaseballPlayer, Season, Series, Pitcher, BPParticipation, LineUp, TeamOnTheField, StarPlayer, PlayerInPosition, Score, Game, PlayerSwap, PlayerInLineUp
 
 # Rol Factory
 class RolFactory(DjangoModelFactory):
@@ -171,13 +169,6 @@ class LineUpFactory(DjangoModelFactory):
         model = LineUp
 
     team_id = factory.SubFactory(TeamFactory)
-
-# LineUp Factory
-class LineUpFactory(DjangoModelFactory):
-    class Meta:
-        model = LineUp
-
-    team_id = factory.SubFactory(TeamFactory)  
 
 # TeamOnTheField Factory
 class TeamOnTheFieldFactory(DjangoModelFactory):
@@ -414,7 +405,7 @@ def populate_baseball_players_and_positions(teams):
 
 
     print(f"{len(baseball_players)} jugadores de béisbol creados y asignados a posiciones.")
-    print(f"Jugadores con posición 'Pitcher' añadidos a la tabla Pitcher.")
+    print("Jugadores con posición 'Pitcher' añadidos a la tabla Pitcher.")
     return {"positions": positions, "baseball_players": baseball_players, "team_player_mapping": team_player_mapping, "pitcher_list": pitcher_list}
 
 
@@ -719,7 +710,6 @@ def backfill_person_biometrics():
     Backfill de los campos nuevos de Person/BaseballPlayer sobre una BD ya sembrada:
     birth_date, height_cm, weight_kg, nationality, bats y throws a los registros sin valor.
     """
-    from datetime import timedelta
     faker = Faker()
     NATIONALITIES = ['Rep. Dominicana', 'Venezuela', 'Cuba', 'México', 'Puerto Rico', 'Panamá', 'Estados Unidos', 'Colombia']
 

@@ -27,6 +27,11 @@ dependencies = [
     "typing-extensions",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.16",
+]
+
 [tool.setuptools.packages.find]
 # Restringe a los paquetes de la app Django (evita que la auto-discovery
 # falle por el flat-layout con python_enviroment/, media/, Baseball_Management/).
@@ -36,3 +41,20 @@ exclude = ["docs*", "Documentacion*", "media*", "python_enviroment*", "Baseball_
 [tool.setuptools.package-data]
 api = ["reports/exports/*.jpg", "migrations/*.py"]
 db_structure = ["migrations/*.py"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+# Código de la app. docs/Documentacion/ y Documentacion/ son scripts de referencia
+# del análisis de BD (no código del sistema); python_enviroment es el venv local.
+extend-exclude = ["docs/**", "Documentacion/**", "python_enviroment/**"]
+
+[tool.ruff.lint]
+# Set conservador: errores de sintaxis (E4/E7/E9) + pyflakes (F), sin churn de estilo.
+select = ["E4", "E7", "E9", "F"]
+# F403/F405: star imports (`from .models import *`) son el patrón deliberado del repo.
+ignore = ["F403", "F405"]
+
+[tool.ruff.lint.per-file-ignores]
+# Los imports dentro de populate_db (dentro de funciones) son intencionales.
+"populate_db.py" = ["E402"]

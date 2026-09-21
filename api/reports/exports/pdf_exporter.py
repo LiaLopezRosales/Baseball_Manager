@@ -19,7 +19,7 @@ from reportlab.platypus import (
 from .base_exporter import BaseExporter
 from .theme import (
     CLAY, CHALK, CHALK_DIM, GREY, HAIR, LIGHTS, NIGHT, PALE, STRIPE, TURF, WHITE,
-    FOOTER_H, HEADER_H, NumberedCanvas,
+    HEADER_H, NumberedCanvas,
 )
 from .theme import draw_lnb_brand
 
@@ -247,7 +247,7 @@ class PDFExporter(BaseExporter):
         total = sum(lengths) or 1
         floor = usable * 0.06
         cap = usable * 0.55
-        raw = [min(cap, max(floor, (l / total) * usable)) for l in lengths]
+        raw = [min(cap, max(floor, (length / total) * usable)) for length in lengths]
         scale = usable / sum(raw)
         widths = [w * scale for w in raw]
         # Guardia final: nunca superar el ancho útil
@@ -271,13 +271,6 @@ class PDFExporter(BaseExporter):
         return numeric
 
     def _build_styles(self):
-        base = {
-            'fontName': 'Helvetica',
-            'textColor': NIGHT,
-            'fontSize': 8,
-            'leading': 10,
-            'wordWrap': 'CJK',  # evita que celdas largas se salgan del borde
-        }
         styles = {
             'section': ParagraphStyle('section', fontName='Helvetica-Bold', fontSize=11,
                                       textColor=NIGHT, leading=14, spaceAfter=2),

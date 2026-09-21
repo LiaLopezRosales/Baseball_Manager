@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 from db_structure.views import (
     RolViewSet, PositionViewSet, SeasonViewSet, UserViewSet,
-    WorkerViewSet, DirectionTeamViewSet, TeamViewSet, LineUpViewSet,
+    WorkerViewSet, TeamViewSet, LineUpViewSet,
     PersonViewSet, BaseballPlayerViewSet, TechnicalDirectorViewSet, GameViewSet
 )
 

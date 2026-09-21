@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from .repositories import *
 from .serializers import *
 from db_structure.generic_classes.BaseViewSet import BaseViewSet

@@ -1,9 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 from db_structure.models import (
-    User, Rol, Worker, BaseballPlayer, Person, TechnicalDirector,
-    DirectionTeam, Team, Score, LineUp, Game, PlayerSwap, Position,
-    BPParticipation, Series, StarPlayer, PlayerInPosition, TeamOnTheField
+    User, Rol, Worker, BaseballPlayer, Person, DirectionTeam, Team, Score, LineUp, Game, PlayerSwap, Position,
+    Series, StarPlayer
 )
 from django.core.exceptions import ValidationError
 

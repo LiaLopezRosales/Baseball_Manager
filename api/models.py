@@ -3,7 +3,6 @@
 from django.db import models
 from db_structure.models import Rol, TechnicalDirector
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.contrib.auth.hashers import make_password, check_password
 from .roles import AdminRole, DirectorTecnicoRole, UsuarioGeneralRole
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):

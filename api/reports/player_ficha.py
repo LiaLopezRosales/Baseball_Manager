@@ -7,15 +7,15 @@ Diseño: paleta Diamond Plate LNB PRO (heredada de la UI).
 from io import BytesIO
 
 from django.db.models import Q
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from api.reports.exports.theme import (
-    CLAY, CHALK, CHALK_DIM, GREY, HAIR, LIGHTS, NIGHT, PALE, STRIPE, TURF, WHITE,
-    FOOTER_H, HEADER_H, NumberedCanvas,
+    CLAY, CHALK, CHALK_DIM, HAIR, LIGHTS, NIGHT, PALE, STRIPE, TURF, WHITE,
+    HEADER_H, NumberedCanvas,
 )
 from api.reports.exports.theme import draw_lnb_brand
 from db_structure.models import BaseballPlayer, Game, StarPlayer, TeamOnTheField
@@ -57,7 +57,7 @@ def _col_widths(headers, rows, usable):
     total = sum(lengths) or 1
     floor = usable * 0.06
     cap = usable * 0.50
-    raw = [min(cap, max(floor, (l / total) * usable)) for l in lengths]
+    raw = [min(cap, max(floor, (length / total) * usable)) for length in lengths]
     scale = usable / sum(raw)
     widths = [w * scale for w in raw]
     if sum(widths) > usable - 2:
@@ -178,9 +178,10 @@ def build_player_ficha(player_id):
     ).order_by('-series__init_date').first()
     equipo = part.team_id.name if part else 'Agente libre'
 
-    fmt = lambda v: '—' if v is None else (
-        f'{v:.3f}'.lstrip('0') if isinstance(v, float) else str(v)
-    )
+    def fmt(v):
+        if v is None:
+            return '—'
+        return f'{v:.3f}'.lstrip('0') if isinstance(v, float) else str(v)
 
     # ── DOCUMENT ────────────────────────────────────────────────
     buf = BytesIO()

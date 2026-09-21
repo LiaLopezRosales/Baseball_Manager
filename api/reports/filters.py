@@ -3,7 +3,6 @@
 from django.db.models import Q, ForeignKey, OneToOneField
 from rest_framework.response import Response
 from django.db.models import Model
-from rest_framework import status
 
 
 def get_related_fields(model: Model, external_fields=False, show_ids=False, visited=set(), path_prefix="", table_path=""):

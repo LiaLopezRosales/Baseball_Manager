@@ -45,12 +45,15 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Install dependencies
-        run: pip install .
+        run: pip install ".[dev]"
 
       - name: Chequeos del sistema (migraciones al día)
         run: |
           python manage.py makemigrations --check --dry-run
           python manage.py check
+
+      - name: Lint backend (ruff)
+        run: ruff check .
 
       - name: Migraciones desde cero
         run: python manage.py migrate --noinput

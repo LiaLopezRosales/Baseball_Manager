@@ -4,12 +4,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
-from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition, PlayerSwap, Person, Rol, BaseballPlayer, Pitcher, StarPlayer, Score, Position, Series, FavoriteTeam as FavoriteTeamModel, FavoritePlayer as FavoritePlayerModel, Notification as NotificationModel
+from db_structure.models import Team, LineUp, Game, PlayerInLineUp, BPParticipation, TeamOnTheField, PlayerInPosition, PlayerSwap, Person, Rol, BaseballPlayer, Pitcher, StarPlayer, Score, Series, FavoriteTeam as FavoriteTeamModel, FavoritePlayer as FavoritePlayerModel, Notification as NotificationModel
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 # from datetime import datetime
 from db_structure.serializers import PlayerSwapSerializer, BaseballPlayerSerializer
-from db_structure.views import FavoriteTeamViewSet, FavoritePlayerViewSet, NotificationViewSet
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Q, Sum, Case, When, F
