@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend (Django + Postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github_actions
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PYTHON_VERSION: "3.12"
+      SECRET_KEY: ci-insecure-key-only-for-github-actions
+      DEBUG: "False"
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      DB_NAME: github_actions
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: "5432"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install dependencies
+        run: pip install .
+
+      - name: Chequeos del sistema (migraciones al día)
+        run: |
+          python manage.py makemigrations --check --dry-run
+          python manage.py check
+
+      - name: Migraciones desde cero
+        run: python manage.py migrate --noinput
+
+      - name: Tests backend
+        run: python manage.py test db_structure --verbosity 2
+
+      - name: Chequeo de despliegue (informativo)
+        run: python manage.py check --deploy
+
+  frontend:
+    name: Frontend (React build + tests)
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: "22"
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: Baseball_Management/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Baseball_Management
+        run: npm ci
+
+      - name: Lint
+        working-directory: Baseball_Management
+        run: npm run lint
+
+      - name: Tests frontend
+        working-directory: Baseball_Management
+        run: CI=true npm test --watchAll=false
+
+      - name: Build
+        working-directory: Baseball_Management
+        run: CI=false npm run build
+
+      - name: Subir build como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseball-manager-frontend
+          path: Baseball_Management/build
+          if-no-files-found: error

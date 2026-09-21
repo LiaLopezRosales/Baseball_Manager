@@ -1,6 +1,12 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "Baseball_Manager"  
-version = "0.1.0"           # Versión inicial del proyecto
+name = "Baseball_Manager"
+version = "0.1.0"
+description = "Sistema de gestión de campeonatos de béisbol: Django REST + React"
+requires-python = ">=3.10"
 dependencies = [
     "asgiref", #para poder instalar manualmente la ultima versión de django
     "chardet",
@@ -11,12 +17,22 @@ dependencies = [
     "factory-boy",
     "faker",
     "psycopg2-binary",
-    "Pillow",                
-    "django-extensions",     
+    "Pillow",
+    "django-extensions",
     "python-decouple",
     "python-dateutil",
     "pytz",
-    "reportlab", 
+    "reportlab",
     "six",
     "typing-extensions",
 ]
+
+[tool.setuptools.packages.find]
+# Restringe a los paquetes de la app Django (evita que la auto-discovery
+# falle por el flat-layout con python_enviroment/, media/, Baseball_Management/).
+include = ["api*", "db_structure*", "Baseball_Manager*"]
+exclude = ["docs*", "Documentacion*", "media*", "python_enviroment*", "Baseball_Management*"]
+
+[tool.setuptools.package-data]
+api = ["reports/exports/*.jpg", "migrations/*.py"]
+db_structure = ["migrations/*.py"]

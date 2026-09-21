@@ -23,6 +23,7 @@
     "start:django": "python ../manage.py runserver 127.0.0.1:8000",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "lint": "eslint src --ext .js,.jsx",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

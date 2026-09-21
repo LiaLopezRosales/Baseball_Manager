@@ -7,7 +7,6 @@ import '@testing-library/jest-dom';
 // Polyfills necesarios para framer-motion (useInView) y observadores en jsdom
 if (typeof global.IntersectionObserver === 'undefined') {
   global.IntersectionObserver = class {
-    constructor(callback, options) {}
     observe() {}
     unobserve() {}
     disconnect() {}
