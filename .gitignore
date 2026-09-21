@@ -496,9 +496,10 @@ uv-installer.sh
 # artefactos de build de React (CRA)
 Baseball_Management/build/
 
-# eliminar que se suban las migraciones para que cada uno las haga en su propia computadora
-migrations/
-/migrations
+# Las migraciones SÍ se versionan (clave para un clon reproducible con `migrate`).
+# Solo se ignoran los artefactos generados dentro de esos directorios.
+**/migrations/*.pyc
+**/migrations/__pycache__/
 
 # artefactos de autoevaluación de UI (Playwright MCP)
 .playwright-mcp/
