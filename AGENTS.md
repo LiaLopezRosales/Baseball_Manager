@@ -109,8 +109,11 @@ Detalles de alineación con la implementación real:
   `unread_notifications`; en dashboard/notis los tests usan claves reales.
 - `ReportSerializer` valida `report_id` ∈ 0–8; un id inválido → 400 con
   `{'report_id': [...]}` (field errors), no `{'error': ...}`.
-- Los 3 casos de `test_serializers.py` que validan PKs (Rol/Team/Player) requieren
-  una BD sembrada: contra una test DB vacía fallan (esperado; se validan en CI con seed).
+- Los 3 casos de `test_serializers.py` que validan PKs (Rol/Team/Player) se
+  auto-siembran con las factories (`RolFactory`/`TeamFactory`/`PersonFactory`)
+  y NO requieren BD sembrada previa. `test_models.py` restaura los managers
+  que parchea en `tearDown` (`objects.__dict__.pop("create")`) — sin eso, los
+  mocks quedan vivos y rompen cualquier test posterior que cree filas reales.
 
 Frontend: 14 tests (`.test.jsx` junto a cada componente). Prefijo de grupo `(WP5)`.
 RadarChart mockea `echarts-for-react` (jsdom sin canvas); FavoriteButton/NotificationBell/

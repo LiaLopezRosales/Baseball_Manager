@@ -1,0 +1,64 @@
+# docker-compose.yml — Baseball Manager (desarrollo local, un comando)
+#
+#   docker compose up --build
+#
+# Servicios:
+#   db       → PostgreSQL 16
+#   backend  → Django REST (migra + seed + runserver :8000)
+#   frontend → React 18 CRA (:3000)
+#
+# El navegador del HOST alcanza backend vía http://localhost:8000 (publicado) y
+# frontend vía http://localhost:3000. CORS de Django ya permite localhost:3000.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: campeonatos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d campeonatos"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    # Sin exposicion de puerto: solo lo usa el backend en la red interna.
+    # Descomenta si quieres conectarte desde el host (p.ej. '127.0.0.1:5432:5432')
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      SECRET_KEY: docker-local-secret-key
+      DEBUG: "True"
+      DB_NAME: campeonatos
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: db
+      DB_PORT: "5432"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./Baseball_Management
+      dockerfile: Dockerfile.frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./Baseball_Management:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

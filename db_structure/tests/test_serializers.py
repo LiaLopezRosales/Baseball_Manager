@@ -6,6 +6,7 @@ from db_structure.serializers import (
     BaseballPlayerSerializer, BPParticipationSerializer, PlayerInLineUpSerializer, PlayerInPositionSerializer
 )
 from db_structure.models import BaseballPlayer, BPParticipation, PlayerInLineUp
+from populate_db import PersonFactory, RolFactory, TeamFactory
 
 
 class TestSerializersWithMock(unittest.TestCase):
@@ -31,7 +32,8 @@ class TestSerializersWithMock(unittest.TestCase):
 
     def test_user_serializer_valid_data(self):
         """✅ Validar datos correctos en UserSerializer"""
-        data = {"id": 1, "email": "user@example.com", "password": "securePass123", "rol_id": 2}
+        rol = RolFactory()  # Auto-seed: el PK de rol debe existir en BD para validarse
+        data = {"id": 1, "email": "user@example.com", "password": "securePass123", "rol_id": rol.id}
         serializer = UserSerializer(data=data)
         self.assertTrue(serializer.is_valid())
         self.assertEqual(serializer.validated_data["email"], "user@example.com")
@@ -59,7 +61,9 @@ class TestSerializersWithMock(unittest.TestCase):
 
     def test_score_serializer_valid_data(self):
         """✅ Validar datos correctos en ScoreSerializer"""
-        data = {"id": 1, "winner": 2, "loser": 3, "w_points": 10, "l_points": 5}
+        winner = TeamFactory()
+        loser = TeamFactory()
+        data = {"id": 1, "winner": winner.id, "loser": loser.id, "w_points": 10, "l_points": 5}
         serializer = ScoreSerializer(data=data)
         self.assertTrue(serializer.is_valid())
         self.assertEqual(serializer.validated_data["w_points"], 10)
@@ -119,7 +123,8 @@ class TestSerializersWithMock(unittest.TestCase):
 
     def test_baseball_player_serializer_valid(self):
         """✅ Serializar jugador de béisbol correctamente"""
-        data = {"id": 1, "batting_average": 0.345, "years_of_experience": 5, "P_id": 1}
+        person = PersonFactory()  # Auto-seed: el PK de persona debe existir en BD
+        data = {"batting_average": 0.345, "years_of_experience": 5, "P_id": person.id}
         serializer = BaseballPlayerSerializer(data=data)
         self.assertTrue(serializer.is_valid())
         self.assertEqual(serializer.validated_data["batting_average"], 0.345)

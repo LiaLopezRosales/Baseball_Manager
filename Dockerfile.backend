@@ -1,0 +1,39 @@
+# Dockerfile — Backend Django REST (Baseball Manager)
+# Uso con docker-compose (ver docker-compose.yml). También sirve standalone:
+#   docker build -f Dockerfile.backend -t baseball-manager-backend .
+#   docker run -p 8000:8000 baseball-manager-backend
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+# libpq para psycopg2-binary en runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Dependencias primero (mejor caché de capas). `pip install -e .` exige el
+# fuente de los paquetes, así que copiamos pyproject + los 3 paquetes Django
+# (api, db_structure, Baseball_Manager=SÍ, no confundir con Baseball_Management=fron)
+COPY pyproject.toml ./
+COPY api ./api
+COPY db_structure ./db_structure
+COPY Baseball_Manager ./Baseball_Manager
+RUN pip install -e .
+
+# Resto del código (manage.py, populate_db.py, .env* si existiera, etc.)
+COPY . .
+
+EXPOSE 8000
+
+# Espera a que Postgres responda, migra, siembra demo (idempotente) y corre.
+# `|| true` en populate_db: las factories son get_or_create (idempotentes), pero
+# un error puntual no debe tumbar el container en el arranque.
+CMD ["sh", "-c", \
+     "until python manage.py check --database default >/dev/null 2>&1; do echo 'Esperando Postgres...'; sleep 2; done; \
+      python manage.py migrate --noinput; \
+      python populate_db.py || echo '(seed ya aplicado o skip)'; \
+      python manage.py runserver 0.0.0.0:8000"]

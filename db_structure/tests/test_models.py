@@ -62,6 +62,18 @@ class TestModelsWithMock(unittest.TestCase):
         self.mock_lineup = MagicMock(spec=LineUp)
         self.mock_lineup.id = 1
 
+    def tearDown(self):
+        """Restaurar los managers parcheados (sombras en `objects.create`).
+
+        Estos tests asignan `Model.objects.create = MagicMock(...)` sobre el
+        manager compartido del modelo; sin restaurarlo, los mocks quedan vivos
+        para el resto del proceso y rompen cualquier test posterior que cree
+        filas reales (p. ej. factories en test_serializers).
+        """
+        for model in (Worker, BaseballPlayer, Team, Series, PlayerSwap,
+                      StarPlayer, DirectionTeam, User, Rol, Game, Score, LineUp):
+            model.objects.__dict__.pop("create", None)
+
     def test_create_worker(self):
         """✅ Crear trabajador correctamente"""
         Worker.objects.create = MagicMock(return_value=self.mock_worker)

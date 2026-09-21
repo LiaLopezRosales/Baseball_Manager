@@ -55,6 +55,17 @@ npm install
 npm start   # servidor en http://localhost:3000 (API proxied a :8000)
 ```
 
+### Alternativa: todo en Docker (recomendada)
+
+Levanta Postgres + Django + React en un comando (migraciones y seed automáticos):
+
+```bash
+docker compose up --build
+# backend  → http://localhost:8000
+# frontend -> http://localhost:3000
+# reset:   docker compose down -v && docker compose up --build
+```
+
 ### Usuarios demo (seed)
 
 | Rol | Email | Password |
@@ -84,15 +95,16 @@ por lo que no depende del `populate_db.py` de mano. Endpoints validados: auth (3
 reportes 0/5/6/8 + dinamic-filter (Postgres real), favoritos toggle team/player (add=201/remove=200),
 notificaciones (badge, marcar 1, marcar todas).
 
-> ℹ️ `test_serializers.py` (db_structure) usa `MagicMock` sin BD: los casos que validan PKs de
-> equipo/rol/jugador dependen de que exista seed. Contra una BD de test vacía, 3 de esos casos
-> fallan (documentado en el commit `69b3422`; se validan en CI con `populate_db.py`).
+> ℹ️ Los tests unitarios (`db_structure`) pasan **sin BD sembrada**: los casos de `test_serializers.py`
+> que validan PKs (rol/equipo/jugador) se auto-siembran con las factories, y `test_models.py` restaura
+> sus mocks de managers en `tearDown` — 96 tests, 0 dependencias de seed manual.
 
 ### Frontend
 
 ```bash
 cd Baseball_Management
-npm test -- --watchAll=false    # 12 tests (FavoriteButton, NotificationBell, UserDashboard, RadarChart)
+npm test -- --watchAll=false    # 14 tests (App, FavoriteButton, NotificationBell, UserDashboard, RadarChart)
+npm run lint                    # 0 errores / 0 warnings
 ```
 
 Los tests de `FavoriteButton`/`NotificationBell`/`UserDashboard` mockean `src/api` y usan
@@ -148,4 +160,4 @@ MIT — ver [LICENSE](LICENSE).
 
 - [AGENTS.md](AGENTS.md) — guía de desarrollo, gotchas y convenciones.
 - [docs/README_EN.md](docs/README_EN.md) — índice/overview en inglés.
-- [docs/design/ROADMAP_PROFESIONAL.md](docs/design/ROADMAP_PROFESIONAL.md) — roadmap.
+- [docs/planning/ROADMAP_PROFESIONAL.md](docs/planning/ROADMAP_PROFESIONAL.md) — roadmap.

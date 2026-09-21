@@ -1,0 +1,7 @@
+# Contexto de build del frontend
+node_modules/
+build/
+.env
+.env.*
+*.test.jsx
+coverage/

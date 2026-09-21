@@ -1,0 +1,19 @@
+# Contexto de build del backend: excluir todo lo que no sea código.
+.git
+.gitignore
+python_enviroment/
+__pycache__/
+*.pyc
+media/
+Documentacion/
+docs/
+Baseball_Management/
+node_modules/
+.env
+.env.*
+docker-compose.yml
+Dockerfile.backend
+README.md
+reset_demo.sh
+# Capturas raíz de QA (los README usan docs/screenshots/, no estas PNG).
+qa-*.png
