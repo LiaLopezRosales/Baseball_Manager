@@ -58,6 +58,11 @@ jobs:
       - name: Tests backend
         run: python manage.py test db_structure --verbosity 2
 
+      - name: Tests de integración (Postgres real en CI)
+        env:
+          INTEGRATION_TESTS: "1"
+        run: python manage.py test api.tests.integration --verbosity 1
+
       - name: Chequeo de despliegue (informativo)
         run: python manage.py check --deploy
 

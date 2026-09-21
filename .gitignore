@@ -517,3 +517,12 @@ landing-hero-*-new.png
 /admin-personas-*.png
 /admin-personas-*.yml
 /audit-*.png
+
+# Artefactos generados por instalación editable (setuptools/
+# pip install -e): metadatos del paquete en el repo raíz
+*.egg-info/
+*.egg-info
+*.dist-info/
+.django_
+.coverage
+htmlcov/
