@@ -12,8 +12,10 @@ import './userDashboard.css';
 function UserDashboard({ standings = [], stars = [] }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const isLogged = !!localStorage.getItem('token');
 
   useEffect(() => {
+    if (!isLogged) return undefined;
     let active = true;
     apiGet('/api/user/dashboard/')
       .then((d) => {
@@ -25,8 +27,9 @@ function UserDashboard({ standings = [], stars = [] }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isLogged]);
 
+  if (!isLogged) return null;
   if (error) return null;
   if (!data) {
     return (
