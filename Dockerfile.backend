@@ -35,12 +35,18 @@ EXPOSE 8000
 #   2) genera migraciones (están gitignoreadas; Render/Railway compilan desde
 #      git y no las incluyen) — idempotente: si no hay cambios, "No changes"
 #   3) migra
-#   4) siembra SOLO si la BD está vacía (guard con Team.objects.exists), para
-#      que el cold-start de los arranques siguientes sea rápido
-#   5) sirve con gunicorn (no runserver) en el puerto $PORT (Render lo inyecta)
+#   4) arranca gunicorn en background (el puerto se abre YA; sin esto, Render
+#      da "Timed Out" porque su scanner de puertos no ve nada durante el seed)
+#   5) siembra la demo en foreground con `seed_demo`: idempotente y
+#      auto-reparable (BD vacía -> siembra; equipos sin scores -> flush +
+#      reseed; completa -> skip). El seed puede tardar 2-3 min sin bloquear el
+#      arranque del servicio
+#   6) wait mantiene el contenedor vivo mientras gunicorn atiende
+# Se usa --workers 1: la instancia free de Render es de 0.1 CPU/512 MB.
 CMD ["sh", "-c", \
      "until python manage.py check --database default >/dev/null 2>&1; do echo 'Esperando Postgres...'; sleep 2; done; \
       python manage.py makemigrations --noinput; \
       python manage.py migrate --noinput; \
-      { python manage.py shell -c 'from db_structure.models import Team; import sys; sys.exit(1 if not Team.objects.exists() else 0)'; } || { echo '(BD vacia: sembrando demo...)'; python populate_db.py || true; }; \
-      python -m gunicorn Baseball_Manager.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120"]
+      python -m gunicorn Baseball_Manager.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 120 --access-logfile - & \
+      python manage.py seed_demo || { echo '(seed falló: revisar logs)'; true; }; \
+      wait"]

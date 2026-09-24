@@ -70,8 +70,12 @@ python populate_db.py
 - `settings.py` lee `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` y `DB_SSLMODE` desde env
   (comas separadas). `DEBUG=false` en producción.
 - `Dockerfile.backend` entrypoint de producción: espera BD → `makemigrations --noinput`
-  (las migrations están gitignoreadas y Render compila desde git) → `migrate` → seed SOLO si
-  `Team` está vacío (guard, para un cold-start rápido tras el primer deploy) → `gunicorn`.
+  (las migrations están gitignoreadas y Render compila desde git) → `migrate` →
+  **arranca gunicorn en background PRIMERO** (el scanner de puertos de Render da
+  "Timed Out" si el seed tarda sin puerto abierto) → `python manage.py seed_demo`
+  (comando idempotente y auto-reparable: BD vacía → seed completo; equipos SIN scores
+  → `flush` + reseed para recuperar un seed parcial; completa → skip) → `wait`.
+  `--workers 1` (instancia free 512 MB) + `--access-logfile -`.
 - El Web Service free de Render **se duerme a los 15 min**. La demo lo mantiene despierto con
   un monitor HTTP de **UptimeRobot** cada 5 min contra `/teams/` (endpoint raíz del router DRF;
   ver README § Despliegue).
