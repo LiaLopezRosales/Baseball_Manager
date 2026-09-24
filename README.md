@@ -6,6 +6,8 @@ Plataforma full-stack para administrar campeonatos de béisbol: **reportes estad
 - **Frontend**: React 18 (CRA) + ECharts (radar/bar charts) + React Router
 - **Arquitectura**: Repository + BaseViewSet + Factory Boy (seed) — ver [AGENTS.md](AGENTS.md)
 
+🔗 **Demo en vivo:** [https://baseball-manager-frontend.onrender.com/](https://baseball-manager-frontend.onrender.com/) — accede como invitado o entra con los [Usuarios demo](#usuarios-demo-seed).
+
 ---
 
 ## ✨ Funcionalidades
