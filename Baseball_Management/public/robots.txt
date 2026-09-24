@@ -1,3 +1,7 @@
 # https://www.robotstxt.org/robotstxt.html
+# La SPA no necesita bloqueos; todas las rutas públicas son rastreables.
+# ATENCIÓN: usar el dominio real de producción en la directiva Sitemap.
 User-agent: *
 Disallow:
+
+Sitemap: https://lnb.example.com/sitemap.xml

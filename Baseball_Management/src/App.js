@@ -18,6 +18,9 @@ import AltasBajasPage from './components/infoPages/AltasBajasPage';
 import { INFO_PAGES } from './components/infoPages/infoContent';
 import { AuthModalContext } from './authModal';
 import { clearSession } from './session';
+import { usePageMeta } from './pageMeta';
+import NotFoundPage from './components/NotFoundPage';
+import CookieBanner from './components/CookieBanner';
 
 // El registro ya no es una página: navegar a /registro abre el modal y vuelve al inicio.
 // Con sesión activa no tiene sentido abrir el registro: solo redirige al inicio.
@@ -35,6 +38,8 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
   const location = useLocation();
   const isStandalone = location.pathname === '/';
   const infoContent = INFO_PAGES[location.pathname];
+
+  usePageMeta(location.pathname);
 
   return isStandalone ? (
     <Landing
@@ -181,7 +186,19 @@ function AppRoutes({ role, team, isLogged, userName, onModalOpen, onRegisterOpen
   ) : (
     <Routes>
       <Route path="/registro" element={<RegisterRedirect onOpen={onRegisterOpen} isLogged={isLogged} />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="*"
+        element={
+          <NotFoundPage
+            isLogged={isLogged}
+            userName={userName}
+            role={role}
+            onModalOpen={onModalOpen}
+            onRegisterOpen={onRegisterOpen}
+            onLogout={onLogout}
+          />
+        }
+      />
     </Routes>
   );
 }
@@ -246,6 +263,8 @@ function App() {
             onRegisterOpen={handleRegisterOpen}
             onLogout={handleLogout}
           />
+
+          <CookieBanner />
 
           <Modal isOpen={modalMode !== null} onClose={handleModalClose}>
             {modalMode === 'register' ? (

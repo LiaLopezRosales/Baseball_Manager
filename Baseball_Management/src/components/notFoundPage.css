@@ -1,0 +1,59 @@
+.nf {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.nf__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 3rem var(--lnd-gutter, 2rem);
+  background: var(--lnd-bg, #071322);
+  color: var(--lnd-text, #f3efe3);
+}
+
+[data-theme='light'] .nf__main {
+  background: var(--lnd-bg, #ffffff);
+  color: var(--lnd-text, #16211c);
+}
+
+.nf__code {
+  margin: 0;
+  font-family: var(--lnd-font-num, 'JetBrains Mono', monospace);
+  font-size: clamp(4rem, 12vw, 8rem);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--lnd-lights, #f8af3c);
+  opacity: 0.9;
+}
+
+.nf__title {
+  margin: 0;
+  font-family: var(--lnd-font-display, 'Oswald', 'Inter', sans-serif);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.nf__lead {
+  max-width: 30rem;
+  margin: 0;
+  color: var(--lnd-dim, #94a3b8);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.nf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1rem;
+}

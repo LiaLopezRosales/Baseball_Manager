@@ -1059,3 +1059,12 @@ def mark_all_notifications_read(request):
         return Response({'ok': True}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def api_404(request, exception=None):
+    """Respuesta JSON consistente para rutas API no existentes (handler404)."""
+    from django.http import JsonResponse
+    return JsonResponse(
+        {'error': 'Recurso no encontrado.', 'detail': str(exception) or 'La ruta solicitada no existe.'},
+        status=404,
+    )

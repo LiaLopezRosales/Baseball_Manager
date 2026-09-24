@@ -21,6 +21,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from db_structure.views import *
 
+# Respuesta JSON para rutas API inexistentes (ver api.views.api_404).
+handler404 = 'api.views.api_404'
+
 
 router = DefaultRouter()
 # router.register(r'users', UserViewSet, basename='user')
