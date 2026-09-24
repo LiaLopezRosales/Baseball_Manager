@@ -25,6 +25,7 @@ dependencies = [
     "reportlab",
     "six",
     "typing-extensions",
+    "gunicorn",
 ]
 
 [project.optional-dependencies]

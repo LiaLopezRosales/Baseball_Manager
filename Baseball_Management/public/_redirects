@@ -1,0 +1,4 @@
+# Fallback SPA para Static Sites (Render/Netlify): cualquier ruta sin archivo
+# físico se sirve con index.html para que las rutas de React Router funcionen
+# al recargar (p. ej. /reporte/average, /equipo/1, /consultas/Series).
+/* /index.html 200

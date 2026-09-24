@@ -112,6 +112,48 @@ Los tests de `FavoriteButton`/`NotificationBell`/`UserDashboard` mockean `src/ap
 
 ---
 
+## ☁️ Despliegue en Render (demo pública, gratis, sin tarjeta)
+
+Arquitectura 100 % free: **Static Site** (nunca duerme) + **Web Service API** + **BD Neon
+serverless** (gratis, **sin caducidad**). El blueprint `render.yaml` provisiona todo.
+
+### 1. Crear una BD gratis en Neon (no caduca, a diferencia del Postgres de Render)
+1. Crea cuenta en https://neon.tech (login GitHub) → proyecto nuevo con la rama `main`.
+2. Copia de las credenciales: `host` (p. ej. `ep-xxxx.eu-central-1.aws.neon.tech`), `database`, `user` y `password`.
+3. Guarda el password (solo se muestra una vez).
+
+### 2. Desplegar en Render
+1. Cuenta en https://render.com (login GitHub, sin tarjeta).
+2. **New + → Blueprint** → conecta/elige este repo → Render lee `render.yaml` y crea
+   `baseball-manager-frontend` (static), `baseball-manager-api` (docker) y sus env vars.
+3. En el servicio API, rellena los valores que faltan (los que el blueprint deja marcados):
+   `SECRET_KEY` (cualquiera larga), `DB_PASSWORD` de Neon y `DB_NAME`/`DB_USER`/`DB_HOST`.
+4. Aplica el deploy. El backend espera a la BD, migra y **siembra la demo automáticamente**
+   solo la primera vez (guard: si `Team` está vacío).
+
+### 3. Verificar dominios (Render puede añadir sufijos si el nombre está ocupado)
+- Frontend: `https://baseball-manager-frontend.onrender.com` → abre la landing y `/reporte/average`.
+- API: `https://baseball-manager-api.onrender.com/teams/` → devuelve JSON.
+- Si Render asignó otra URL, actualiza: `REACT_APP_API_URL` y `CORS_ALLOWED_ORIGINS` en el
+  frontend (redeploy estático) y `ALLOWED_HOSTS`/`CORS_ALLOWED_ORIGINS` en la API.
+
+### 4. Keep-alive (evitar el cold start del plan free) — OBLIGATORIO para la demo
+El Web Service free de Render **se duerme tras 15 min de inactividad** y tarda ~10-20 s en
+despertar (mala primera impresión). Lo mantenemos despierto gratis con **UptimeRobot**:
+1. https://uptimerobot.com → cuenta free (sin tarjeta).
+2. **Add New Monitor** → tipo **HTTP(S)**.
+3. URL: `https://baseball-manager-api.onrender.com/teams/` (endpoint raíz que responde rápido).
+4. Interval: **Every 5 minutes** → guardar.
+Con un ping cada 5 min el backend nunca llega a dormirse (threshold 15 min). El Static Site y
+Neon no requieren keep-alive.
+
+Los usuarios demo del seed son los de la sección [Usuarios demo](#usuarios-demo-seed).
+
+> Notas: las migrations están gitignoreadas → el entrypoint hace `makemigrations` en cada
+> arranque (idempotente). El seed solo corre si la BD está vacía, así los redeploys son rápidos.
+
+---
+
 ## 🗂️ Estructura del repo
 
 ```

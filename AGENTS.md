@@ -61,6 +61,24 @@ python manage.py migrate
 python populate_db.py
 ```
 
+## Despliegue en producción (Render free + Neon)
+
+- Blueprint `render.yaml`: `baseball-manager-frontend` (Static Site, SPA fallback vía
+  `Baseball_Management/public/_redirects`) + `baseball-manager-api` (Web Service con
+  `Dockerfile.backend`). `render.yaml` NO provisiona Postgres interno (expira a los 90 días):
+  la BD es **Neon serverless free** (sin caducidad), conectada por las variables `DB_*`.
+- `settings.py` lee `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` y `DB_SSLMODE` desde env
+  (comas separadas). `DEBUG=false` en producción.
+- `Dockerfile.backend` entrypoint de producción: espera BD → `makemigrations --noinput`
+  (las migrations están gitignoreadas y Render compila desde git) → `migrate` → seed SOLO si
+  `Team` está vacío (guard, para un cold-start rápido tras el primer deploy) → `gunicorn`.
+- El Web Service free de Render **se duerme a los 15 min**. La demo lo mantiene despierto con
+  un monitor HTTP de **UptimeRobot** cada 5 min contra `/teams/` (endpoint raíz del router DRF;
+  ver README § Despliegue).
+- `REACT_APP_API_URL` se inyecta a build-time en el Static Site; CORS debe incluir el origen
+  real del frontend. Tras el primer deploy hay que confirmar las URLs `*.onrender.com` (Render
+  añade sufijo si el nombre está tomado) y ajustar la API si cambian.
+
 ## Key Architectural Patterns
 
 ### Repository + BaseViewSet (CRUD)

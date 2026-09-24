@@ -1,0 +1,63 @@
+# Blueprint de despliegue en Render (plan free, sin tarjeta).
+#
+#   - frontend:  Static Site (gratis, NUNCA se duerme, sin caducidad) con
+#                fallback SPA via public/_redirects.
+#   - backend:   Web Service con Dockerfile.backend (free; se duerme a los
+#                15 min de inactividad → mantenlo despierto con el keep-alive
+#                de UptimeRobot, ver README sección "Despliegue en Render").
+#   - BD:        NO usa Postgres de Render (caduca a los 90 días). Usa una
+#                BD externa serverless de Neon (free, sin caducidad) rellenando
+#                las variables DB_* abajo con los datos de tu proyecto Neon.
+#
+# Variables TIPO de una Neon free:
+#   DB_HOST      → ep-xxxx.region.aws.neon.tech
+#   DB_USER      → <usuario>
+#   DB_PASSWORD  → <password>  (pedida al desplegar, no va en el repo)
+#   DB_NAME      → <nombre de la base>
+#   DB_PORT      → 5432
+#   DB_SSLMODE   → require
+#
+# ATENCIÓN: Render asigna el dominio <nombre>.onrender.com SI el nombre está
+# libre (si no, añade un sufijo). Tras el primer deploy, verifica las tres URLs
+# reales y ajusta REACT_APP_API_URL, ALLOWED_HOSTS y CORS_ALLOWED_ORIGINS si
+# difieren de estas.
+
+services:
+  # ── Frontend: React estático ────────────────────────────────────────────────
+  - type: web
+    name: baseball-manager-frontend
+    runtime: static
+    buildCommand: cd Baseball_Management && npm ci --no-audit --no-fund && CI=false npm run build
+    staticPublishPath: Baseball_Management/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://baseball-manager-api.onrender.com
+
+  # ── Backend: API Django (Dockerfile) ────────────────────────────────────────
+  - type: web
+    name: baseball-manager-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.backend
+    healthCheckPath: /teams/
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: "false"
+      - key: ALLOWED_HOSTS
+        value: baseball-manager-api.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://baseball-manager-frontend.onrender.com
+      - key: DB_SSLMODE
+        value: require
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_NAME
+        value: cambiar-por-tu-neon-db
+      - key: DB_USER
+        value: cambiar-por-tu-neon-user
+      - key: DB_HOST
+        value: cambiar-por-tu-neon-host
+      - key: DB_PASSWORD
+        sync: false

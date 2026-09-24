@@ -1,5 +1,6 @@
 # Dockerfile — Backend Django REST (Baseball Manager)
-# Uso con docker-compose (ver docker-compose.yml). También sirve standalone:
+# Uso con docker-compose (ver docker-compose.yml). También sirve standalone y
+# como imagen de producción en Render/Railway:
 #   docker build -f Dockerfile.backend -t baseball-manager-backend .
 #   docker run -p 8000:8000 baseball-manager-backend
 FROM python:3.12-slim
@@ -8,9 +9,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
-# libpq para psycopg2-binary en runtime
+# libpq para psycopg2-binary en runtime + fuente para los retratos del seed (Pillow)
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libpq5 \
+    && apt-get install -y --no-install-recommends libpq5 fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -29,11 +30,17 @@ COPY . .
 
 EXPOSE 8000
 
-# Espera a que Postgres responda, migra, siembra demo (idempotente) y corre.
-# `|| true` en populate_db: las factories son get_or_create (idempotentes), pero
-# un error puntual no debe tumbar el container en el arranque.
+# Entrypoint de producción (también funciona en local/docker-compose):
+#   1) espera a que Postgres responda
+#   2) genera migraciones (están gitignoreadas; Render/Railway compilan desde
+#      git y no las incluyen) — idempotente: si no hay cambios, "No changes"
+#   3) migra
+#   4) siembra SOLO si la BD está vacía (guard con Team.objects.exists), para
+#      que el cold-start de los arranques siguientes sea rápido
+#   5) sirve con gunicorn (no runserver) en el puerto $PORT (Render lo inyecta)
 CMD ["sh", "-c", \
      "until python manage.py check --database default >/dev/null 2>&1; do echo 'Esperando Postgres...'; sleep 2; done; \
+      python manage.py makemigrations --noinput; \
       python manage.py migrate --noinput; \
-      python populate_db.py || echo '(seed ya aplicado o skip)'; \
-      python manage.py runserver 0.0.0.0:8000"]
+      { python manage.py shell -c 'from db_structure.models import Team; import sys; sys.exit(1 if not Team.objects.exists() else 0)'; } || { echo '(BD vacia: sembrando demo...)'; python populate_db.py || true; }; \
+      python -m gunicorn Baseball_Manager.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120"]

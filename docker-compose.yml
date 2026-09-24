@@ -4,7 +4,7 @@
 #
 # Servicios:
 #   db       → PostgreSQL 16
-#   backend  → Django REST (migra + seed + runserver :8000)
+#   backend  → Django REST (espera BD + makemigrations/migrate + seed-si-vacío + gunicorn :8000)
 #   frontend → React 18 CRA (:3000)
 #
 # El navegador del HOST alcanza backend vía http://localhost:8000 (publicado) y

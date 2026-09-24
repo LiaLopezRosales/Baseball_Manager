@@ -32,7 +32,12 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-placeholder')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 # ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# En producción (Render/Railway/*.onrender.com) se pasan por env separados por comas.
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+    if h.strip()
+]
 
 # Application definition
 
@@ -94,6 +99,8 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
+        # Neon (serverless free) exige sslmode=require en producción.
+        'OPTIONS': {'sslmode': config('DB_SSLMODE', default='prefer')},
     }
     
 }
@@ -174,9 +181,14 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Orígenes CORS permitidos: locales + los de producción (env, separados por comas).
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',  # React frontend
     'http://127.0.0.1:3000',
+] + [
+    o.strip()
+    for o in config('CORS_ALLOWED_ORIGINS', default='').split(',')
+    if o.strip()
 ]
 
 
