@@ -53,11 +53,14 @@ services:
         value: require
       - key: DB_PORT
         value: "5432"
+      # Conexión a Neon: estos 4 se rellenan A MANO en el dashboard de Render
+      # (sync:false → no van en un repo público). Solo te pide SECRET_KEY,
+      # DB_PASSWORD, DB_HOST, DB_USER y DB_NAME.
       - key: DB_NAME
-        value: cambiar-por-tu-neon-db
+        sync: false
       - key: DB_USER
-        value: cambiar-por-tu-neon-user
+        sync: false
       - key: DB_HOST
-        value: cambiar-por-tu-neon-host
+        sync: false
       - key: DB_PASSWORD
         sync: false
