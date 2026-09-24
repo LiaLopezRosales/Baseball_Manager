@@ -80,10 +80,13 @@
         La aplicación web será una solución integral para la gestión y consulta de estadísticas en campeonatos de 
         béisbol. Estará diseñada para ofrecer:
         \begin{itemize}
+            \item Una landing pública de acceso libre, sin necesidad de autenticación.
             \item Acceso a estadísticas detalladas de series, equipos y jugadores.
-            \item Generación de reportes personalizados.
+            \item Generación de reportes personalizados con exportación a PDF/CSV.
             \item Funcionalidades diferenciadas según el rol del usuario (administrador, director técnico, 
-            periodista/usuarios generales, etc.).
+            periodista/usuarios generales, invitados, etc.).
+            \item Servicios personalizados para usuarios con cuenta: favoritos, notificaciones y panel personal.
+            \item Perfiles detallados de equipos y jugadores, y comparador de peloteros.
         \end{itemize}
 
         \subsection*{Funciones del Producto}
@@ -98,6 +101,8 @@
                 estadísticas específicas.
                 \item \textbf{Periodista/Usuario General:} Consulta las estadísticas y genera reportes basados en 
                 los datos almacenados en el sistema.
+                \item \textbf{Invitado:} Visitante sin sesión. Consulta la información pública (landing, consultas,
+                reportes y perfiles) pero no puede exportar ni usar los servicios personalizados.
             \end{itemize}
 
         \item \textbf{Casos de Uso del Sistema} (que se muestran ilustrados en la Figura 1)
@@ -164,6 +169,8 @@
         \subsection*{Características de los usuarios}
         El sistema contará con diferentes perfiles de usuarios:
         \begin{itemize}
+            \item \textbf{Invitados}: Visualizan toda la información pública del sitio (estadísticas,
+            consultas, reportes y perfiles) sin necesidad de registrarse.
             \item \textbf{Administradores}: Control total del sistema, incluyendo la estructura de las series.
             \item \textbf{Directores Técnicos}: Gestión de alineaciones y rendimiento de los equipos.
             \item \textbf{Periodistas/Usuarios Generales}: Consulta de información general sobre los campeonatos. 
@@ -199,28 +206,55 @@
 
         \subsection*{Requerimientos Funcionales}
             \begin{enumerate}
-                \item Registrar, editar, eliminar y listar datos por el administrador mediante formularios.
-                \item Generar modelos tabulares y gráficos.
-                \item Gestionar los roles de la base de datos que son los usuarios especiales (administrador), los 
-                directores técnicos y los usuarios normales (periodista).
-                \item Listar y filtrar según sus categorías definidas, nombres de equipos ganadores y directores 
-                técnicos en series nacionales por temporada.
-                \item Listar y filtrar según sus categorías definidas, nombres y posiciones de jugadores del equipo 
-                "Todos Estrellas" y su efectividad por serie.
-                \item Listar y filtrar según sus categorías definidas, series con mayor y menor cantidad de juegos 
-                celebrados.
-                \item Listar equipos en primer y último lugar por serie, clasificados por tipo y orden cronológico.
-                \item Listar y filtrar según sus categorías definidas, total de juegos ganados por un lanzador y su 
-                promedio de carreras limpias permitidas.
-                \item Modificar posición de un jugador en la alineación inicial de un juego específico.
+                \item Mostrar una \textbf{landing pública} con el estado del campeonato: resumen ejecutivo,
+                tabla de posiciones, líderes de bateo, jugadores estrella, campeones por temporada y líder
+                de la temporada.
+                \item Ofrecer \textbf{dos temas visuales} (oscuro y claro) persistidos en el navegador y
+                accesibles desde toda la aplicación.
+                \item Permitir el \textbf{registro público}: un visitante crea su cuenta (nombre, apellido,
+                correo y contraseña) obteniendo automáticamente el rol de Usuario General.
+                \item Permitir \textbf{iniciar y cerrar sesión} (token de autenticación) con vistas
+                diferenciadas según el rol.
+                \item Registrar, editar, eliminar y listar datos por el administrador mediante formularios
+                dinámicos (\textbf{Panel Administrativo CRUD} de las entidades del sistema).
+                \item Listar y filtrar según sus categorías definidas, nombres de equipos ganadores y
+                directores técnicos en series nacionales por temporada.
+                \item Listar y filtrar según sus categorías definidas, nombres y posiciones de jugadores del
+                equipo "Todos Estrellas" y su rendimiento por serie.
+                \item Listar y filtrar según sus categorías definidas, series con mayor y menor cantidad de
+                juegos celebrados.
+                \item Listar equipos en primer y último lugar por serie, clasificados por tipo y orden
+                cronológico.
+                \item Listar y filtrar según sus categorías definidas, total de juegos ganados por un
+                lanzador y su promedio de carreras limpias permitidas.
                 \item Listar y filtrar según sus categorías definidas, estadísticas de un jugador.
-                \item Exportar reportes a formato PDF con soporte para la agregación de otros formatos.
-                \item Presentar diferentes vistas para los distintos tipos de roles.
-                \item Generar formularios para ingresar los datos a la base de datos por parte del administrador 
-                (distintos formularios para las distintas tablas de la base de datos).
-                \item Tener un formulario para el director técnico que le permita crear, eliminar y listar los 
-                cambios en  la alineación.
-                \item Mostrar un formulario con opciones de filtrado y solicitudes para la generación de los reportes.
+                \item Ofrecer \textbf{consultas dinámicas} sobre las entidades del sistema con listado y
+                filtros por texto, número o fecha.
+                \item Mostrar \textbf{reportes oficiales} preseccionando el primer parámetro disponible
+                (temporada, serie o equipo) para que ningún reporte quede vacío.
+                \item Exportar reportes a formato \textbf{PDF} y \textbf{CSV} con la identidad visual de la
+                LNB, restringido a usuarios autenticados.
+                \item Permitir \textbf{imprimir la boleta técnica} con el corte completo de registros y
+                descargar el boletín técnico en PDF con la marca del reporte actual.
+                \item Mostrar el \textbf{perfil de equipo}: ficha de franquicia, récord con split
+                local/visitante, KPIs colectivos, rankings, campeonatos por serie, distribución del plantel,
+                próximos juegos y desglose de la temporada, con descarga del roster oficial en PDF.
+                \item Mostrar el \textbf{perfil de jugador}: datos personales, estadísticas de bateo y
+                pitcheo, radar de rendimiento de 6 ejes y trayectoria reciente en las últimas series.
+                \item Ofrecer un \textbf{comparador de peloteros} lado a lado (solo usuarios con cuenta).
+                \item Permitir \textbf{marcar favoritos} de equipos y jugadores y listarlos en la landing,
+                con un panel personal ("Tu panel") que muestra posición del equipo favorito, últimos juegos
+                y estrella del equipo (solo usuarios con cuenta).
+                \item Generar \textbf{notificaciones automáticas} al registrar un resultado para los
+                seguidores de ambos equipos, con contador de no leídas, marcado individual o global y
+                actualización periódica (solo usuarios con cuenta).
+                \item Proporcionar al \textbf{Director Técnico} un portal de cambios con lineup titular
+                WBSC, diamante defensivo, bullpen filtrable por posición, métricas del equipo y validación
+                de juegos futuros en backend.
+                \item Mostrar el \textbf{historial de cambios} del Director Técnico con ordenamiento,
+                paginación, alta y baja de cambios.
+                \item Presentar diferentes vistas para los distintos tipos de roles, bloqueando los accesos
+                insuficientes con una pantalla de acceso denegado.
             \end{enumerate}
 
         \vspace{1cm}
@@ -231,8 +265,9 @@
 
             \subsubsection*{Usabilidad}
             \begin{itemize}
-                \item Se espera que la interfaz sea capaz de mostrar gráficas.
+                \item Se espera que la interfaz sea capaz de mostrar gráficas y diagramas (barras y radar).
                 \item Se espera un sistema visual de filtrado para seleccionar qué datos mostrar en los reportes.
+                \item La interfaz debe cumplir los criterios de contraste de accesibilidad WCAG AA en ambos temas.
             \end{itemize}
         
             \subsubsection*{Seguridad}
@@ -290,6 +325,8 @@
             \subsubsection{Hardware}
             \begin{itemize}
                 \item Dispositivos capaces de ejecutar navegadores modernos y conexiones a internet estables.
+                \item En producción, un plan gratuito de Render (backend 512~MB) + una base de datos
+                serverless de Neon.
             \end{itemize}
             
             \subsubsection{Software}
@@ -298,6 +335,7 @@
                 \item En cuanto al backend de la aplicación web, este de desarrollará en Python con DjangoRest como 
                 librería principal, omitiendo la función de admin que viene ya preparada.
                 \item El frontend se realizará en JavaScript con el framework de React.
+                \item Los reportes y las fichas PDF se generan con la librería reportlab.
             \end{itemize}
 
     \newpage
