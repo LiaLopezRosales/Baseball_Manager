@@ -83,27 +83,27 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: Baseball_Management/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: Baseball_Management
+        working-directory: frontend
         run: npm ci
 
       - name: Lint
-        working-directory: Baseball_Management
+        working-directory: frontend
         run: npm run lint
 
       - name: Tests frontend
-        working-directory: Baseball_Management
+        working-directory: frontend
         run: CI=true npm test --watchAll=false
 
       - name: Build
-        working-directory: Baseball_Management
+        working-directory: frontend
         run: CI=false npm run build
 
       - name: Subir build como artefacto
         uses: actions/upload-artifact@v4
         with:
           name: baseball-manager-frontend
-          path: Baseball_Management/build
+          path: frontend/build
           if-no-files-found: error

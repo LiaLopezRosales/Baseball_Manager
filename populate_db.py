@@ -2,7 +2,7 @@ import os
 import django
 
 # Configurar el entorno de Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Baseball_Manager.settings')  # Cambia por tu proyecto
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')  # Cambia por tu proyecto
 django.setup()
 
 import factory

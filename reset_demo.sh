@@ -47,7 +47,7 @@ python populate_db.py
 echo ""
 echo "✅ Demo lista."
 echo "   Backend:  python manage.py runserver   (http://localhost:8000)"
-echo "   Frontend: cd Baseball_Management && npm start   (http://localhost:3000)"
+echo "   Frontend: cd frontend && npm start   (http://localhost:3000)"
 echo ""
 echo "   Usuarios demo:"
 echo "   - Admin:            lialopez@gmail.com / lia"

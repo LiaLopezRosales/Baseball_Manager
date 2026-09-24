@@ -447,11 +447,8 @@ $RECYCLE.BIN/
 ##
 ## Visual Studio Code
 ##
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+.vscode/
+.ruff_cache/
 
 #Archivos LaTex
 *.aux
@@ -494,7 +491,7 @@ uv-installer.sh
 !*.env.example
 
 # artefactos de build de React (CRA)
-Baseball_Management/build/
+frontend/build/
 
 # Las migraciones SÍ se versionan (clave para un clon reproducible con `migrate`).
 # Solo se ignoran los artefactos generados dentro de esos directorios.

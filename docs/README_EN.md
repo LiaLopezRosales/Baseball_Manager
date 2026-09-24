@@ -33,7 +33,7 @@ python manage.py migrate
 python populate_db.py
 python manage.py runserver 127.0.0.1:8000
 
-# Frontend (separate terminal, from Baseball_Management/)
+# Frontend (separate terminal, from frontend/)
 npm install
 npm start   # React :3000 (proxies /api -> :8000)
 ```
@@ -52,7 +52,7 @@ npm start   # React :3000 (proxies /api -> :8000)
 ```bash
 python manage.py test db_structure                        # 96 unit tests (no DB)
 INTEGRATION_TESTS=1 python manage.py test api.tests.integration   # 27 real-Postgres tests
-cd Baseball_Management && npm test -- --watchAll=false    # 14 component tests
+cd frontend && npm test -- --watchAll=false    # 14 component tests
 ```
 
 Integration suite is self-contained (`api/tests/integration/seed.py` seeds its own

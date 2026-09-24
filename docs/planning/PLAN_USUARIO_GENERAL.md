@@ -83,7 +83,7 @@ Siguiendo el patrón existente (`Model` → `Repository` → `Serializer` → `V
 
 ### 1.6 Registro en URLs
 
-- `Baseball_Manager/urls.py` — agregar ViewSets al router
+- `backend/urls.py` — agregar ViewSets al router
 - `api/urls.py` — agregar rutas custom
 
 ---
@@ -286,7 +286,7 @@ Añadir botón de logout en el sidebar footer cuando el usuario está logueado:
 - `db_structure/repositories.py` — 3 repositorios
 - `api/views.py` — RegisterView, DashboardView, notificaciones, modificar ExportView
 - `api/urls.py` — rutas nuevas
-- `Baseball_Manager/urls.py` — registros en router
+- `backend/urls.py` — registros en router
 
 ### Frontend nuevos:
 - `src/components/Register.jsx` + `register.css`

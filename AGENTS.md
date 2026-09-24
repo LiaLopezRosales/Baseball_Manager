@@ -8,13 +8,13 @@ Baseball championship management system. Django REST backend + React 18 (CRA) fr
 
 ```
 /                          # Django project root (manage.py lives here)
-├── Baseball_Manager/      # Django project settings, urls, wsgi
+├── backend/      # Django project settings, urls, wsgi
 ├── db_structure/          # Core Django app: all domain models, serializers, views, repositories
 │   ├── generic_classes/   # BaseViewSet and BaseRepository (pattern used by all CRUD)
 │   └── tests/             # Unit tests for views, repositories, serializers, models
 ├── api/                   # Second Django app: auth, custom endpoints, reports
 │   └── reports/           # Reports subsystem: queries (raw SQL), filters, exports (PDF/CSV plugin system)
-├── Baseball_Management/   # React frontend (CRA)
+├── frontend/   # React frontend (CRA)
 │   └── src/components/    # React components including FormulariosCRUD/ (auto-generated CRUD forms)
 ├── Documentacion/         # Project documentation (PDFs, design docs)
 ├── populate_db.py         # Factory-based DB seeder (creates teams, players, simulated championships)
@@ -25,7 +25,7 @@ Baseball championship management system. Django REST backend + React 18 (CRA) fr
 
 **Start both frontend and backend (recommended):**
 ```bash
-cd Baseball_Management && npm start
+cd frontend && npm start
 ```
 This runs `concurrently` — React on port 3000, Django on port 8000.
 
@@ -36,7 +36,7 @@ python manage.py runserver 127.0.0.1:8000
 
 **Start only React:**
 ```bash
-cd Baseball_Management && npm run start:react
+cd frontend && npm run start:react
 ```
 
 **Virtual environment:**
@@ -48,7 +48,7 @@ source python_enviroment/bin/activate
 
 - PostgreSQL (driver: `psycopg2-binary`)
 - DB config in root `.env` (`DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`)
-- React API URL in `Baseball_Management/.env` (`REACT_APP_API_URL=http://localhost:8000`)
+- React API URL in `frontend/.env` (`REACT_APP_API_URL=http://localhost:8000`)
 - **Migrations are gitignored** — you must run `makemigrations` yourself after model changes.
 
 ```bash
@@ -116,7 +116,7 @@ python manage.py test db_structure
 INTEGRATION_TESTS=1 python manage.py test api.tests.integration
 
 # Frontend (componentes + App)
-cd Baseball_Management && npm test -- --watchAll=false
+cd frontend && npm test -- --watchAll=false
 ```
 
 Tests unitarios: `unittest` + `MagicMock`, en `db_structure/tests/` (96).
@@ -400,9 +400,9 @@ las funciones de Usuario General que habían quedado huérfanas:
   Checklist/anti-slop enriquecidos con ideas de **Design Auditor** (Ashutos1997), **TasteCheck**
   (KyaniteLabs, MIT) y **ui-audit** (tommygeoco/UxTools); `visual-audit/references/` alberga
   Nielsen 10 heurísticas + capa cognitive-a11y. Atribución detallada al pie de `blueprint-template`.
-- **V1 (proyecto-local, obsoleta pero intacta)**: renombrada a `.opencode/agents/redesign-expert-v1.md`
-  para liberar el nombre `redesign-expert` y que la global V2 tome precedencia en este y cualquier
-  proyecto tras reiniciar opencode.
+- **V1 (proyecto-local) eliminada en la limpieza del repo**: la V2 global (definida en
+  `~/.config/opencode/agents/redesign-expert.md`) toma precedencia en este y cualquier
+  proyecto; en el repo no queda ningún agente local que la duplique.
 - **Provider google global**: añadido a `~/.config/opencode/opencode.jsonc`
   (`options.apiKey: "{file:~/.secrets/google-gemini.key}"`) para que el agente global corra en
   cualquier proyecto.

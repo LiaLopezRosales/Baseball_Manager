@@ -18,11 +18,11 @@ WORKDIR /app
 
 # Dependencias primero (mejor caché de capas). `pip install -e .` exige el
 # fuente de los paquetes, así que copiamos pyproject + los 3 paquetes Django
-# (api, db_structure, Baseball_Manager=SÍ, no confundir con Baseball_Management=fron)
+# (api, db_structure, backend=SÍ, no confundir con frontend)
 COPY pyproject.toml ./
 COPY api ./api
 COPY db_structure ./db_structure
-COPY Baseball_Manager ./Baseball_Manager
+COPY backend ./backend
 RUN pip install -e .
 
 # Resto del código (manage.py, populate_db.py, .env* si existiera, etc.)
@@ -47,6 +47,6 @@ CMD ["sh", "-c", \
      "until python manage.py check --database default >/dev/null 2>&1; do echo 'Esperando Postgres...'; sleep 2; done; \
       python manage.py makemigrations --noinput; \
       python manage.py migrate --noinput; \
-      python -m gunicorn Baseball_Manager.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 120 --access-logfile - & \
+      python -m gunicorn backend.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 120 --access-logfile - & \
       python manage.py seed_demo || { echo '(seed falló: revisar logs)'; true; }; \
       wait"]

@@ -193,6 +193,6 @@ Para que un agente pueda "ver" cómo queda la UI mientras edita se necesitan
    hot-recarrega).
 2. En la sesión, `/models` → seleccionar un modelo con visión
    (p. ej. `Muse Spark 1.3 Free`).
-3. El agente lanza `cd Baseball_Management && npm start`, usa la herramienta
+3. El agente lanza `cd frontend && npm start`, usa la herramienta
    de navegador del MCP para navegar a `http://localhost:3000`, toma
    screenshots y los interpreta él mismo.

@@ -29,7 +29,7 @@ El diseño de la landing se fundamenta en principios de psicología del consumid
 
 ## 3. Sistema de Tokens (Diamond Plate & Adjudicación de Menta)
 
-Se reutilizan rigurosamente los tokens existentes en `Baseball_Management/src/index.css` sin alterar sus nombres (API estable), garantizando la compatibilidad con el resto de la aplicación.
+Se reutilizan rigurosamente los tokens existentes en `frontend/src/index.css` sin alterar sus nombres (API estable), garantizando la compatibilidad con el resto de la aplicación.
 
 ### Evaluación de la Sugerencia del Usuario: "Menta" (`preferences_to_evaluate`)
 - **Sugerencia:** Añadir color "menta" a la paleta de colores.

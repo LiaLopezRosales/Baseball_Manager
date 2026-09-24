@@ -208,8 +208,8 @@ Documento completo: estado actual, benchmarking, stack visual, fases, y especifi
 |---|---|---|---|
 | 0.1 | **Levantar demo** — verificar venv, instalar deps, makemigrations + migrate + populate_db + npm start | — | Backend :8000, frontend :3000, login funcional |
 | 0.2 | **Fix tests rotos** — arreglar assertions intencionalmente falsos en test_repositories.py (L38,82,212,226) | `db_structure/tests/test_repositories.py` | `manage.py test db_structure` → 0 failures |
-| 0.3 | **Actualizar App.test.js** — reemplazar boilerplate CRA con test mínimo que pase | `Baseball_Management/src/App.test.js` | `npm test` → pass |
-| 0.4 | **Untrack .env** — `git rm --cached .env Baseball_Management/.env`, crear `.env.example` con placeholders | `.env`, `.env.example`, `.gitignore` | `.env` fuera de跟踪 |
+| 0.3 | **Actualizar App.test.js** — reemplazar boilerplate CRA con test mínimo que pase | `frontend/src/App.test.js` | `npm test` → pass |
+| 0.4 | **Untrack .env** — `git rm --cached .env frontend/.env`, crear `.env.example` con placeholders | `.env`, `.env.example`, `.gitignore` | `.env` fuera de跟踪 |
 | 0.5 | **Commit pendiente** — docs migration, AGENTS.md, todos los fixes | Todos los archivos untracked | `git status` limpio |
 
 **Orden**: 0.1 → 0.2 → 0.3 → 0.4 → 0.5
@@ -388,7 +388,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '18' }
-      - run: cd Baseball_Management && npm ci
+      - run: cd frontend && npm ci
       - run: npm test -- --watchAll=false
       - run: npm run build
 ```
@@ -492,7 +492,7 @@ services:
       POSTGRES_USER: lia
       POSTGRES_PASSWORD: ${DB_PASSWORD}
   frontend:
-    build: ./Baseball_Management
+    build: ./frontend
     ports: ["3000:3000"]
 ```
 
@@ -573,7 +573,7 @@ services:
 - `db_structure/repositories.py`, `serializers.py`, `views.py` — capas CRUD de las 3 entidades
 - `api/views.py` — `RegisterView`, `DashboardView`, `toggle_favorite_team/player`, `get_favorites`, `get_notifications`, `mark_notification_read`, `mark_all_notifications_read`
 - `api/authentication.py` — `FlexibleTokenAuthentication` (el `CustomUser.is_active=None` rompía `TokenAuthentication`)
-- `api/urls.py`, `Baseball_Manager/urls.py` — rutas nuevas
+- `api/urls.py`, `backend/urls.py` — rutas nuevas
 
 **Archivos creados en Fase C (frontend):**
 - `src/components/Register.jsx` + `register.css` — registro público con ruta `/registro`

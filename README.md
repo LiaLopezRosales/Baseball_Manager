@@ -33,7 +33,7 @@ Plataforma full-stack para administrar campeonatos de béisbol: **reportes estad
 source python_enviroment/bin/activate   # o tu venv
 pip install -e .
 
-# 2. Variables (de .env; si no, usa los defaults de Baseball_Manager/settings.py)
+# 2. Variables (de .env; si no, usa los defaults de backend/settings.py)
 cp .env.example .env  # y rellena DB_NAME, DB_USER, DB_PASSWORD...
 
 # 3. BD (Postgres local o docker)
@@ -52,7 +52,7 @@ python manage.py runserver 127.0.0.1:8000
 ### Frontend (React)
 
 ```bash
-cd Baseball_Management
+cd frontend
 npm install
 npm start   # servidor en http://localhost:3000 (API proxied a :8000)
 ```
@@ -104,7 +104,7 @@ notificaciones (badge, marcar 1, marcar todas).
 ### Frontend
 
 ```bash
-cd Baseball_Management
+cd frontend
 npm test -- --watchAll=false    # 14 tests (App, FavoriteButton, NotificationBell, UserDashboard, RadarChart)
 npm run lint                    # 0 errores / 0 warnings
 ```
@@ -168,13 +168,13 @@ Los usuarios demo del seed son los de la sección [Usuarios demo](#usuarios-demo
 ## 🗂️ Estructura del repo
 
 ```
-Baseball_Manager/
-├── Baseball_Manager/            # settings Django, urls, wsgi
+backend/
+├── backend/            # settings Django, urls, wsgi
 ├── db_structure/                # modelos + repos + serializers + views (CRUD)
 ├── api/                         # auth, favoritos, notificaciones, dashboard, reportes
 │   ├── reports/                 # queries (SQL raw), serializers, exports (PDF/CSV plugin)
 │   └── tests/integration/       # suite de integración Postgres real
-├── Baseball_Management/         # React (CRA) — componentes, FormulariosCRUD, ui/RadarChart
+├── frontend/         # React (CRA) — componentes, FormulariosCRUD, ui/RadarChart
 ├── populate_db.py               # seed con factories
 ├── manage.py
 └── docs/
