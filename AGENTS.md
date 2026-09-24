@@ -63,10 +63,14 @@ python populate_db.py
 
 ## Despliegue en producción (Render free + Neon)
 
-- Blueprint `render.yaml`: `baseball-manager-frontend` (Static Site, SPA fallback vía
-  `Baseball_Management/public/_redirects`) + `baseball-manager-api` (Web Service con
-  `Dockerfile.backend`). `render.yaml` NO provisiona Postgres interno (expira a los 90 días):
+- Blueprint `render.yaml`: `baseball-manager-frontend` (Static Site) +
+  `baseball-manager-api` (Web Service con `Dockerfile.backend`). `render.yaml` NO
+  provisiona Postgres interno (expira a los 90 días):
   la BD es **Neon serverless free** (sin caducidad), conectada por las variables `DB_*`.
+- **Fallback SPA en Render = regla de Rewrite en el Dashboard** (Source `/*` →
+  `/index.html`, Action Rewrite). Render **NO lee** `public/_redirects` (eso es Netlify):
+  sin la regla las rutas de React Router dan 404 al recargar. `_redirects` queda solo
+  como compatibilidad Netlify (cabecera comentada lo explica).
 - `settings.py` lee `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` y `DB_SSLMODE` desde env
   (comas separadas). `DEBUG=false` en producción.
 - `Dockerfile.backend` entrypoint de producción: espera BD → `makemigrations --noinput`

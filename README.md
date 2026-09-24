@@ -137,6 +137,15 @@ serverless** (gratis, **sin caducidad**). El blueprint `render.yaml` provisiona 
 - Si Render asignó otra URL, actualiza: `REACT_APP_API_URL` y `CORS_ALLOWED_ORIGINS` en el
   frontend (redeploy estático) y `ALLOWED_HOSTS`/`CORS_ALLOWED_ORIGINS` en la API.
 
+### 3b. Fallback SPA (OBLIGATORIO en Render) — regla de Rewrite en el Dashboard
+Render **no lee el `_redirects`** de Netlify. Sin una regla, recargar `/reporte/average`,
+`/equipo/1` o cualquier ruta de React Router da **404**. En el Static Site:
+1. Dashboard → **`baseball-manager-frontend`** → **Redirects & Rewrites** → **Add Rule**:
+   - Source: `/*` · Destination: `/index.html` · Action: **Rewrite**
+2. Guardar. Render sirve el archivo físico si existe (assets JS/CSS intactos) y solo
+   reescribe a `/index.html` cuando la ruta no tiene recurso — exactamente lo que necesita
+   una SPA. El `public/_redirects` queda solo como compatibilidad con Netlify.
+
 ### 4. Keep-alive (evitar el cold start del plan free) — OBLIGATORIO para la demo
 El Web Service free de Render **se duerme tras 15 min de inactividad** y tarda ~10-20 s en
 despertar (mala primera impresión). Lo mantenemos despierto gratis con **UptimeRobot**:

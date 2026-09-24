@@ -1,4 +1,7 @@
-# Fallback SPA para Static Sites (Render/Netlify): cualquier ruta sin archivo
-# físico se sirve con index.html para que las rutas de React Router funcionen
-# al recargar (p. ej. /reporte/average, /equipo/1, /consultas/Series).
+# Fallback SPA SOLO para Netlify (Render NO lee este archivo).
+# En Render la regla equivalente se configura en el Dashboard del Static Site:
+#   Redirects & Rewrites -> Source: /* / Destination: /index.html / Action: Rewrite
+# (Render sirve el archivo físico si existe en la ruta; solo aplica la regla a
+#  rutas sin recurso, así los assets JS/CSS no se ven afectados.)
+# Si algún día se publica en Netlify, la regla de abajo hace el mismo trabajo.
 /* /index.html 200
