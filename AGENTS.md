@@ -106,7 +106,7 @@ Three roles defined in `api/roles.py`: `Admin` (full access), `Director Técnico
 - **Errores**: los `except Exception` ya NO devuelven `str(e)` (log + mensaje genérico); `api_404` sin `str(exception)`; en `DynamicFilterView` los `ValueError` de validación de entrada → **400**.
 - **Django `/admin/` eliminado** (urls + `INSTALLED_APPS`); la gestión es el CRUD React en `/admin/:slug`. `BrowsableAPIRenderer` solo con `DEBUG=True`.
 - **Campos sensibles**: `api/reports/filters.py` (`SENSITIVE_FIELDS = {'CI','password'}`) los excluye de `table-structure` y `dinamic-filter`.
-- **Headers de transporte** solo con `DEBUG=False`: `SECURE_PROXY_SSL_HEADER`, `SECURE_SSL_REDIRECT`, `SESSION/CSRF_COOKIE_SECURE`, HSTS.
+- **Headers de transporte** solo con `DEBUG=False` y fuera del modo test (`_TESTING = 'test' in sys.argv`): `SECURE_PROXY_SSL_HEADER`, `SECURE_SSL_REDIRECT`, `SESSION/CSRF_COOKIE_SECURE`, HSTS. El guard evita que `SECURE_SSL_REDIRECT` devuelva 301 en el runner de integración cuando CI corre `manage.py test` con `DEBUG=False` (el test client no envía `X-Forwarded-Proto`).
 - `UserSerializer` deja `password` **write_only** y cifra en `create`/`update` (el CRUD de admin también hashea). `ScriptPasswordHasher` eliminado de `PASSWORD_HASHERS`.
 - Los usuarios de prueba (`lia`/`director`/`general`) se **mantienen** a propósito para que el reclutador pruebe todo (en producción real se eliminarían).
 

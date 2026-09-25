@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import sys
 from pathlib import Path
 from decouple import config
 
@@ -30,6 +31,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-placeholder')
 
 DEBUG = config('DEBUG', default=True, cast=bool)
+
+# Detecta la ejecución del runner de tests (`manage.py test`). En modo test el
+# cliente de Django no envía X-Forwarded-Proto, así que el bloque de transporte
+# de abajo (SECURE_SSL_REDIRECT) redirigiría cada request a HTTPS (301) y la
+# suite de integración fallaría aunque se corra con DEBUG=False (como en CI).
+_TESTING = 'test' in sys.argv
 
 # ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 # En producción (Render/Railway/*.onrender.com) se pasan por env separados por comas.
@@ -119,9 +126,10 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ] + (['rest_framework.renderers.BrowsableAPIRenderer'] if DEBUG else []),
     'DEFAULT_THROTTLE_RATES': {
-        # En dev/tests el límite es alto (evita falsos 429 en el runner);
-        # en producción se endurece para frenar fuerza bruta de login.
-        'login': '8/min' if not DEBUG else '500/min',
+        # En dev/tests el límite es alto (evita falsos 429 en el runner de
+        # integración, que comparte IP/proceso y corre con DEBUG=False en CI);
+        # en producción real se endurece para frenar fuerza bruta de login.
+        'login': '8/min' if (not DEBUG and not _TESTING) else '500/min',
     },
 
 }
@@ -203,8 +211,10 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Seguridad de transporte: solo se activan en producción (Render/Nginx terminan SSL y
-# envían X-Forwarded-Proto). Localmente (http://localhost) se mantienen desactivadas.
-if not DEBUG:
+# envían X-Forwarded-Proto). Localmente (http://localhost) se mantienen desactivadas
+# y en modo test (CI, `manage.py test ...`) se omiten porque el cliente de test no
+# envía X-Forwarded-Proto y SECURE_SSL_REDIRECT devolvería 301 en cada request.
+if not DEBUG and not _TESTING:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
