@@ -42,7 +42,6 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',     # Deshabilita panel admin
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -118,8 +117,12 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',  # Formularios HTML
-    ],
+    ] + (['rest_framework.renderers.BrowsableAPIRenderer'] if DEBUG else []),
+    'DEFAULT_THROTTLE_RATES': {
+        # En dev/tests el límite es alto (evita falsos 429 en el runner);
+        # en producción se endurece para frenar fuerza bruta de login.
+        'login': '8/min' if not DEBUG else '500/min',
+    },
 
 }
 
@@ -147,7 +150,6 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',     # Encriptado por defecto
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
-    'django.contrib.auth.hashers.ScriptPasswordHasher',
 ]
 
 AUTH_USER_MODEL = 'api.CustomUser'
@@ -199,3 +201,14 @@ STATIC_URL = 'static/'
 # Media files (fotos de jugadores, etc.)
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Seguridad de transporte: solo se activan en producción (Render/Nginx terminan SSL y
+# envían X-Forwarded-Proto). Localmente (http://localhost) se mantienen desactivadas.
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

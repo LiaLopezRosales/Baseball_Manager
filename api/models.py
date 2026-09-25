@@ -3,6 +3,7 @@
 from django.db import models
 from db_structure.models import Rol, TechnicalDirector
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.hashers import make_password, check_password as verify_password
 from .roles import AdminRole, DirectorTecnicoRole, UsuarioGeneralRole
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -52,27 +53,25 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return None
 
     def check_password(self, raw_password):
-        """Validación directa sin cifrado. NO SEGURO PARA PRODUCCIÓN."""
-        return self.password == raw_password  # Comparación directa de contraseñas
+        """Validación con hash PBKDF2; fallback transicional para filas legacy en claro."""
+        if self.password and '$' not in self.password:
+            # Contraseña aún en texto plano (seed previo a la migración):
+            # se compara directo hasta que `rehash_passwords` la cifre.
+            return self.password == raw_password
+        return verify_password(raw_password, self.password)
 
     def save(self, *args, **kwargs):
-        """Guardar sin cifrar la contraseña."""
+        """Cifra la contraseña en claro antes de guardar (idempotente)."""
+        if self.password and not self._is_hashed(self.password):
+            self.password = make_password(self.password)
         super().save(*args, **kwargs)
+
+    @staticmethod
+    def _is_hashed(value):
+        """Los hashes de Django usan el prefijo `algoritmo$iteraciones$...`."""
+        return '$' in value
 
     def __str__(self):
         return f"{self.email} - Rol: {self.get_role_name()}"
-
-
-    #### PARA SI SE IMPLEMENTA ENCRIPTACIÓN DE LA CONTRASEÑA ####
-
-    # # Sobrescribir el guardado para cifrar contraseñas correctamente
-    # def save(self, *args, **kwargs):
-    #     if not self.password.startswith('pbkdf2_'):
-    #         self.password = make_password(self.password)
-    #     super().save(*args, **kwargs)
-
-    # # Validación segura de contraseña
-    # def check_password(self, raw_password):
-    #     return check_password(raw_password, self.password)
 
     

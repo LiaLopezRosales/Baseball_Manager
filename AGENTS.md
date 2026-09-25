@@ -93,10 +93,22 @@ python populate_db.py
 All entity CRUD follows: `Model` → `Repository(BaseRepository)` → `Serializer` → `ViewSet(BaseViewSet)`. To add a new entity, create all four layers following existing examples in `db_structure/`.
 
 ### Custom User Model
-`api.models.CustomUser` maps to `db_structure.User` table via `managed = False`. It overrides `check_password` with **direct string comparison** (not hashed). This is intentional for the current stage.
+`api.models.CustomUser` maps to `db_structure.User` table via `managed = False`. Las contraseñas se guardan **hasheadas (PBKDF2)**: `save()` cifra en claro automáticamente y `check_password` usa `django.contrib.auth.hashers`. `check_password` conserva un **fallback transicional**: si el valor almacenado no tiene `$` (fila legacy en claro), compara directo hasta que `python manage.py rehash_passwords` la cifre (idempotente; integrado en `seed_demo`, que corre en cada deploy).
 
 ### Role-Based Access
 Three roles defined in `api/roles.py`: `Admin` (full access), `Director Técnico` (team-scoped), `Usuario General` (read-only stats). The DRF default permission is `AllowAny` — auth is enforced per-view via custom permission classes in `api/permissions.py`.
+
+### Seguridad: endurecimiento (sept-2026)
+- **CRUD cerrado**: `BaseViewSet.get_permissions()` → lectura pública (`AllowAny`) + escritura (`create`/`update`/`destroy`) solo `IsAdmin`. Los helpers `api/permissions.py` usan `_role_name()` (robusto ante usuarios anónimos; antes `IsAdmin`/`IsUsuarioGeneral` reventaban con `AttributeError`).
+- **Login unificado**: email no registrado y contraseña incorrecta devuelven ambos **401 `Credenciales inválidas.`** (sin enumeración). Test de integración actualizado: `test_login_unregistered_email` espera 401 + mensaje genérico.
+- **Throttling** de login/registro: `ScopedRateThrottle` scope `login` → **8/min en producción**, 500/min en dev (los falsos 429 rompen el runner de integración, que comparte IP).
+- **Endpoints DT**: `PlayerSwapByDTView` y `PlayerSwapsForTeamView` con `IsAdminOrDirectorTecnico`; el POST de swap y el DELETE validan que el DT opere sobre **su propio equipo** (403). Los GETs públicos de lineup/bullpen se mantienen de lectura.
+- **Errores**: los `except Exception` ya NO devuelven `str(e)` (log + mensaje genérico); `api_404` sin `str(exception)`; en `DynamicFilterView` los `ValueError` de validación de entrada → **400**.
+- **Django `/admin/` eliminado** (urls + `INSTALLED_APPS`); la gestión es el CRUD React en `/admin/:slug`. `BrowsableAPIRenderer` solo con `DEBUG=True`.
+- **Campos sensibles**: `api/reports/filters.py` (`SENSITIVE_FIELDS = {'CI','password'}`) los excluye de `table-structure` y `dinamic-filter`.
+- **Headers de transporte** solo con `DEBUG=False`: `SECURE_PROXY_SSL_HEADER`, `SECURE_SSL_REDIRECT`, `SESSION/CSRF_COOKIE_SECURE`, HSTS.
+- `UserSerializer` deja `password` **write_only** y cifra en `create`/`update` (el CRUD de admin también hashea). `ScriptPasswordHasher` eliminado de `PASSWORD_HASHERS`.
+- Los usuarios de prueba (`lia`/`director`/`general`) se **mantienen** a propósito para que el reclutador pruebe todo (en producción real se eliminarían).
 
 ### Reports System
 - 9 predefined reports at `GET /api/queries/reports/?report_id=N`

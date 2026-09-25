@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.hashers import make_password
 from .models import *
 
 class RolSerializer(serializers.ModelSerializer):
@@ -20,6 +21,19 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def _hash_password(self, validated_data):
+        password = validated_data.get('password')
+        if password and '$' not in password:
+            validated_data['password'] = make_password(password)
+        return validated_data
+
+    def create(self, validated_data):
+        return super().create(self._hash_password(validated_data))
+
+    def update(self, instance, validated_data):
+        return super().update(instance, self._hash_password(validated_data))
         
     
 

@@ -125,8 +125,11 @@ class DynamicFilterView(APIView):
 
         except LookupError:
             return Response({"error": f"El modelo {table_name} no existe."}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)},  status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except ValueError as e:
+            # Errores de validación de entrada del usuario (tipos numéricos/string)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({"error": "Error interno del servidor."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ExportView(APIView):
     permission_classes = [IsAuthenticated]

@@ -1,5 +1,7 @@
 # api/views.py
 
+import logging
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -11,9 +13,13 @@ from .serializers import CustomUserSerializer
 from db_structure.serializers import PlayerSwapSerializer, BaseballPlayerSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from .permissions import IsAdminOrDirectorTecnico, _role_name
+from rest_framework.throttling import ScopedRateThrottle
 from django.db.models import Q, Sum, Case, When, F
 from django.utils import timezone
 from django.http import HttpResponse
+
+logger = logging.getLogger(__name__)
 
 
 class PlayerProfileView(APIView):
@@ -542,6 +548,9 @@ class LoginView(APIView):
     """
     Vista para manejar el login de usuarios con validación de roles y permisos.
     """
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'login'
+
     def post(self, request, *args, **kwargs):
         try:
             email = request.data.get('email')
@@ -552,12 +561,8 @@ class LoginView(APIView):
                 return Response({'error': 'El correo y la contraseña son obligatorios.'}, status=status.HTTP_400_BAD_REQUEST)
 
             user = CustomUser.objects.filter(email=email).first()
-            
-            if not user:
-                return Response({'error': 'El correo electrónico no está registrado.'}, status=status.HTTP_404_NOT_FOUND)
-
-            if not user.check_password(password):
-                return Response({'error': 'Contraseña incorrecta.'}, status=status.HTTP_401_UNAUTHORIZED)
+            if not user or not user.check_password(password):
+                return Response({'error': 'Credenciales inválidas.'}, status=status.HTTP_401_UNAUTHORIZED)
 
             # Generación del token
             token, created = Token.objects.get_or_create(user=user)
@@ -569,14 +574,17 @@ class LoginView(APIView):
                 'role_name': user.get_role_name()
             }, status=status.HTTP_200_OK)
         
-        except Exception as e:
-            # Captura cualquier otro error inesperado
-            return Response({'error': f'Error interno del servidor: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            # Captura cualquier otro error inesperado sin exponer detalles internos
+            logger.exception('Error inesperado en LoginView')
+            return Response({'error': 'Error interno del servidor.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PlayerSwapByDTView(APIView):
     """
     View para manejar la lógica de intercambio de jugadores por el Director Técnico.
+    Solo accesible para Admin o Director Técnico (la propiedad del equipo se valida en POST).
     """
+    permission_classes = [IsAdminOrDirectorTecnico]
 
     def get(self, request, team_id):
         """
@@ -675,6 +683,14 @@ class PlayerSwapByDTView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            # El DT solo puede operar sobre su propio equipo (el Admin puede en cualquiera)
+            team = game_team_obj.lineup_id.team_id
+            if _role_name(request.user) != 'Admin' and request.user.get_team_id() != team.id:
+                return Response(
+                    {"error": "No está autorizado para operar sobre este equipo."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
             serialized_data = {
                 "game_team": game_team,
                 "old_player": old_player,
@@ -690,8 +706,9 @@ class PlayerSwapByDTView(APIView):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as e:
-            return Response({"error": f"Un error inesperado ocurrió: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            logger.exception('Error inesperado en PlayerSwapByDTView.post')
+            return Response({"error": "Un error inesperado ocurrió."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -724,8 +741,9 @@ class LineUpForTheGameView(APIView):
 
         except TeamOnTheField.DoesNotExist:
             return Response({"error": "No se encontró alineación para el equipo."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": f"Error al obtener jugadores disponibles: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            logger.exception('Error inesperado en LineUpForTheGameView')
+            return Response({"error": "Error al obtener la alineación."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -766,13 +784,16 @@ class PlayersAvailableInPosition(APIView):
 
         except LineUp.DoesNotExist:
             return Response({"error": "No se encontró alineación para el equipo."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": f"Error al obtener jugadores disponibles: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            logger.exception('Error inesperado en PlayersAvailableInPosition')
+            return Response({"error": "Error al obtener jugadores disponibles."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PlayerSwapsForTeamView(APIView):
     """
     Obtiene los cambios de jugadores asociados a un equipo específico y permite eliminarlos.
+    Solo Admin o Director Técnico (la propiedad del equipo se valida en DELETE).
     """
+    permission_classes = [IsAdminOrDirectorTecnico]
 
     def get(self, request, team_id):
         """
@@ -821,25 +842,33 @@ class PlayerSwapsForTeamView(APIView):
             return Response({"error": "Equipo no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         except LineUp.DoesNotExist:
             return Response({"error": "No se encontró alineación para el equipo"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": f"Error interno: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            logger.exception('Error inesperado en PlayerSwapsForTeamView.get')
+            return Response({"error": "Error interno."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, swap_id):
         """
         Elimina un cambio de jugador específico.
         """
         try:
-            swap = PlayerSwap.objects.get(id=swap_id)
+            swap = PlayerSwap.objects.select_related('game_team__lineup_id__team_id').get(id=swap_id)
+            team = swap.game_team.lineup_id.team_id
+            if _role_name(request.user) != 'Admin' and request.user.get_team_id() != team.id:
+                return Response({"error": "No está autorizado para eliminar este cambio."},
+                                status=status.HTTP_403_FORBIDDEN)
             swap.delete()
             return Response({"message": "Cambio de jugador eliminado exitosamente."}, status=status.HTTP_200_OK)
         except PlayerSwap.DoesNotExist:
             return Response({"error": "Cambio de jugador no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": f"Error interno: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            logger.exception('Error inesperado en PlayerSwapsForTeamView.delete')
+            return Response({"error": "Error interno."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'login'
 
     def post(self, request):
         try:
@@ -850,6 +879,9 @@ class RegisterView(APIView):
 
             if not all([name, lastname, email, password]):
                 return Response({'error': 'Todos los campos son obligatorios.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if len(password) < 8:
+                return Response({'error': 'La contraseña debe tener al menos 8 caracteres.'}, status=status.HTTP_400_BAD_REQUEST)
 
             if CustomUser.objects.filter(email=email).exists():
                 return Response({'error': 'El correo ya está registrado.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -886,8 +918,9 @@ class RegisterView(APIView):
 
         except Rol.DoesNotExist:
             return Response({'error': 'Error de configuración: rol no encontrado.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except Exception as e:
-            return Response({'error': f'Error interno del servidor: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            logger.exception('Error inesperado en RegisterView')
+            return Response({'error': 'Error interno del servidor.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class DashboardView(APIView):
@@ -958,8 +991,9 @@ class DashboardView(APIView):
 
             return Response(data, status=status.HTTP_200_OK)
 
-        except Exception as e:
-            return Response({'error': f'Error al obtener dashboard: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            logger.exception('Error inesperado en DashboardView')
+            return Response({'error': 'Error al obtener dashboard.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -977,8 +1011,8 @@ def toggle_favorite_team(request):
         else:
             FavoriteTeamModel.objects.create(user_id=request.user.id, team_id=team_id)
             return Response({'favorited': True}, status=status.HTTP_201_CREATED)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception:
+        return Response({'error': 'Error interno del servidor.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -996,8 +1030,8 @@ def toggle_favorite_player(request):
         else:
             FavoritePlayerModel.objects.create(user_id=request.user.id, player_id=player_id)
             return Response({'favorited': True}, status=status.HTTP_201_CREATED)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception:
+        return Response({'error': 'Error interno del servidor.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -1011,8 +1045,8 @@ def get_favorites(request):
             'teams': [{'id': ft.team.id, 'name': ft.team.name, 'initials': ft.team.initials} for ft in fav_teams],
             'players': [{'id': fp.player.id, 'name': f"{fp.player.P_id.name} {fp.player.P_id.lastname}"} for fp in fav_players],
         }, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception:
+        return Response({'error': 'Error interno del servidor.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -1033,8 +1067,8 @@ def get_notifications(request):
             ],
             'unread_count': NotificationModel.objects.filter(user_id=request.user.id, is_read=False).count(),
         }, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception:
+        return Response({'error': 'Error interno del servidor.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -1047,8 +1081,8 @@ def mark_notification_read(request, notification_id):
         notif.is_read = True
         notif.save()
         return Response({'ok': True}, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception:
+        return Response({'error': 'Error interno del servidor.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -1057,14 +1091,14 @@ def mark_all_notifications_read(request):
     try:
         NotificationModel.objects.filter(user_id=request.user.id, is_read=False).update(is_read=True)
         return Response({'ok': True}, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception:
+        return Response({'error': 'Error interno del servidor.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def api_404(request, exception=None):
     """Respuesta JSON consistente para rutas API no existentes (handler404)."""
     from django.http import JsonResponse
     return JsonResponse(
-        {'error': 'Recurso no encontrado.', 'detail': str(exception) or 'La ruta solicitada no existe.'},
+        {'error': 'Recurso no encontrado.', 'detail': 'La ruta solicitada no existe.'},
         status=404,
     )

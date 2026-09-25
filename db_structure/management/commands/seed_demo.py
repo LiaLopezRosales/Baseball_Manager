@@ -9,7 +9,8 @@ Usado por el entrypoint de producción (Dockerfile.backend). Decisiones:
     rápido en redeploys).
 
 También programa el "Calendario Futuro LNB" (schedule_upcoming_games) para que
-el panel de Director Técnico tenga juegos pendientes.
+el panel de Director Técnico tenga juegos pendientes, y re-cifra con PBKDF2
+cualquier contraseña que aún esté en texto plano (migración única).
 """
 
 from django.core.management import call_command
@@ -41,6 +42,19 @@ class Command(BaseCommand):
         needs = (not has_teams) or partial
         return needs, partial
 
+    def _rehash_passwords(self):
+        from api.models import CustomUser
+
+        updated = 0
+        for user in CustomUser.objects.all().iterator():
+            if user.password and '$' not in user.password:
+                user.save(update_fields=['password'])
+                updated += 1
+        if updated:
+            self.stdout.write(
+                self.style.SUCCESS(f"{updated} contraseñas re-cifradas (PBKDF2).")
+            )
+
     def handle(self, *args, **options):
         needs, partial = self._needs_seed()
 
@@ -49,6 +63,7 @@ class Command(BaseCommand):
             return
 
         if not needs and not options["force"]:
+            self._rehash_passwords()
             self.stdout.write(self.style.SUCCESS("Demo ya sembrada: seed omitido."))
             return
 
@@ -64,5 +79,6 @@ class Command(BaseCommand):
 
         simulate_full_championship()
         schedule_upcoming_games()
+        self._rehash_passwords()
 
         self.stdout.write(self.style.SUCCESS("Demo lista."))

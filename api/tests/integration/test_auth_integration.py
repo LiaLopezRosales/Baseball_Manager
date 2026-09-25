@@ -99,11 +99,12 @@ class RegisterLoginIntegrationTests(TestCase):
         self.assertNotIn("token", resp.data)
 
     def test_login_unregistered_email(self):
-        """❌ Email no registrado → 404"""
+        """❌ Email no registrado → 401 con mensaje genérico (sin enumeración)"""
         resp = self.general_client.post(LOGIN_PATH, {
             "email": "noexiste@test.com", "password": "xxx",
         }, format="json")
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.status_code, 401)
+        self.assertEqual(resp.data.get("error"), "Credenciales inválidas.")
 
     def test_protected_endpoint_requires_token(self):
         """❌ Endpoint protegido sin token → 401 (invitado no accede)"""

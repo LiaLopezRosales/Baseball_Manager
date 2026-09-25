@@ -4,6 +4,13 @@ from django.db.models import Q, ForeignKey, OneToOneField
 from rest_framework.response import Response
 from django.db.models import Model
 
+# Campos que no deben exponerse a través de consultas dinámicas públicas.
+SENSITIVE_FIELDS = {'CI', 'password'}
+
+
+def _is_sensitive_path(path):
+    return path.split('__')[-1] in SENSITIVE_FIELDS
+
 
 def get_related_fields(model: Model, external_fields=False, show_ids=False, visited=set(), path_prefix="", table_path=""):
     
@@ -18,6 +25,10 @@ def get_related_fields(model: Model, external_fields=False, show_ids=False, visi
     for field in model._meta.get_fields():
         # Si el campo es 'id' y no se deben mostrar los IDs, continúa con el siguiente campo
         if field.name == 'id' and not show_ids:
+            continue
+
+        # No exponer campos sensibles (CI, password, etc.)
+        if _is_sensitive_path(field.name):
             continue
         
         # Construye la ruta actual del campo
@@ -49,9 +60,18 @@ def dynamic_filter(model: Model, selected_fields: list, filters={}):
     
     if model.__name__ in ['User', 'Rol']:
         return
+
+    # Rechazar campos seleccionados sensibles (CI, password, etc.)
+    if selected_fields:
+        for selected in selected_fields:
+            if _is_sensitive_path(selected):
+                return Response({"error": f"El campo {selected} está restringido."}, status=400)
     
     query = Q()  # Inicializa un objeto Q vacío para construir la consulta
     for path, condition in filters.items():
+        if _is_sensitive_path(path):
+            return Response({"error": f"El campo {path} está restringido."}, status=400)
+
         model_shadow = model
         fields = path.split("__")  # Divide el path en campos individuales
         for field in fields:

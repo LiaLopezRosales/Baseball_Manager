@@ -1,14 +1,24 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError as DRFValidationError
 import re
 from django.utils.translation import gettext as _
+from api.permissions import IsAdmin
 
 class BaseViewSet(viewsets.ViewSet):
     repository = None  
     serializer_class = None  
+
+    def get_permissions(self):
+        """
+        Lectura pública; escritura (create/update/delete) solo Admin autenticado.
+        """
+        if self.action in {'create', 'update', 'partial_update', 'destroy'}:
+            return [IsAdmin()]
+        return [AllowAny()]  
 
     def list(self, request):#Listar todos los datos
         objs = self.repository.get_all()
@@ -60,7 +70,14 @@ class BaseViewSet(viewsets.ViewSet):
             except (DjangoValidationError, DRFValidationError) as e:
                 return Response({"errors": e.message_dict}, status=status.HTTP_400_BAD_REQUEST)
             except IntegrityError as e:
-                return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                error_message = str(e)
+                match = re.search(r'check constraint "(.*?)"', error_message)
+                if match:
+                    constraint_name = match.group(1)
+                    translated_error = _(f"Error de restricción: {constraint_name}")
+                else:
+                    translated_error = _("Ocurrió un error de integridad en la base de datos.")
+                return Response({"detail": translated_error}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
